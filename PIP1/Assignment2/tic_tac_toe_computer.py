@@ -7,13 +7,13 @@ Homework 3: Modify exercise 2, second player is now computer that randomly selec
 import random
 
 
-def print_board(board):
+def draw_board(board):
     for row in board:
         print(" | ".join(row))
         print("-" * 9)
 
 
-def check_winner(board):
+def get_winner(board):
     for i in range(3):
         if board[i][0] == board[i][1] == board[i][2] != " ":
             return board[i][0]
@@ -40,10 +40,10 @@ def get_computer_move(board):
 def run_game():
     board = [[" " for _ in range(3)] for _ in range(3)]
     current_player = "X"
-    game_active = True  # Control the game loop
+    game_active = True
 
     while game_active:
-        print_board(board)
+        draw_board(board)
 
         if current_player == "X":
             try:
@@ -66,16 +66,16 @@ def run_game():
             board[row][col] = current_player
             print(f"Computer placed {current_player} at ({row}, {col})")
 
-        winner = check_winner(board)
+        winner = get_winner(board)
 
         if winner:
-            print_board(board)
+            draw_board(board)
             print(f"Player {winner} wins!")
-            game_active = False  # End the game
+            game_active = False
             break
 
         if is_draw(board):
-            print_board(board)
+            draw_board(board)
             print("It's a draw!")
             game_active = False
             break

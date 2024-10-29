@@ -4,13 +4,13 @@ in the console after each turn.
 """
 
 
-def print_board(board):
+def draw_board(board):
     for row in board:
         print(" | ".join(row))
         print("-" * 9)
 
 
-def check_winner(board):
+def get_winner(board):
     for i in range(3):
         if board[i][0] == board[i][1] == board[i][2] != " ":
             return board[i][0]
@@ -35,7 +35,7 @@ def run_game():
     game_active = True
 
     while game_active:
-        print_board(board)
+        draw_board(board)
         try:
             row = int(input(f"Player {current_player}, enter the row (0-2): "))
             col = int(input(f"Player {current_player}, enter the column (0-2): "))
@@ -46,15 +46,16 @@ def run_game():
 
             board[row][col] = current_player
 
-            winner = check_winner(board)
+            winner = get_winner(board)
+
             if winner:
-                print_board(board)
+                draw_board(board)
                 print(f"Player {winner} wins!")
                 game_active = False
                 break
 
             if is_draw(board):
-                print_board(board)
+                draw_board(board)
                 print("It's a draw!")
                 game_active = False
                 break
