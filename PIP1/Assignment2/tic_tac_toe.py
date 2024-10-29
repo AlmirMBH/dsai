@@ -65,4 +65,4 @@ def run_game():
             print("Invalid input. Please enter row and column numbers between 0 and 2.")
 
 
-run_game
+run_game()
