@@ -1,5 +1,5 @@
 """
-Exercise 4: Write a program to convert temperatures to and from Celsius and Fahrenheit.
+Conditionals 4: Write a program to convert temperatures to and from Celsius and Fahrenheit.
 """
 
 # Functions

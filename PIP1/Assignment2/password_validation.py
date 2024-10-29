@@ -1,7 +1,7 @@
 import re
 
 """
-Exercise 6: Write a program that asks the user to enter a password and validates it by the
+Conditionals 6: Write a program that asks the user to enter a password and validates it by the
 following rules:
 • Password must have at least 1 letter between [a-z] and 1 letter between [A-Z].
 • Password must have at least 2 numbers between [0-9].

@@ -1,5 +1,5 @@
 """
-Exercise 3: Write a program that asks the user to enter two numbers and prints all numbers that
+Loops 3: Write a program that asks the user to enter two numbers and prints all numbers that
 are not the multiple of 6 between them.
 """
 

@@ -1,7 +1,7 @@
 import re
 
 """
-Exercise 2: Write a program that asks the user to input two numbers, then asks the user which
+Conditionals 5: Write a program that asks the user to input two numbers, then asks the user which
 mathematical operation to perform, and shows the result.
 """
 

@@ -1,5 +1,5 @@
 """
-Exercise 1: Given the prices of adult and child tickets, and three boolean values that indicate
+Conditionals 1: Given the prices of adult and child tickets, and three boolean values that indicate
 whether the customers are adult, calculate and display the total amount to pay for the 3 tickets
 """
 

@@ -1,5 +1,5 @@
 """
-Exercise 3: Write a program that asks the user to enter points obtained in a course and displays
+Conditionals 3: Write a program that asks the user to enter points obtained in a course and displays
 the grade. For the point range 100-95 the grade is 10, 94-85 for grade 9, 84-75 for
 grade 8, 74-65 for grade 7, 64-55 for grade 6, no grade if below 55 points. If the user
 enters points that are not in the range (100-0), appropriate message is printed out

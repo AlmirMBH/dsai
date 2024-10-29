@@ -1,5 +1,5 @@
 """
-Exercise 5: Write a program that asks the user to enter a matrix and displays its transpose.
+Loops 5: Write a program that asks the user to enter a matrix and displays its transpose.
 """
 
 # Functions

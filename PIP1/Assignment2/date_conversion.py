@@ -1,5 +1,5 @@
 """
-Exercise 2: Write a program that asks the user to enter two integers day and month . The value of
+Conditionals 2: Write a program that asks the user to enter two integers day and month . The value of
 day should be between 1 and 31, and the value of month should be between 1 and 12.
 If the input is valid, the program needs to print out the date in the following format:
 day of monthName , where the monthName is the name of the month corresponding

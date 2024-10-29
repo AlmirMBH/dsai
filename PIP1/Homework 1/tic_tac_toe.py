@@ -1,5 +1,5 @@
 """
-Homework 2: Write a program that allows two users to play Tic-Tac-Toe game. Display game state
+Homework 1 2: Write a program that allows two users to play Tic-Tac-Toe game. Display game state
 in the console after each turn.
 """
 

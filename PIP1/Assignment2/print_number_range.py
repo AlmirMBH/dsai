@@ -1,5 +1,5 @@
 """
-Write a program that asks the user to enter a series of numbers from the keyboard.
+Loops 4: Write a program that asks the user to enter a series of numbers from the keyboard.
 User can stop entering numbers by entering value -1. The program needs to calculate
 and print out the average of all entered numbers that are between 20 and 50, as well
 as print out how many numbers were out of [20, 50] range.

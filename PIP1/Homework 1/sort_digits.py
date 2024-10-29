@@ -1,5 +1,5 @@
 """
-Homework 1: Write a program that plays a simple game. The game is described as follows. User
+Homework 1 1: Write a program that plays a simple game. The game is described as follows. User
 enters a number. Then, the user tries to sort the digits of the number by repeatedly
 reversing the order of the first 'n' digits of a number. Make sure to validate user input.
 For example, if the user enters 52136, the output should be 12356. To get this output,

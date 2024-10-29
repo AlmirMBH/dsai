@@ -1,7 +1,7 @@
 import random
 
 """
-Homework 3: Modify exercise 2, second player is now computer that randomly selects valid move.
+Homework 1 3: Modify exercise 2, second player is now computer that randomly selects valid move.
 """
 
 import random

@@ -1,7 +1,7 @@
 import random
 
 """
-Exercise 7: Write a program that allows you to play a game of Rock, Paper, Scissors against a
+Conditionals 7: Write a program that allows you to play a game of Rock, Paper, Scissors against a
 computer. Use random library to select computer move.
 """
 
