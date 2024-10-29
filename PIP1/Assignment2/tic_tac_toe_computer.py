@@ -14,19 +14,18 @@ def print_board(board):
 
 
 def check_winner(board):
-    # Check rows, columns, and diagonals for a win
     for i in range(3):
         if board[i][0] == board[i][1] == board[i][2] != " ":
-            return board[i][0]  # Check rows
+            return board[i][0]
         if board[0][i] == board[1][i] == board[2][i] != " ":
-            return board[0][i]  # Check columns
+            return board[0][i]
 
     if board[0][0] == board[1][1] == board[2][2] != " ":
-        return board[0][0]  # Check diagonal
+        return board[0][0]
     if board[0][2] == board[1][1] == board[2][0] != " ":
-        return board[0][2]  # Check other diagonal
+        return board[0][2]
 
-    return None  # No winner yet
+    return None
 
 
 def is_draw(board):
@@ -38,7 +37,7 @@ def get_computer_move(board):
     return random.choice(available_moves) if available_moves else None
 
 
-def main():
+def run_game():
     board = [[" " for _ in range(3)] for _ in range(3)]
     current_player = "X"
     game_active = True  # Control the game loop
@@ -47,7 +46,6 @@ def main():
         print_board(board)
 
         if current_player == "X":
-            # Human player's turn
             try:
                 row = int(input("Player X, enter the row (0-2): "))
                 col = int(input("Player X, enter the column (0-2): "))
@@ -63,13 +61,13 @@ def main():
                 continue
 
         else:
-            # Computer's turn
             print("Computer's turn:")
             row, col = get_computer_move(board)
             board[row][col] = current_player
             print(f"Computer placed {current_player} at ({row}, {col})")
 
         winner = check_winner(board)
+
         if winner:
             print_board(board)
             print(f"Player {winner} wins!")
@@ -79,13 +77,12 @@ def main():
         if is_draw(board):
             print_board(board)
             print("It's a draw!")
-            game_active = False  # End the game
+            game_active = False
             break
 
         # Switch players
         current_player = "O" if current_player == "X" else "X"
 
 
-if __name__ == "__main__":
-    main()
+run_game()
 
