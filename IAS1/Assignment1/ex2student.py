@@ -3,7 +3,8 @@ import vrep
 import numpy as np
 import time
 import math
-
+# Command to run
+# C:\Users\root\AppData\Local\Microsoft\WindowsApps\python.exe .\ex2student.py
 # Robot Geometry
 diameter         = 0.1                 # Diameter of the wheels in m
 perimeter        = math.pi * diameter  # Perimeter of the wheels in m
@@ -11,44 +12,65 @@ wheelDistanceVer = 0.471               # Vertical distance between the wheels
 wheelDistanceHor = 0.30046             # Horizontal distance between the wheels
 
 
+def setWheelVelocityToZero(wheelJoints, clientID):
+    for wheel in wheelJoints:
+        vrep.simxSetJointTargetVelocity(clientID, wheel, 0, vrep.simx_opmode_oneshot)
+
+
+def controlCommunication(clientID, pauseStatus):
+    vrep.simxPauseCommunication(clientID, pauseStatus)
+
+
 def moveForward(distance, speed, clientID, wheelJoints):
     correctionFactor = 1.045
 
     # set wheels velocity to 0
-# INSERT YOUR CODE HERE
+    setWheelVelocityToZero(wheelJoints, clientID)
 
-    # calculate velocity for each wheel
-# INSERT YOUR CODE HERE (hint: call wheelVel function and pause communication)
-    
-    # set wheel velocity to calculated values
-# INSERT YOUR CODE HERE (hint: pause communication in the end)
+    # calculate velocity for each wheel (hint: call wheelVel function and pause communication)
+    wheel_speeds = wheelVel(speed, 0, 0)
+    controlCommunication(clientID, True)
 
-    # keep the velocity for the required amount of time
-# INSERT YOUR CODE HERE
+    # set wheel velocity to calculated values (hint: pause communication in the end)
+    for i in range(4):
+        vrep.simxSetJointTargetVelocity(clientID, wheelJoints[i], wheel_speeds[i], vrep.simx_opmode_oneshot)
+
+    controlCommunication(clientID, False)  
+    required_sleep_time = (distance/perimeter) * (2*math.pi/speed) * correctionFactor
+    time.sleep(required_sleep_time)
 
     # set wheels velocity to 0
-# INSERT YOUR CODE HERE
+    setWheelVelocityToZero(wheelJoints, clientID)
+
 
 def turnRight(degree, speed, clientID, wheelJoints):
-
     # set wheel velocity to 0
-# INSERT YOUR CODE HERE
+    setWheelVelocityToZero(wheelJoints, clientID) 
     
     # calculate velocity for each wheel
-# INSERT YOUR CODE HERE
-    
+    wheel_speeds = wheelVel(0, 0, speed)
+    controlCommunication(clientID, True)
+
     # set wheel velocity to calculated values
-# INSERT YOUR CODE HERE
+    for i in range(4):
+        vrep.simxSetJointTargetVelocity(clientID, wheelJoints[i], wheel_speeds[i], vrep.simx_opmode_oneshot)
+
+    controlCommunication(clientID, False)
     
     # keep the velocity for the required amount of time
-# INSERT YOUR CODE HERE
+    time_required = (wheelDistanceVer + wheelDistanceHor)/perimeter * math.pi * degree/abs(speed) * math.pi/180
+    time.sleep(time_required)
 
     # set wheel velocity to 0
-# INSERT YOUR CODE HERE
+    setWheelVelocityToZero(wheelJoints, clientID)     
 
-def wheelVel(forwBackVel, leftRightVel, rotVel):
-    # set individual wheel velocities
-# INSERT YOUR CODE HERE
+
+def wheelVel(forwBackVel , leftRightVel , rotVel):
+    frontLeft = forwBackVel - leftRightVel - rotVel
+    rearLeft = forwBackVel - leftRightVel - rotVel
+    rearRight = forwBackVel + leftRightVel + rotVel
+    frontRight = forwBackVel + leftRightVel + rotVel
+    return np.array([frontLeft, rearLeft, rearRight, frontRight])
 
 
 def main():
@@ -56,22 +78,23 @@ def main():
     print ('Program started')
     vrep.simxFinish(-1) 
     clientID=vrep.simxStart('127.0.0.1',19997,True,True, 2000,5)
+
     if clientID!=-1:
         print ('Connected to remote API server')
-
         emptyBuff = bytearray()
 
         # Start the simulation:
-#INSERT YOUR CODE HERE
+        vrep.simxStartSimulation(clientID, vrep.simx_opmode_oneshot_wait)
 
         # initiaize robot
         # Retrieve wheel joint handles:
-        wheelJoints=np.empty(4, dtype=int); wheelJoints.fill(-1) #front left, rear left, rear right, front right
-#INSERT YOUR CODE HERE
-        res,wheelJoints[0]=
-        res,wheelJoints[1]=
-        res,wheelJoints[2]=
-        res,wheelJoints[3]=
+        wheelJoints = np.empty(4, dtype=int)
+        wheelJoints.fill(-1)  # front left, rear left, rear right, front right
+        joint_names = ['rollingJoint_fl', 'rollingJoint_rl', 'rollingJoint_rr', 'rollingJoint_fr']
+
+        for i, joint_name in enumerate(joint_names):
+            res, wheelJoints[i] = vrep.simxGetObjectHandle(clientID, joint_name, vrep.simx_opmode_oneshot_wait)
+
         armJointsHandle = [0] * 5
         
         #--------------------------------------------------arm------------------------------------------------------------------
@@ -86,13 +109,22 @@ def main():
         #-----------------------------------------------------------------------------------------------------------------------
         
         # set wheel velocity to 0
-#INSERT YOUR CODE HERE
+        setWheelVelocityToZero(wheelJoints, clientID)
 
-#INSERT YOUR CODE HERE (for the main loop to form a square)
+        #INSERT YOUR CODE HERE (for the main loop to form a square)
+        for _ in range(4):
+            moveForward(1, 5, clientID, wheelJoints)
+            turnRight(90, 5, clientID, wheelJoints)
 
-#INSERT YOUR CODE HERE
-        # Pause communication, Stop simulation, Close the connection to V-REP
-	# Ako ne uspije zatvaranje ispiši 'Failed connecting to remote API server'
-	# na samom kraju ispiši 'Program ended'
+     # Pause communication, Stop simulation, Close the connection to V-REP
+	 # Ako ne uspije zatvaranje ispiši 'Failed connecting to remote API server'
+	 # na samom kraju ispiši 'Program ended'
+
+        controlCommunication(clientID, False)
+        vrep.simxStopSimulation(clientID, vrep.simx_opmode_oneshot_wait)
+        vrep.simxFinish(clientID)
+    else:
+        print("Connection to the remote API server failed! Re-open CoppeliaSim, load the movement.ttt and run this script again.")
+    print("Program ended")
 
 if __name__ == "__main__": main()
