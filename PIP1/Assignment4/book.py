@@ -11,7 +11,7 @@ class Book:
         if self.availability:
             self.availability = False
         else:
-            print(f'The book "{self._name}" is not available.')
+            print("The book " +  self._name + " is not available.")
 
 
     def returnBook(self):
@@ -29,22 +29,39 @@ class Book:
 
     def __eq__(self, other):
         if isinstance(other, Book):
-            return self.name == other.name
+            # compare e.g. only names
+            # return self.name == other.name
+            # compare all properties (2 ways)
+            # return self.__dict__ == other.__dict__
+            return vars(self) == vars(other)
         return False
-
 
     def __ne__(self, other):
         if isinstance(other, Book):
-            return self.name != other.name
+            # Compare only names
+            # return self.name != other.name
+            # Compare all properties (2 ways)
+            # return self.__dict__ != other.__dict__
+            return vars(self) != vars(other)
         return False
 
 
     def __str__(self):
-        return f'{self.name}, written by {self.author} in the year {self.release_year}.'
+        return self.name + ", written by " + self.author + " in the year " + str(self.release_year) + "."
 
-# Example usage
+
 book = Book("Process", "Franz Kafka", 1, 1925)
 print(book)
 
 book.borrowBook()
 book.borrowBook()
+
+book2 = Book("Process", "Franz Kafka", 1, 1925)
+book3 = Book("Process", "Franz Kafka", 1, 1925)
+book4 = Book("The Origin", "Dan Brown", 1, 2017)
+
+print("\nComparisons")
+print(book2 == book3)
+print(book2 != book3)
+print(book3 == book4)
+print(book3 != book4)

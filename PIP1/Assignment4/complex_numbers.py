@@ -1,57 +1,64 @@
 import math
 
 class ComplexNumber:
-    def __init__(self, real, imag):
+    def __init__(self, real, imaginary):
         self.real = real
-        self.imag = imag
+        self.imaginary = imaginary
+
 
     # Method for modulus (absolute value)
     def abs(self):
-        return math.sqrt(self.real ** 2 + self.imag ** 2)
+        return math.sqrt(self.real ** 2 + self.imaginary ** 2)
 
-    # Method for phase angle
+
+    # Angle of a complex number shows its direction in the plane, measuring how far it is rotated from the positive real axis.
     def angle(self):
-        return math.atan2(self.imag, self.real)
+        return math.atan2(self.imaginary, self.real)
+
 
     def __add__(self, other):
-        return ComplexNumber(self.real + other.real, self.imag + other.imag)
+        return ComplexNumber(self.real + other.real, self.imaginary + other.imaginary)
+
 
     def __sub__(self, other):
-        return ComplexNumber(self.real - other.real, self.imag - other.imag)
+        return ComplexNumber(self.real - other.real, self.imaginary - other.imaginary)
 
-    # Overload * operator
+
+    # Real part: ac - bd = 1 * 4 - 2 * 0 = 4
+    # Imaginary part: ad + bc = 1 * 0 + 2 * 4 = 8
     def __mul__(self, other):
-        return ComplexNumber(self.real * other.real - self.imag * other.imag,
-                             self.real * other.imag + self.imag * other.real)
+        return ComplexNumber(self.real * other.real - self.imaginary * other.imaginary, self.real * other.imaginary + self.imaginary * other.real)
 
-    # Overload / operator
+
+    # real = (self.real × other.real + self.imaginary × other.imaginary) / other.real ** 2 + other.imaginary ** 2: 1 * 4 + 2 * 0 / 4^2 + 0^2 = 4/16 = 0.25
+    # imaginary = (self.imaginary × other.real − self.real × other.imaginary) / other.real ** 2 + other.imaginary ** 2: 2 * 4 - 1 * 0 / 4^2 + 0^2 = 8/16 = 0.50
     def __truediv__(self, other):
-        denom = other.real ** 2 + other.imag ** 2
-        real = (self.real * other.real + self.imag * other.imag) / denom
-        imag = (self.imag * other.real - self.real * other.imag) / denom
-        return ComplexNumber(real, imag)
+        denom = other.real ** 2 + other.imaginary ** 2
+        real = (self.real * other.real + self.imaginary * other.imaginary) / denom
+        imaginary = (self.imaginary * other.real - self.real * other.imaginary) / denom
+        return ComplexNumber(real, imaginary)
 
-    # Overload == operator
+
     def __eq__(self, other):
-        return self.real == other.real and self.imag == other.imag
+        return self.real == other.real and self.imaginary == other.imaginary
 
-    # Overload != operator
+
     def __ne__(self, other):
-        return self.real != other.real and self.imag != other.imag
+        return self.real != other.real and self.imaginary != other.imaginary
 
-    # String representation
+
     def __str__(self):
-        if self.real == 0 and self.imag == 0:
-            return "0"
+        if self.real == 0 and self.imaginary == 0:
+            return 0
         elif self.real == 0:
-            return f"{self.imag}i"
-        elif self.imag == 0:
+            return str(self.imaginary) + "i"
+        elif self.imaginary == 0:
             return str(self.real)
 
-        if self.imag > 0:
-            return f"{self.real}+{self.imag}i"
+        if self.imaginary > 0:
+            return str(self.real) + "+" + str(self.imaginary) + "i"
         else:
-            return f"{self.real}{self.imag}i"
+            return str(self.real * self.imaginary) + "i"
 
 
 # Example usage
