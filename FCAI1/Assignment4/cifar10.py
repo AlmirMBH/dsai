@@ -21,7 +21,7 @@ for i in range(10):
     label = trainy[i]
 
     # Set up a subplot (2 rows, 5 columns)
-    plt.subplot(2, 5, i + 1)
+    plt.subplot(2, 5, i+1) # i+1 is the index of each subplot, not visible on the figure
     plt.imshow(image)
     plt.axis('off')  # Hide axis
     plt.title('Class ' + str(label[0]) + ' (' + class_names[label[0]] + ')')
