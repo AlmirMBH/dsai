@@ -27,9 +27,9 @@ ax.scatter(
 )
 
 # Set the labels for the plot axes
-ax.set_xlabel("Income from Tarik and Haris over the next 6 months")
-ax.set_ylabel("Hours overtime")
-ax.set_zlabel("Late salary savings")
+ax.set_xlabel("1st Component")
+ax.set_ylabel("2nd Component")
+ax.set_zlabel("3rd Component")
 
 # Show the plot
 plt.show()
