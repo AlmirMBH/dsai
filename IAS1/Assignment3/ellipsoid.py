@@ -3,8 +3,7 @@ from shared_methods import SharedMethods
 
 
 class Ellipsoid:
-    @classmethod
-    def ellipsoid(cls, radius, speed, clientID, wheelJoints):
+    def ellipsoid(radius, speed, clientID, wheelJoints):
         angular_position = 0
         ellipse_factor = 3
         SharedMethods.setWheelVelocity(wheelJoints, clientID)

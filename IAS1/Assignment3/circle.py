@@ -8,8 +8,7 @@ correctionFactor = 1.045
 
 
 class Circle:
-    @classmethod
-    def circle(cls, radius, speed, clientID, wheelJoints):
+    def circle(radius, speed, clientID, wheelJoints):
         left_wheels_speed = speed + (wheelDistanceHor * (speed / radius)) / 2 # angular velocity = speed / radius
         right_wheels_speed = speed - (wheelDistanceHor * (speed / radius)) / 2
         wheelVelocities = [right_wheels_speed, right_wheels_speed, left_wheels_speed, left_wheels_speed]
