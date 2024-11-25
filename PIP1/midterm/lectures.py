@@ -74,7 +74,7 @@ data = [["apple", 5, "A"], ["cherry", 2, "B"], ["banana", 7, "C"]]
 print(data)
 sorted_data = sorted(data, key = lambda element: element[1], reverse=True)
 sorted_data2 = sorted(data, key = lambda element: (element[1], element[2]))
-print(sorted_data)
+print(sorted_data_2)
 
 DICTIONARY
 dictionary1 = {"key1": value1, "key2": value2}
@@ -90,7 +90,7 @@ values = [["Jordan", "Pippen", "Rodman"], [33, 34, 35], ["Sarajevo", "Chicago", 
 dictionary = dict(zip(keys, values))
 
 pairs = [("name": "Jordan"), ("age": 33), ("city": "Sarajevo")]
-dictionary = dict(zip(pairs))
+dictionary = dict(zip(pairs)) # zip = merge
 
 List of tuples to dictionary
 pairs = [("name", "Jordan"), ("age", 33), ("city", "Sarajevo")] # tuples
@@ -164,7 +164,7 @@ pandas.read_csv("fileName")
 import matplotlib.pyplot as plt
 import numpy as np
 
-n = np.arange(1, 101)
+n = np.arrange(1, 101)
 x = np.sin(n)
 y = np.cos(n)
 
@@ -191,6 +191,10 @@ plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90)
 plt.axis('equal')
 plt.show()
 
+autopct='%1.1f%%': Displays percentages on the pie chart.
+The format '%1.1f%%' means one digit before and one digit after the decimal point (e.g., 25.0%)
+startangle=90: Rotates the pie chart so the first slice starts at 90 degrees (top of the circle).
+
 SCATTER PLOT
 import numpy as np
 import matplotlib.pyplot as plt
@@ -211,14 +215,11 @@ plt.xlabel('x')
 plt.ylabel('y')
 plt.title('Scatter Plot of Random Points with Normal Distribution')
 plt.legend()
-
 plt.grid()
 plt.show()
 
-Decomposition
-- Breaking a large problem into smaller, manageable parts.
-- Abstraction
-- Hiding the complexity by focusing on high-level steps, not implementation details
+Decomposition: Breaking a large problem into smaller, manageable parts.
+Abstraction: Hiding the complexity by focusing on high-level steps, not implementation details
 
 FUNCTION DOCS
 def someFunction():
@@ -231,8 +232,7 @@ help(someFunction)
 GLOBALS
 if you want to change a value of the variable that is not instanced in the function
 you have to use 'global' before the name of the variable
-Use globals only for: configuration constants, shared state across functions and similar stuff
-that should be global
+Use globals only for: configuration constants, shared state across functions and similar stuff that should be global
 
 RACE CONDITION
 A race condition occurs when two or more processes or threads access shared resources
@@ -275,11 +275,14 @@ def factorial(n):
         return n * factorial(n - 1)
 print(factorial(5))  // 5 * 4 * 3 * 2
 
+def factorial(n):
+    return n * factorial(n - 1) if n > 0 else 1
+
 ITERATION INSTEAD OF RECURSION
 def factorial(n):
     result = 1
-    for i in range(1, n + 1)
-        result += i
+    for i in range(1, n + 1):
+        result *= i
     return result
 print(factorial(5))  // 5 * 4 * 3 * 2
 
@@ -356,8 +359,8 @@ It emphasizes reusability, modularity and flexibility.
 
 PILLARS OF OOP
 ENCAPSULATION is the bundling of variables (data) and methods (functions) that operate on the data into a
-single unit called an object.
-Data abstraction is the concept of hiding the internal details of an object and exposing only the necessary
+single unit called an object. Hides internal details and protects data by bundling it with methods that operate on it.
+Data ABSTRACTION is the concept of hiding the internal details of an object and exposing only the necessary
 functionalities.
 INHERITANCE is the process by which one class (subclass) inherits the properties and methods
 of another class (superclass).
@@ -403,17 +406,18 @@ private
 person.__name     def __getName()
 
 METHODS
-Static methods always require first parameter to be e.g. cls, which is used instead of self or this in some languages
+Static methods might require first parameter to be e.g. cls, which might be used instead of 'self' or 'this'
+in some languages. If you do not need to use the 'cls' to refer to sth within the class, you can omit it
 @staticmethod - annotation used above static class methods e.g.
 @staticmethod
 def calculateNumbers(cls)
 
 OVERLOADING
-Whenever e.g. == is called, function __eq__ will be called as well
+Whenever e.g. '==' is used somewhere in the code, function __eq__ will be called as well
 # __eq__ binary ==
 # __ne__ binary !=
 
-ENUM
+ENUM (ENUMERATED)
 class Colors:
     red = (255, 0, 0)
     green = (0, 255, 0)
@@ -428,7 +432,8 @@ class Colors:
         return Colors.nameToColor.get(color)
 
 PROPERTY (SETTER)
-Bear in mind that the setter MUST have an annotation and a getter, and they all MUST have the same name
+Bear in mind that the setter MUST have an annotation and a getter, and they all MUST have the same name.
+In addition, setter name is called like e.g. person.name() but person.name due to @property annotation
 
 class Person:
     def __init__(self, name, age):
@@ -499,14 +504,6 @@ print(student)
 
 result = [i for i in range(5) if i % 2 == 0]
 print(result)
-
-
-
-
-
-
-
-
 
 
 
