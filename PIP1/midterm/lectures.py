@@ -32,7 +32,10 @@ print(list[::-1]) = 50, 40, 30, 20, 10
 len() is used for strings, lists, tuples, dictionaries and sets
 
 FOR LOOP
-for i in range(start:stop:step) e.g. range(1:6) = 1, 2, 3, 4, 5
+for i in range(start:stop:step)
+Example
+for i in range(1, 6, 1):
+    print(i) # 1, 2, 3, 4, 5
 
 If no variable is required, just looping, '_' can be used instead of i
 for _ in range(start:stop:step)
@@ -504,6 +507,3 @@ print(student)
 
 result = [i for i in range(5) if i % 2 == 0]
 print(result)
-
-
-
