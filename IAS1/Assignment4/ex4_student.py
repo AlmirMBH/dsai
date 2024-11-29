@@ -13,9 +13,9 @@ wheelDistanceHor = 0.30046             # Horizontal distance between the wheels
 speed = 5                              # Global variable for speed
 
 # Initial pose of the robot in 2D space (position + orientation): [x, y, alpha (yaw angle)]
-xPos = -1.6335505247116089
-yPos = -0.35127100348472595
-angle = 0.03627798333764076
+xPos = 0
+yPos = 0
+angle = 0
 
 
 def moveRobot(clientID, wheelJoints, angle, distance):
@@ -45,13 +45,13 @@ def printPosition(clientID):
 
 
 def straightRobot(clientID, wheelJoints, distanceMeter):
-    global speed 
+    global speed
     correctionFactor = 1.045
     SharedMethods.setWheelVelocity(wheelJoints, clientID)
     if distanceMeter >= 0: moving_speed = speed
     else: moving_speed = -speed
     wheel_velocities = SharedMethods.calculateWheelVelocities(moving_speed, 0, 0)
-    SharedMethods.pauseCommunication(clientID, True)    
+    SharedMethods.pauseCommunication(clientID, True)
     SharedMethods.setWheelVelocity(wheelJoints, clientID, wheel_velocities)
     SharedMethods.pauseCommunication(clientID, False)
     duration = (abs(distanceMeter)/perimeter) * ((2 * math.pi)/speed) * correctionFactor
@@ -65,7 +65,7 @@ def rotateRobot(clientID, wheelJoints, angle):
     else: rotational_velocity = -speed
     wheel_velocities = SharedMethods.calculateWheelVelocities(0, 0, rotational_velocity)
     SharedMethods.pauseCommunication(clientID, True)
-    SharedMethods.setWheelVelocity(wheelJoints, clientID, wheel_velocities)    
+    SharedMethods.setWheelVelocity(wheelJoints, clientID, wheel_velocities)
     SharedMethods.pauseCommunication(clientID, False)
     radius = (wheelDistanceVer + wheelDistanceHor) / 2
     arc_length = abs(angle) * radius  # Degrees×π/180
@@ -93,7 +93,7 @@ def odometry(angleR, distanceR):
         xPos -= distanceR * math.cos(angle)
         yPos -= distanceR * math.sin(angle)
         angle = angle - (math.pi / 2)
-    
+
     else:
         print("Scenario 3: " + str(angleR))
         xPos += distanceR * math.cos(angle)
@@ -105,7 +105,7 @@ def main():
     global yPos
     global angle
     clientID = SharedMethods.startSimulation()
-    
+
     if clientID:
         print("Connection to the remote API server failed! Re-open CoppeliaSim, load the movement.ttt and run this script again.")
         return
