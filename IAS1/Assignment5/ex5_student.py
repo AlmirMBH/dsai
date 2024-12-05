@@ -140,7 +140,7 @@ def main():
         return
 
     # Start simulation, fetch wheel joints, set the speed to 0
-    vrep.simxStartSimulation(clientID, vrep.simx_opmode_oneshot_wait)
+    SharedMethods.startSimulation()
     wheelJoints = SharedMethods.getObjectHandles(clientID, ['rollingJoint_fl', 'rollingJoint_rl', 'rollingJoint_rr', 'rollingJoint_fr'])
     SharedMethods.setWheelVelocity(wheelJoints, clientID)
     time.sleep(1)
