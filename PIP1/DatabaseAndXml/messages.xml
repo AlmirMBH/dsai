@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Msg>
+    <Locations>
+        <Location id="1" room="Room A4"/>
+        <Location id="2" room="Room A5"/>
+        <Location id="3" room="Room A6"/>
+    </Locations>
+    <Messages>
+        <Message id="3700" priority="High" roomId="1">Meeting at 3 PM</Message>
+        <Message id="3700" priority="High" roomId="2">Meeting at 6 PM</Message>
+    </Messages>
+</Msg>
