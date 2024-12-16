@@ -3,7 +3,8 @@
 
 using namespace std;
 
-// Commands to compile the code
+// Commands to install C++ and compile the code
+// pip install pybind11
 // g++ -shared -fPIC -o example.so example.cpp
 // g++ -shared -fPIC -std=c++11 -o example.so example.cpp
 
