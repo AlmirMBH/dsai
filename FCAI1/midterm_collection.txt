@@ -3,9 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-print("a", "b", sep=", ", end="\n")
-
 # Formatting
+print("a", "b", sep=", ", end="\n")
 pi = 3.14159
 print(f"My number is {pi:.2f}")
 
