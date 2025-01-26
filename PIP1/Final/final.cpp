@@ -385,54 +385,241 @@ std::size_t arrayLength(const T (&)[N]) {
 // Vehicles cannot drive in reverse on the highway. Use virtual methods to implement.
 // Create get and set methods if necessary.
 // All member variables must be private or protected.
-class Vehicle{
-    protected:
-        std::string license_number;
-        int minimum_speed = 0;
-        int current_speed = 0;
-        int maximum_speed = 0;
-    public:
-        Vehicle(std::string license_number){
-            this->license_number = license_number;
-        }
+// class Vehicle{
+//     protected:
+//         std::string license_number;
+//         int minimum_speed = 0;
+//         int current_speed = 0;
+//         int maximum_speed = 0;
+//     public:
+//         Vehicle(std::string license_number){
+//             this->license_number = license_number;
+//         }
     
+//     virtual void accelerate() = 0;
+//     virtual void decelerate() = 0;
+
+//     virtual ~Vehicle() = default;
+// };
+
+// class Motorcycle : public Vehicle {
+//     public:
+//         Motorcycle(std::string license_number) : Vehicle(license_number) {
+//             maximum_speed = 7;
+//         };
+    
+//     void accelerate() override {
+//         if ((current_speed+2) <= maximum_speed) {
+//             std::cout << "Motorcycle is accelerating from speed: " << current_speed << " to speed: " << (current_speed += 2) << std::endl;
+//         } else {
+//             std::cout << "Motorcycle is already driving at max speed" << std::endl;
+//         }
+//     }
+
+
+//     void decelerate() override {
+//         if ((current_speed-2) >= minimum_speed) {
+//             std::cout << "Motorcycle is decelerating from speed: " << current_speed << " to speed: " << (current_speed -= 2) << std::endl;
+//         } else {
+//             std::cout << "Motorcycle is already at min speed" << std::endl;
+//         }
+//     }
+// };
+
+// int main() {
+//     Motorcycle m("123ABC");
+
+//     m.accelerate();
+//     m.accelerate();
+//     m.accelerate();
+//     m.accelerate();
+//     m.decelerate();
+// }
+
+//============================
+// ANALYZE
+//============================
+#include <iostream>
+#include <vector>
+#include <string>
+
+enum Direction { NORTH, SOUTH, EAST, WEST };
+
+class Track {
+private:
+    Direction direction;
+    bool motorcyclesOnly;
+
+public:
+    Track(Direction dir, bool motorcyclesOnly)
+        : direction(dir), motorcyclesOnly(motorcyclesOnly) {}
+
+    Direction getDirection() const { return direction; }
+    bool getMotorcyclesOnly() const { return motorcyclesOnly; }
+};
+
+class Vehicle {
+protected:
+    std::string license_number;
+    int minimum_speed = 0;
+    int current_speed = 3;  // Default starting speed
+    int maximum_speed = 0;
+    Track* track = nullptr;
+
+public:
+    Vehicle(std::string license_number) : license_number(license_number) {}
+
     virtual void accelerate() = 0;
     virtual void decelerate() = 0;
+    virtual std::string getClassName() const = 0;
+
+    void setTrack(Track* t) { track = t; }
+    Track* getTrack() const { return track; }
+    int getCurrentSpeed() const { return current_speed; }
+    std::string getLicenseNumber() const { return license_number; }
 
     virtual ~Vehicle() = default;
 };
 
 class Motorcycle : public Vehicle {
-    public:
-        Motorcycle(std::string license_number) : Vehicle(license_number) {
-            maximum_speed = 7;
-        };
-    
+public:
+    Motorcycle(std::string license_number) : Vehicle(license_number) {
+        maximum_speed = 8;
+    }
+
     void accelerate() override {
-        if ((current_speed+2) <= maximum_speed) {
-            std::cout << "Motorcycle is accelerating from speed: " << current_speed << " to speed: " << (current_speed += 2) << std::endl;
+        if ((current_speed + 2) <= maximum_speed) {
+            current_speed += 2;
+            std::cout << "Motorcycle accelerating to " << current_speed << " m/s." << std::endl;
         } else {
-            std::cout << "Motorcycle is already driving at max speed" << std::endl;
+            std::cout << "Motorcycle already at max speed." << std::endl;
         }
     }
 
+    void decelerate() override {
+        if ((current_speed - 2) >= minimum_speed) {
+            current_speed -= 2;
+            std::cout << "Motorcycle decelerating to " << current_speed << " m/s." << std::endl;
+        } else {
+            std::cout << "Motorcycle already at min speed." << std::endl;
+        }
+    }
+
+    std::string getClassName() const override { return "Motorcycle"; }
+};
+
+class Car : public Vehicle {
+public:
+    Car(std::string license_number) : Vehicle(license_number) {
+        maximum_speed = 6;
+    }
+
+    void accelerate() override {
+        if ((current_speed + 2) <= maximum_speed) {
+            current_speed += 2;
+            std::cout << "Car accelerating to " << current_speed << " m/s." << std::endl;
+        } else {
+            std::cout << "Car already at max speed." << std::endl;
+        }
+    }
 
     void decelerate() override {
-        if ((current_speed-2) >= minimum_speed) {
-            std::cout << "Motorcycle is decelerating from speed: " << current_speed << " to speed: " << (current_speed -= 2) << std::endl;
+        if ((current_speed - 2) >= minimum_speed) {
+            current_speed -= 2;
+            std::cout << "Car decelerating to " << current_speed << " m/s." << std::endl;
         } else {
-            std::cout << "Motorcycle is already at min speed" << std::endl;
+            std::cout << "Car already at min speed." << std::endl;
+        }
+    }
+
+    std::string getClassName() const override { return "Car"; }
+};
+
+class Truck : public Vehicle {
+public:
+    Truck(std::string license_number) : Vehicle(license_number) {
+        maximum_speed = 4;
+    }
+
+    void accelerate() override {
+        if ((current_speed + 1) <= maximum_speed) {
+            current_speed += 1;
+            std::cout << "Truck accelerating to " << current_speed << " m/s." << std::endl;
+        } else {
+            std::cout << "Truck already at max speed." << std::endl;
+        }
+    }
+
+    void decelerate() override {
+        if ((current_speed - 1) >= minimum_speed) {
+            current_speed -= 1;
+            std::cout << "Truck decelerating to " << current_speed << " m/s." << std::endl;
+        } else {
+            std::cout << "Truck already at min speed." << std::endl;
+        }
+    }
+
+    std::string getClassName() const override { return "Truck"; }
+};
+
+class Highway {
+private:
+    std::vector<Track*> tracks;
+    std::vector<Vehicle*> vehicles;
+
+public:
+    void addTrack(Track* t) {
+        tracks.push_back(t);
+    }
+
+    void addVehicle(Vehicle* v, Track* t) {
+        v->setTrack(t);
+        vehicles.push_back(v);
+    }
+
+    void advanceTime() {
+        for (auto v : vehicles) {
+            // Move the vehicle 1 meter per second
+            if (v->getTrack()->getDirection() == EAST || v->getTrack()->getDirection() == WEST) {
+                // Do nothing for simplicity in this case
+            }
+        }
+    }
+
+    void show() {
+        std::cout << "Highway status (first 30 meters):" << std::endl;
+        for (auto v : vehicles) {
+            if (v->getCurrentSpeed() > 0) {
+                std::cout << v->getClassName() << " at speed " << v->getCurrentSpeed() << " m/s on track." << std::endl;
+            }
         }
     }
 };
 
 int main() {
-    Motorcycle m("123ABC");
+    Highway testHighway;
+    Track t1(Direction::EAST, false);
+    Track t2(Direction::EAST, true);
+    Track t3(Direction::WEST, false);
+    testHighway.addTrack(&t1);
+    testHighway.addTrack(&t2);
+    testHighway.addTrack(&t3);
 
-    m.accelerate();
-    m.accelerate();
-    m.accelerate();
-    m.accelerate();
-    m.decelerate();
+    Car c1("ABC-123");
+    Truck tr1("REG-ABC");
+    Motorcycle m1("MC-AI00");
+
+    testHighway.addVehicle(&c1, &t1);
+    testHighway.addVehicle(&tr1, &t3);
+    testHighway.addVehicle(&m1, &t2);
+
+    m1.accelerate();
+    testHighway.advanceTime();
+    c1.accelerate();
+    c1.accelerate();
+    testHighway.advanceTime();
+    testHighway.advanceTime();
+
+    testHighway.show();
 }
 
