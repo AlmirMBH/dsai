@@ -439,160 +439,170 @@ std::size_t arrayLength(const T (&)[N]) {
 //============================
 // ANALYZE
 //============================
-#include <iostream>
-#include <vector>
-#include <string>
-
-enum Direction { NORTH, SOUTH, EAST, WEST };
+enum class Direction { NORTH, SOUTH, EAST, WEST };
 
 class Track {
-private:
+public:
     Direction direction;
     bool motorcyclesOnly;
-
-public:
-    Track(Direction dir, bool motorcyclesOnly)
-        : direction(dir), motorcyclesOnly(motorcyclesOnly) {}
-
-    Direction getDirection() const { return direction; }
-    bool getMotorcyclesOnly() const { return motorcyclesOnly; }
+    Track(Direction dir, bool motorcyclesOnly) : direction(dir), motorcyclesOnly(motorcyclesOnly) {}
 };
 
 class Vehicle {
 protected:
     std::string license_number;
-    int minimum_speed = 0;
-    int current_speed = 3;  // Default starting speed
+    int current_speed = 0;
     int maximum_speed = 0;
+    int position = 0;  // Position on the track
     Track* track = nullptr;
-
 public:
     Vehicle(std::string license_number) : license_number(license_number) {}
 
     virtual void accelerate() = 0;
     virtual void decelerate() = 0;
-    virtual std::string getClassName() const = 0;
-
+    virtual std::string getType() = 0;
     void setTrack(Track* t) { track = t; }
     Track* getTrack() const { return track; }
+    int getPosition() const { return position; }
+    void setPosition(int pos) { position = pos; }
     int getCurrentSpeed() const { return current_speed; }
-    std::string getLicenseNumber() const { return license_number; }
-
     virtual ~Vehicle() = default;
 };
 
 class Motorcycle : public Vehicle {
 public:
-    Motorcycle(std::string license_number) : Vehicle(license_number) {
-        maximum_speed = 8;
-    }
-
+    Motorcycle(std::string license_number) : Vehicle(license_number) { maximum_speed = 8; }
     void accelerate() override {
         if ((current_speed + 2) <= maximum_speed) {
             current_speed += 2;
-            std::cout << "Motorcycle accelerating to " << current_speed << " m/s." << std::endl;
+            std::cout << "Motorcycle accelerating to " << current_speed << " m/s.\n";
         } else {
-            std::cout << "Motorcycle already at max speed." << std::endl;
+            std::cout << "Motorcycle already at max speed.\n";
         }
     }
-
     void decelerate() override {
-        if ((current_speed - 2) >= minimum_speed) {
+        if ((current_speed - 2) >= 0) {
             current_speed -= 2;
-            std::cout << "Motorcycle decelerating to " << current_speed << " m/s." << std::endl;
+            std::cout << "Motorcycle decelerating to " << current_speed << " m/s.\n";
         } else {
-            std::cout << "Motorcycle already at min speed." << std::endl;
+            std::cout << "Motorcycle already at minimum speed.\n";
         }
     }
-
-    std::string getClassName() const override { return "Motorcycle"; }
+    std::string getType() override {
+        return "Motorcycle";
+    }
 };
 
 class Car : public Vehicle {
 public:
-    Car(std::string license_number) : Vehicle(license_number) {
-        maximum_speed = 6;
-    }
-
+    Car(std::string license_number) : Vehicle(license_number) { maximum_speed = 5; }
     void accelerate() override {
         if ((current_speed + 2) <= maximum_speed) {
             current_speed += 2;
-            std::cout << "Car accelerating to " << current_speed << " m/s." << std::endl;
+            std::cout << "Car accelerating to " << current_speed << " m/s.\n";
         } else {
-            std::cout << "Car already at max speed." << std::endl;
+            std::cout << "Car already at max speed.\n";
         }
     }
-
     void decelerate() override {
-        if ((current_speed - 2) >= minimum_speed) {
+        if ((current_speed - 2) >= 0) {
             current_speed -= 2;
-            std::cout << "Car decelerating to " << current_speed << " m/s." << std::endl;
+            std::cout << "Car decelerating to " << current_speed << " m/s.\n";
         } else {
-            std::cout << "Car already at min speed." << std::endl;
+            std::cout << "Car already at minimum speed.\n";
         }
     }
-
-    std::string getClassName() const override { return "Car"; }
+    std::string getType() override {
+        return "Car";
+    }
 };
 
 class Truck : public Vehicle {
 public:
-    Truck(std::string license_number) : Vehicle(license_number) {
-        maximum_speed = 4;
-    }
-
+    Truck(std::string license_number) : Vehicle(license_number) { maximum_speed = 4; }
     void accelerate() override {
         if ((current_speed + 1) <= maximum_speed) {
             current_speed += 1;
-            std::cout << "Truck accelerating to " << current_speed << " m/s." << std::endl;
+            std::cout << "Truck accelerating to " << current_speed << " m/s.\n";
         } else {
-            std::cout << "Truck already at max speed." << std::endl;
+            std::cout << "Truck already at max speed.\n";
         }
     }
-
     void decelerate() override {
-        if ((current_speed - 1) >= minimum_speed) {
+        if ((current_speed - 1) >= 0) {
             current_speed -= 1;
-            std::cout << "Truck decelerating to " << current_speed << " m/s." << std::endl;
+            std::cout << "Truck decelerating to " << current_speed << " m/s.\n";
         } else {
-            std::cout << "Truck already at min speed." << std::endl;
+            std::cout << "Truck already at minimum speed.\n";
         }
     }
-
-    std::string getClassName() const override { return "Truck"; }
+    std::string getType() override {
+        return "Truck";
+    }
 };
 
 class Highway {
-private:
     std::vector<Track*> tracks;
     std::vector<Vehicle*> vehicles;
-
 public:
     void addTrack(Track* t) {
         tracks.push_back(t);
     }
 
+    bool canAddVehicle(Vehicle* v, Track* t) {
+        if (t->motorcyclesOnly && v->getType() != "Motorcycle") {
+            std::cout << "Only motorcycles allowed on this track.\n";
+            return false;
+        }
+        for (auto& vehicle : vehicles) {
+            if (vehicle->getTrack() == t && vehicle->getPosition() < 3) {
+                std::cout << "Track is occupied in the first 3 meters.\n";
+                return false;
+            }
+        }
+        return true;
+    }
+
     void addVehicle(Vehicle* v, Track* t) {
-        v->setTrack(t);
-        vehicles.push_back(v);
+        if (canAddVehicle(v, t)) {
+            v->setTrack(t);
+            v->setPosition(0); // Start at the beginning of the track
+            vehicles.push_back(v);
+        }
     }
 
     void advanceTime() {
-        for (auto v : vehicles) {
-            // Move the vehicle 1 meter per second
-            if (v->getTrack()->getDirection() == EAST || v->getTrack()->getDirection() == WEST) {
-                // Do nothing for simplicity in this case
-            }
+        for (auto& vehicle : vehicles) {
+            vehicle->setPosition(vehicle->getPosition() + vehicle->getCurrentSpeed());
         }
     }
 
     void show() {
-        std::cout << "Highway status (first 30 meters):" << std::endl;
-        for (auto v : vehicles) {
-            if (v->getCurrentSpeed() > 0) {
-                std::cout << v->getClassName() << " at speed " << v->getCurrentSpeed() << " m/s on track." << std::endl;
+        std::cout << "==============================================\n";
+        std::cout << "---------------------------------------------\n";
+        for (int i = 0; i < 30; ++i) {
+            bool vehicleFound = false;
+            for (auto& vehicle : vehicles) {
+                if (vehicle->getPosition() == i) {
+                    std::string type = vehicle->getType();
+                    if (type == "Car") {
+                        std::cout << "C";
+                    } else if (type == "Motorcycle") {
+                        std::cout << "M";
+                    } else if (type == "Truck") {
+                        std::cout << "T";
+                    }
+                    vehicleFound = true;
+                    break;
+                }
+            }
+            if (!vehicleFound) {
+                std::cout << "-";
             }
         }
+        std::cout << ">\n";
+        std::cout << "---------------------------------------------\n";
+        std::cout << "==============================================\n";
     }
 };
 
@@ -601,25 +611,28 @@ int main() {
     Track t1(Direction::EAST, false);
     Track t2(Direction::EAST, true);
     Track t3(Direction::WEST, false);
+
     testHighway.addTrack(&t1);
     testHighway.addTrack(&t2);
     testHighway.addTrack(&t3);
 
+    Motorcycle m1("MC-AI00");
     Car c1("ABC-123");
     Truck tr1("REG-ABC");
-    Motorcycle m1("MC-AI00");
 
+    testHighway.addVehicle(&m1, &t2);
     testHighway.addVehicle(&c1, &t1);
     testHighway.addVehicle(&tr1, &t3);
-    testHighway.addVehicle(&m1, &t2);
 
     m1.accelerate();
-    testHighway.advanceTime();
-    c1.accelerate();
-    c1.accelerate();
-    testHighway.advanceTime();
+    tr1.accelerate();
     testHighway.advanceTime();
 
+    c1.accelerate();
+    c1.accelerate();
+    testHighway.advanceTime();
+    testHighway.advanceTime();
     testHighway.show();
 }
+
 
