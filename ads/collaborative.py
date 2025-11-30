@@ -5,24 +5,42 @@ class CollaborativeRecommender:
         self.graph = graph
     
     def score_movie(self, user_id, movie_id):
-        if movie_id in self.graph.get_user_movies(user_id):
+        # Fetch user (to whom we are recommending) movies and check if the user watched it,
+        # if so, return score 0 (do not recommend it again)
+        user_movies = self.graph.get_user_movies(user_id)
+        if movie_id in user_movies:
             return 0
         
-        score = 0.0
-        user_movies = self.graph.get_user_movies(user_id)
-        movie_users = self.graph.get_movie_users(movie_id)
+        total_score = 0.0
         
-        for other_user_id in movie_users:
-            common_movies = user_movies & self.graph.get_user_movies(other_user_id)
+        # Fetch users who watched this movie (potentially similar users).
+        users_who_watched_movie = self.graph.get_movie_users(movie_id)
+        
+        # Fetch watched movies that the other user watched and find if there are
+        # movies that both users watched. If not, skip this user because
+        # we cannot calculate the similarity between the two users.
+        for other_user_id in users_who_watched_movie:
+            other_user_movies = self.graph.get_user_movies(other_user_id)
+            common_movies = user_movies & other_user_movies
+
             if len(common_movies) == 0:
                 continue
             
-            similarity = len(common_movies) / (len(user_movies) + len(self.graph.get_user_movies(other_user_id)) - len(common_movies))
-            rating = self.graph.get_rating(other_user_id, movie_id)
+            # Calculate Jaccard similarity (two users' movie preferences overlap ratio):
+            # similarity = common_movies / (user_movies + other_user_movies - common_movies)
+            num_common_movies = len(common_movies)
+            num_user_movies = len(user_movies)
+            num_other_user_movies = len(other_user_movies)
+            total_unique_movies = num_user_movies + num_other_user_movies - num_common_movies
+            similarity = num_common_movies / total_unique_movies
             
-            score += similarity * rating
+            # Get the rating that the other user gave to the movie.
+            # Add the weighted contribution: similarity * rating            
+            other_user_rating = self.graph.get_rating(other_user_id, movie_id)
+            weighted_contribution = similarity * other_user_rating
+            total_score += weighted_contribution
         
-        return score
+        return total_score
     
     def _pick_users_for_movies(self, similar_users, recommended_movie_ids, max_users_per_movie):
         users = []
