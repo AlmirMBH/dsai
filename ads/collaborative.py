@@ -91,22 +91,39 @@ class CollaborativeRecommender:
     
 
     def recommend(self, user_id, top_k=10):
-        user_movies = self.graph.get_user_movies(user_id)
-        
-        # Find similar users (users who share movies with selected user)
         similar_users = set()
-        for mid in user_movies:
-            similar_users.update(self.graph.get_movie_users(mid))
+        movie_scores = []
+        recommended_movie_ids = []
+
+        # Get all movies that the user watched and find similar users (overlapping movies).        
+        user_movies = self.graph.get_user_movies(user_id)
+
+        for movie_id in user_movies:
+            users_who_watched_this_movie = self.graph.get_movie_users(movie_id)            
+            similar_users.update(users_who_watched_this_movie)
+        
         similar_users.discard(user_id)
         
-        # Score and select top k movies
+        # Get all movies and find those that the user has not watched (potential recommendations).
         all_movies = set(self.graph.movie_users.keys())
         unseen_movies = all_movies - user_movies
-        scores = [(movie_id, self.score_movie(user_id, movie_id)) for movie_id in unseen_movies]
-        scores.sort(key=lambda x: x[1], reverse=True)
-        recommendations = scores[:top_k]
         
-        recommended_movie_ids = [movie_id for movie_id, _ in recommendations]
+        # Score each unseen movie (see score_movie method above).
+        for movie_id in unseen_movies:
+            score = self.score_movie(user_id, movie_id)
+            movie_scores.append((movie_id, score))
+        
+        # Sort movies by score in descending order (highest scores first).
+        movie_scores.sort(key=lambda item: item[1], reverse=True)
+        
+        # Select the top_k (specified in the config.py) movies.
+        recommendations = movie_scores[:top_k]
+        
+        for movie_id, score in recommendations:
+            recommended_movie_ids.append(movie_id)
+        
+        # These users are displayed in the graph, so that it is visible
+        # why specific movies were recommended.
         similar_users_for_viz = self.pick_users_for_movies(similar_users, recommended_movie_ids, MAX_SIMILAR_USERS)
         
         return recommendations, recommended_movie_ids, similar_users_for_viz

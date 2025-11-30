@@ -4,3 +4,5 @@
 FCAI1/Assignment1/__pycache__/
 venv/
 .vscode/
+__pycache__/
+ads/__pycache__/
