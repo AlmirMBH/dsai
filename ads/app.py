@@ -25,7 +25,7 @@ st.title("Movie Recommendation System")
 
 # Get all user IDs from the graph, sort them and limit to MAX_USERS
 # to keep the dropdown manageable (see config.py).
-all_user_ids = list(graph.user_movies.keys())
+all_user_ids = list(graph.get_user_movies_dict().keys())
 sorted_user_ids = sorted(all_user_ids)
 user_ids = sorted_user_ids[:MAX_USERS]
 

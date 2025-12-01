@@ -9,7 +9,7 @@ class ColdStartRecommender:
         movie_list = []
         recommendations = []
 
-        for movie_id in self.graph.movie_users.keys():
+        for movie_id in self.graph.get_movie_users_dict().keys():
             users_who_watched = self.graph.get_movie_users(movie_id)
             movie_counts[movie_id] = len(users_who_watched)
         

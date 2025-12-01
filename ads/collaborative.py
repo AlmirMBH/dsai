@@ -105,7 +105,7 @@ class CollaborativeRecommender:
         similar_users.discard(user_id)
         
         # Get all movies and find those that the user has not watched (potential recommendations).
-        all_movies = set(self.graph.movie_users.keys())
+        all_movies = set(self.graph.get_movie_users_dict().keys())
         unseen_movies = all_movies - user_movies
         
         # Score each unseen movie (see score_movie method above).

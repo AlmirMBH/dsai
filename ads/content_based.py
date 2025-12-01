@@ -39,7 +39,7 @@ class ContentBasedRecommender:
         # get the user's movie preferences.
         # Fetch movies that the user has not watched.
         user_vectors = self.movie_vectors[user_movie_indices]        
-        all_movies = set(self.graph.movie_users.keys())
+        all_movies = set(self.graph.get_movie_users_dict().keys())
         unseen_movies = all_movies - user_movies
         
         # Calculate how similar unseen is to user's watched movies.

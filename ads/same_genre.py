@@ -31,7 +31,7 @@ class SameGenreRecommender:
             user_genres.update(movie_genres)
         
         # Fetch movies the user has not watched (potential recommendations).
-        all_movies = set(self.graph.movie_users.keys())
+        all_movies = set(self.graph.get_movie_users_dict().keys())
         unseen_movies = all_movies - user_movies
         
         # Check if movies are in user's genres.
