@@ -26,6 +26,7 @@ The `config.py` file contains system settings. The number of users is pretty low
 - **RECOMMENDATION_TOP_K**: Number of top recommendations to return (default: 10)
 - **MAX_USERS**: Maximum number of users displayed in the user selection dropdown (default: 50)
 - **MAX_SIMILAR_USERS**: Number of similar users to show per recommended movie in graph visualization is configurable to keep the visibility of the similar users in the graph. The algorithm prioritizes unique users first, then reuses users if needed.
+- **DEFAULT_DROP_DOWN_USER_ID**: Default user ID selected in the dropdown (default: 5)
 
 After making any changes to `config.py`, press the "Rerun" button in the upper right corner of the Streamlit UI to apply and see the changes.
 
@@ -53,7 +54,7 @@ This structure enables recommendations if User A and User B both rated the same 
 
 **Graph:** Visualizes recommendation paths for the collaborative algorithm (not for others as they are not based on graphs).
 - Red = selected user
-- Blue = similar users
+- Light blue = similar users
 - Green = recommended movies
 
 
