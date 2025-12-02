@@ -1,10 +1,8 @@
-import pandas as pd
-
 class SameGenreRecommender:
-    def __init__(self, graph, movies_file):
+    def __init__(self, graph, movies_df):
         self.graph = graph
         self.movie_genres = {}
-        self.movies_df = pd.read_csv(movies_file) # see archive/movies.csv
+        self.movies_df = movies_df
                 
         # Mapping from movie ID to its genres set for easy
         # comparison (e.g., {"Action", "Adventure", "Sci-Fi"}).        
@@ -20,7 +18,6 @@ class SameGenreRecommender:
     def recommend(self, user_id, top_k=10):
         user_genres = set()
         movie_scores = {}
-        movie_list = []
 
         # Get movies that the user watched.
         # Extract genres from movies that the user watched (user's genre preferences).
@@ -31,7 +28,7 @@ class SameGenreRecommender:
             user_genres.update(movie_genres)
         
         # Fetch movies the user has not watched (potential recommendations).
-        all_movies = set(self.graph.get_movie_users_dict().keys())
+        all_movies = set(self.graph.get_movie_ids())
         unseen_movies = all_movies - user_movies
         
         # Check if movies are in user's genres.
@@ -48,25 +45,11 @@ class SameGenreRecommender:
                     rating = self.graph.get_rating(user_id_who_watched, movie_id)
                     ratings.append(rating)
                 
-                # Calculate average rating (sum of ratings divided by their count)
-                # and store it as the score for this movie.
-                if len(ratings) > 0:
-                    total_rating = sum(ratings)
-                    num_ratings = len(ratings)
-                    average_rating = total_rating / num_ratings
-                else:
-                    average_rating = 0
-                
+                # Calculate average rating and store it as the score for this movie.
+                average_rating = sum(ratings) / len(ratings) if ratings else 0
                 movie_scores[movie_id] = average_rating
         
-        # Convert dictionary to list of tuples for sorting because
-        # sorted() works on sequences (lists, tuples), not dictionaries.
-        for movie_id, score in movie_scores.items():
-            movie_list.append((movie_id, score))
-        
         # Sort movies by highest ratings first and return the top_k (specified in the config.py).
-        sorted_movies = sorted(movie_list, key=lambda item: item[1], reverse=True)
-        recommendations = sorted_movies[:top_k]
-        
-        return recommendations
+        sorted_movies = sorted(movie_scores.items(), key=lambda item: item[1], reverse=True)
+        return sorted_movies[:top_k]
 

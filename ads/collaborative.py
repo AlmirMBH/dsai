@@ -48,7 +48,7 @@ class CollaborativeRecommender:
         
         # Here we just pick users to show with movies in the graph (not for recommendations).
         # Track which users have already been selected to avoid duplicates (if possible)
-        # across different movies.
+        # across different movies in the graph.
         used_users = set()
         
         # For each recommended movie, pick users who watched it.
@@ -105,7 +105,7 @@ class CollaborativeRecommender:
         similar_users.discard(user_id)
         
         # Get all movies and find those that the user has not watched (potential recommendations).
-        all_movies = set(self.graph.get_movie_users_dict().keys())
+        all_movies = set(self.graph.get_movie_ids())
         unseen_movies = all_movies - user_movies
         
         # Score each unseen movie (see score_movie method above).
@@ -113,10 +113,9 @@ class CollaborativeRecommender:
             score = self.score_movie(user_id, movie_id)
             movie_scores.append((movie_id, score))
         
-        # Sort movies by score in descending order (highest scores first).
+        # Sort movies by score in descending order (highest scores first)
+        # and select the top_k movies.
         movie_scores.sort(key=lambda item: item[1], reverse=True)
-        
-        # Select the top_k (specified in the config.py) movies.
         recommendations = movie_scores[:top_k]
         
         for movie_id, score in recommendations:
