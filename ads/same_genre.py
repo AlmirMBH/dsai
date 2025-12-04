@@ -1,13 +1,18 @@
 class SameGenreRecommender:
+    """
+    Recommends movies based on genre similarity to user's watched movies.
+    Scores movies by average rating of all users who watched them.
+    """
     def __init__(self, graph, movies_df):
+        """
+        During the initialization of the SameGenreRecommender, we split a movie
+        genres by "|" to get individual genres, convert genres to set for
+        comparisons, and map movie ID to its genres set.
+        """
         self.graph = graph
         self.movie_genres = {}
         self.movies_df = movies_df
-                
-        # Mapping from movie ID to its genres set for easy
-        # comparison (e.g., {"Action", "Adventure", "Sci-Fi"}).        
-        # Split genres by "|" to get individual genres, and convert to set
-        # for comparisons.
+        
         for i, row in self.movies_df.iterrows():
             movie_id = int(row['movieId'])
             genres_string = str(row['genres'])
@@ -16,27 +21,30 @@ class SameGenreRecommender:
     
 
     def recommend(self, user_id, top_k=10):
+        """
+        We get movies that the user watched, extract genres from movies that the
+        user watched (user's genre preferences). Then, we fetch movies the user
+        has not watched (potential recommendations) and check if they share any
+        genres with the user's genre preferences. If they do, we score the movie
+        by the average rating of all users who watched the candidate movie and
+        return the top_k movies with the highest scores.
+        """
         user_genres = set()
         movie_scores = {}
 
-        # Get movies that the user watched.
-        # Extract genres from movies that the user watched (user's genre preferences).
         user_movies = self.graph.get_user_movies(user_id)
                 
         for movie_id in user_movies:
             movie_genres = self.movie_genres.get(movie_id, set())
             user_genres.update(movie_genres)
         
-        # Fetch movies the user has not watched (potential recommendations).
         all_movies = set(self.graph.get_movie_ids())
         unseen_movies = all_movies - user_movies
         
-        # Check if movies are in user's genres.
         for movie_id in unseen_movies:
             movie_genres = self.movie_genres.get(movie_id, set())
             shared_genres = user_genres & movie_genres
             
-            # Get all users who watched this movie and their ratings.
             if len(shared_genres) > 0:
                 ratings = []
                 users_who_watched = self.graph.get_movie_users(movie_id)
@@ -44,12 +52,8 @@ class SameGenreRecommender:
                 for user_id_who_watched in users_who_watched:
                     rating = self.graph.get_rating(user_id_who_watched, movie_id)
                     ratings.append(rating)
-                
-                # Calculate average rating and store it as the score for this movie.
-                average_rating = sum(ratings) / len(ratings) if ratings else 0
-                movie_scores[movie_id] = average_rating
+            
+                movie_scores[movie_id] = sum(ratings) / len(ratings) if ratings else 0
         
-        # Sort movies by highest ratings first and return the top_k (specified in the config.py).
-        sorted_movies = sorted(movie_scores.items(), key=lambda item: item[1], reverse=True)
-        return sorted_movies[:top_k]
+        return sorted(movie_scores.items(), key=lambda item: item[1], reverse=True)[:top_k]
 

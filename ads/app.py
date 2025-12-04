@@ -9,7 +9,10 @@ from content_based import ContentBasedRecommender
 from same_genre import SameGenreRecommender
 from config import RATINGS_FILE, MOVIES_FILE, RECOMMENDATION_TOP_K, MAX_USERS, DEFAULT_DROP_DOWN_USER_ID
 
-# Bipartite graph from ratings data i.e. user-movie relationships (who watched what).
+# This is the main file where the app starts. We load the data,
+# initialize the recommenders, show recommendations and the graph
+# and create the UI. See README.md for the project setup and
+# more details about how the project works.
 ratings_df = pd.read_csv(RATINGS_FILE)
 graph = BipartiteGraph(ratings_df)
 movies_df = pd.read_csv(MOVIES_FILE)
@@ -19,10 +22,8 @@ cold_start_recommender = ColdStartRecommender(graph)
 content_based_recommender = ContentBasedRecommender(graph, movies_df)
 same_genre_recommender = SameGenreRecommender(graph, movies_df)
 
-
 st.title("Movie Recommendation System")
-# Get all user IDs from the graph, sort them and limit to MAX_USERS
-# to keep the dropdown manageable (see config.py).
+# Dropdown limited to MAX_USERS (too long otherwise).
 user_ids = sorted(graph.get_user_ids())[:MAX_USERS]
 
 if DEFAULT_DROP_DOWN_USER_ID in user_ids:
@@ -43,56 +44,69 @@ if selected_user:
     else:
         recommendations = cold_start_recommender.recommend(selected_user, RECOMMENDATION_TOP_K)
     
+    if recommender_type == "Cold-Start":
+        score_text = "number of users who watched this movie"
+    elif recommender_type == "Collaborative":
+        score_text = "similar users and their ratings of the movie"
+    elif recommender_type == "Content-Based":
+        score_text = "similarity to your past watches"
+    elif recommender_type == "Same-Genre":  
+        score_text = "average rating"
 
-    # Display the top recommendations and graph for collaborative filtering.
     st.subheader(f"Top {RECOMMENDATION_TOP_K} Recommendations")
-    # Recommended movies with their titles and scores
+    st.write(f"***(Score based on: {score_text})***")
+
     for movie_id, score in recommendations:
         movie_rows = movies_df[movies_df['movieId'] == movie_id]
         movie_info = movie_rows.iloc[0]
         movie_title = movie_info['title']
-        st.write(f"**{movie_title}** - Score: {score:.1f}")
+
+        if recommender_type == "Cold-Start":
+            result = f"**{movie_title}**  --  {score}"
+        elif recommender_type == "Content-Based":
+            result = f"**{movie_title}**  --  {score*100:.1f}%"
+        elif (recommender_type == "Collaborative"
+             or recommender_type == "Same-Genre"):
+            result = f"**{movie_title}**  --  {score:.1f}"
+        st.write(result)
     
-    # Graph visualization for collaborative filtering (other algorithms do not provide similar_users data).
+    # Only collaborative filtering has user-movie relationships.
     if recommender_type == "Collaborative":
         st.subheader("Graph Visualization")
         G = nx.Graph()
         
-        # Selected user as a node ("U" for user).
+        # Edges added from the selected user to recommended movies.
         selected_user_node = f"U{selected_user}"
         G.add_node(selected_user_node, node_type="selected_user")
         
-        # Similar users as nodes (users with similar movie preferences).
         for user_id in similar_users:
             user_node = f"U{user_id}"
             G.add_node(user_node, node_type="similar_user")
         
-        # Recommended movies as nodes ("M" for movie).
         for movie_id in recommended_movie_ids:
             movie_node = f"M{movie_id}"
             G.add_node(movie_node, node_type="recommended_movie")
         
-        # Edges from the selected user to all recommended movies.
         for movie_id in recommended_movie_ids:
             movie_node = f"M{movie_id}"
             G.add_edge(selected_user_node, movie_node)
         
-        # Get all movies the similar users watched, and add edges to recommended movies only.
+        # Edges between similar users and recommended movies.
         for user_id in similar_users:
             user_node = f"U{user_id}"
             movies_watched_by_user = graph.get_user_movies(user_id)
-            
+
             for movie_id in movies_watched_by_user:
-                movie_node = f"M{movie_id}"            
+                movie_node = f"M{movie_id}"
                 if G.has_node(movie_node):
                     G.add_edge(user_node, movie_node)
         
-        # Calculate positions of all nodes (spring layout algorithm)
-        # to arrange nodes in a visible way.
+        # Here we use spring_layout to map each node to (x, y) coordinates
+        # for arranging nodes in the graph: k=1 sets the target spacing
+        # between nodes, and iterations=50 runs 50 adjustment steps, moving
+        # nodes until forces balance and the layout settles into stable positions.
+        # Then, we filter nodes by type to color them differently.
         pos = nx.spring_layout(G, k=1, iterations=50)
-        
-        # Prepare list of nodes for the selected user (for coloring).
-        # Filter nodes by type to color them differently (similar_user, recommended_movie).
         selected_node = [selected_user_node]
         similar_user_nodes = []
         recommended_movie_nodes = []
@@ -105,16 +119,13 @@ if selected_user:
                 recommended_movie_nodes.append(node)
         
         plt.figure()
-        
-        nx.draw_networkx_nodes(G, pos, nodelist=selected_node, node_color='red', node_size=300)
+        nx.draw_networkx_nodes(G, pos, nodelist=selected_node, node_color='red', node_size=200)
         nx.draw_networkx_nodes(G, pos, nodelist=similar_user_nodes, node_color='lightblue', node_size=100)
         nx.draw_networkx_nodes(G, pos, nodelist=recommended_movie_nodes, node_color='green', node_size=150)
         
         # Draw connections between nodes, and add a legend.
+        # Hide axes as they are not needed.
         nx.draw_networkx_edges(G, pos)
-        plt.legend(['Selected User', 'Similar Users', 'Recommended Movies'], loc='upper left', fontsize=8)
-        
-        # Hide axes for a clean visualization, and show the plot.
+        plt.legend(['Selected User', 'Similar Users', 'Recommended Movies'], loc='upper right', fontsize=6)
         plt.axis('off')
         st.pyplot(plt)
-

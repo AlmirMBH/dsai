@@ -1,9 +1,17 @@
 class ColdStartRecommender:
+    """
+    Here we recommend most popular movies to users who have no rating history.
+    This is how we solve so-called cold-start problem which cannot be solved by
+    collaborative filtering. The principle is simple:
+    We fetch the movies that the user watched (if any). Then we fetch all movies
+    and find those that the user has not watched (to recommend).
+    Finally, we sort movies by popularity (number of users who watched them)
+    and return the top_k. The score is the number of users who watched the movie.
+    """
     def __init__(self, graph):
         self.graph = graph
     
     def recommend(self, user_id, top_k=10):
-        # Count how many users watched each movie to find most popular movies to recommend.
         movie_counts = {}
         unseen_movies = {}
 
@@ -11,15 +19,11 @@ class ColdStartRecommender:
             users_who_watched = self.graph.get_movie_users(movie_id)
             movie_counts[movie_id] = len(users_who_watched)
         
-        # Fetch all movies that the user watched.
         user_movies = self.graph.get_user_movies(user_id)
         
-        # Filter movies that the user did not watch (to recommend).
         for movie_id, count in movie_counts.items():
             if movie_id not in user_movies:
                 unseen_movies[movie_id] = count
         
-        # Sort movies by popularity (number of users who watched them).
-        sorted_movies = sorted(unseen_movies.items(), key=lambda item: item[1], reverse=True)
-        return sorted_movies[:top_k]
+        return sorted(unseen_movies.items(), key=lambda item: item[1], reverse=True)[:top_k]
 

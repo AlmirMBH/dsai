@@ -2,17 +2,19 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 class ContentBasedRecommender:
+    """
+    Recommend movies based on content similarity using TF-IDF vectorization.
+    Score movies by cosine similarity, see functions below.
+    """
     def __init__(self, graph, movies_df):
+        """
+        Initialize the recommender and vectorize all movie titles using TF-IDF.
+        Map movie ID to its index in the dataframe to find a movie's vector via its ID.
+        """
         self.graph = graph
         self.movies_df = movies_df
-        
-        # Via TF-IDF vectorizer convert movie titles into numerical vectors.
-        # TF-IDF measures how important words are in movie titles.
         self.vectorizer = TfidfVectorizer()
         self.movie_vectors = self.vectorizer.fit_transform(self.movies_df['title'])
-        
-        # Create a mapping from movie ID to its index in the dataframe.
-        # This helps us find a movie's vector when we only know its ID.
         self.movie_id_to_idx = {}
 
         for idx, row in self.movies_df.iterrows():
@@ -21,11 +23,15 @@ class ContentBasedRecommender:
     
 
     def recommend(self, user_id, top_k=10):
+        """
+        This recommender algorithm is an extra feature. We fetch the movies that
+        the user watched and extract their vectors, see init above. Then, we calculate
+        the cosine similarity for each unseen movie by comparing it to the user's watched
+        movies. By doing this, we cover all preferences by the user.
+        """
         user_movie_indices = []
         movie_scores = {}
 
-        # Fetch movies that the user watched and dataframe indices for those
-        # movies to get their vectors (see above).
         user_movies = self.graph.get_user_movies(user_id)
 
         for movie_id in user_movies:
@@ -33,28 +39,21 @@ class ContentBasedRecommender:
                 idx = self.movie_id_to_idx[movie_id]
                 user_movie_indices.append(idx)
         
-        # Get vectors for all movies the user watched.
-        # Get movies that the user has not watched.
         user_vectors = self.movie_vectors[user_movie_indices]        
         all_movies = set(self.graph.get_movie_ids())
         unseen_movies = all_movies - user_movies
         
-        # Calculate how similar unseen is to user's watched movies.
-        # Skip movies that are not in the dataframe (missing data).
         for movie_id in unseen_movies:
             if movie_id not in self.movie_id_to_idx:
                 continue
             
             movie_idx = self.movie_id_to_idx[movie_id]
             movie_vector = self.movie_vectors[movie_idx]
-            
-            # Calculate cosine similarity between unseen movie and user's watched
-            # movies, and pick the one with the highest similarity.
+        
             similarity_scores = cosine_similarity(movie_vector, user_vectors)
             max_similarity = similarity_scores.max()
 
             if max_similarity > 0:
                 movie_scores[movie_id] = max_similarity
         
-        sorted_movies = sorted(movie_scores.items(), key=lambda item: item[1], reverse=True)
-        return sorted_movies[:top_k]
+        return sorted(movie_scores.items(), key=lambda item: item[1], reverse=True)[:top_k]

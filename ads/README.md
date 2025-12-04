@@ -1,6 +1,21 @@
 # Movie Recommendation System
 Bipartite graph-based movie recommendation system with multiple recommendation strategies (python < 3.14 required).
 
+## Project Background
+
+This project was completed as part of the undergraduate course _Algorithms and Data Structures II_ at the Faculty of Electrical Engineering, University of Sarajevo, under the supervision of Professor Sead Delic. The project implements a movie recommendation system that leverages bipartite graph data structures to model user-movie relationships and applies various graph-based algorithms for generating recommendations. The system is used to demonstrate practical applications of graphs through collaborative filtering, content-based filtering, and genre-based recommendation algorithms, with a Streamlit interface that visualizes the underlying graph structure and recommendation paths (collaborative filtering).
+
+## Technologies
+
+The recommender is built using Python and several libraries:
+- **Streamlit**: Web framework for building the interactive user interface and displaying recommendations.
+- **NetworkX**: Graph library for creating and manipulating the bipartite graph structure, as well as graph layout algorithms for visualization.
+- **pandas**: Data manipulation library for reading and processing CSV files containing movie ratings and metadata.
+- **scikit-learn**: Machine learning library used for TF-IDF vectorization of movie titles and cosine similarity calculations in the content-based recommender.
+- **matplotlib**: Plotting library for rendering the graph visualization with custom node colors and layouts.
+
+## Note: The first time project is run, it might take several seconds to show the graph and recommendations.
+
 ## Setup Virtual Environment
 ```bash
 python3.12 -m venv venv
@@ -41,9 +56,13 @@ This structure enables recommendations if User A and User B both rated the same 
 
 ## Recommender algorithms
 - **Collaborative**: Finds users who watched the same movies as the selected user. It calculates similarity between the selected user and each similar user once per user pair using Jaccard (common movies divided by total unique movies both users watched). For each movie that the selected user has not watched, scores it by summing (similarity × rating) contributions. The similarity is between the selected user and a similar user, and rating is the similar user's rating of that specific unseen movie. Then, it ranks all unseen movies by total score and recommends the top k.
-- **Content-Based**: This is an extra feature. It vectorizes all movie titles using TF-IDF. For each movie that the user has not watched, it calculates cosine similarity (range 0-1, unitless ratio) between that movie's title vector and the title vectors of movies the user watched, taking the maximum similarity. then, it ranks unseen movies by similarity score and recommends the top ones.
+- **Content-Based**: This is an extra feature. It vectorizes all movie titles using TF-IDF. For each movie that the user has not watched, it calculates cosine similarity (range 0-1, unitless ratio) between that movie's title vector and the title vectors of movies the user watched, taking the maximum similarity. Then, it ranks unseen movies by similarity score and recommends the top ones.
 - **Same-Genre**: This is an extra feature. It scores movies by average rating, but only includes movies sharing genres with movies that a user watched.
 - **Cold-Start**: This is an extra feature. It scores movies by how many users rated them (most popular movies).
+
+## Frontend
+
+The frontend is built using Streamlit. The application runs as a single-page application where users can select a user ID and recommendation algorithm from dropdown menus. The interface displays the top-k movie recommendations with their relevance scores. For the collaborative filtering algorithm, an interactive graph shows the bipartite graph structure with color-coded nodes (red for selected user, light blue for similar users, green for recommended movies).
 
 ## How to use UI
 **Dropdowns:**
@@ -64,3 +83,48 @@ This structure enables recommendations if User A and User B both rated the same 
 2. **Content-Based Filtering**: Uses TF-IDF vectorization and cosine similarity on movie titles to find semantically similar movies based on title content, independent of user ratings.
 
 3. **Same-Genre Recommendations**: Filters recommendations to movies sharing genres with the user's watched movies, then ranks by average rating to ensure quality matches within preferred genres.
+
+## Known Limitations
+
+- **User dropdown limitation**: The user selection dropdown is limited to MAX_USERS (default: 50) to keep the interface manageable, meaning larger datasets will be truncated (see config.py).
+- **Collaborative filtering dependency**: Collaborative filtering requires users to have watched common movies with other users; users with no overlapping movie history will receive poor or no recommendations.
+- **Content-based scope**: The content-based recommender only uses movie titles for similarity calculations, ignoring other metadata (dataset constraint).
+- **Graph visualization**: Graph visualization is only available for the collaborative filtering algorithm; other recommendation algorithms do not have movie-user relationships.
+- **In-memory processing**: All data structures are loaded into memory, which may limit scalability for large datasets.
+- **Cold-start simplicity**: The cold-start solution provides basic popularity-based recommendations but lacks personalization until users have rated multiple movies.
+
+## Next Steps
+
+Future improvements for the recommendation system:
+- **Evaluation metrics**: Implement evaluation metrics such as precision, recall, RMSE (Root Mean Square Error), and user studies to measure recommendation quality and user satisfaction.
+- **Scaling improvements**: Migrate from in-memory data structures to persistent databases to improve performance with large datasets.
+- **Algorithm enhancements**: Explore advanced techniques such as matrix factorization (e.g. SVD), hybrid recommendation approaches combining multiple algorithms, and deep learning-based methods for better personalization.
+- **Feature enhancements**: Integrate user feedback mechanisms, support real-time rating updates, expand content-based filtering to include movie descriptions and metadata, and implement A/B testing for algorithm comparison.
+- **Performance optimizations**: Optimize graph traversal algorithms, implement parallel processing for similarity calculations, and add incremental updates to avoid full recomputation when new ratings are added.
+
+## Contact
+
+For questions or collaboration, please reach out to:
+
+- **Almir Mustafic** — [GitHub](https://github.com/AlmirMBH)
+
+## License
+
+This project is licensed under the MIT License.
+
+## Acknowledgments
+
+This project uses the following third-party libraries, datasets, and services:
+
+- **MovieLens Dataset**: The datasets used in this project are from [MovieLens Latest Small Dataset](https://www.kaggle.com/datasets/grouplens/movielens-latest-small) by GroupLens Research, licensed under the Creative Commons Attribution 4.0 International License.
+- **pandas**: BSD License
+- **Streamlit**: Apache License 2.0
+- **matplotlib**: Matplotlib License (BSD-compatible)
+- **NetworkX**: BSD License
+- **scikit-learn**: BSD License
+
+Special thanks to Professor Sead Delic for guidance and supervision during the course.
+
+## Disclaimer
+
+The MovieLens dataset used in this project is for educational and demonstration purposes only. This project is an academic exercise completed as part of the Algorithms and Data Structures II course and does not represent a production-ready recommendation system.
