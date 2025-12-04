@@ -14,7 +14,9 @@ The recommender is built using Python and several libraries:
 - **scikit-learn**: Machine learning library used for TF-IDF vectorization of movie titles and cosine similarity calculations in the content-based recommender.
 - **matplotlib**: Plotting library for rendering the graph visualization with custom node colors and layouts.
 
-## Note: The first time project is run, it might take several seconds to show the graph and recommendations.
+## Note: Performance and Caching
+
+The first time the project is run, it might take several seconds to load data and show the graph and recommendations. However, recommendation results are cached using Streamlit's `@st.cache_data`. When you request recommendations for the same user and algorithm combination again, the results are retrieved from cache instantly, improving response time.
 
 ## Setup Virtual Environment
 ```bash
@@ -77,7 +79,7 @@ The frontend is built using Streamlit. The application runs as a single-page app
 - Green = recommended movies
 
 
-## Three Unique Features (explained above)
+## Three Unique Features
 1. **Cold-Start Handling**: Recommends popular movies to new users who have no rating history, solving the cold-start problem where collaborative filtering fails.
 
 2. **Content-Based Filtering**: Uses TF-IDF vectorization and cosine similarity on movie titles to find semantically similar movies based on title content, independent of user ratings.

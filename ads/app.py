@@ -34,15 +34,22 @@ else:
 selected_user = st.selectbox("Select User ID", user_ids, index=default_index)
 recommender_type = st.selectbox("Recommender Algorithm", ["Collaborative", "Content-Based", "Same-Genre", "Cold-Start"])
 
+@st.cache_data
+def get_recommendations(user_id, recommender_type, top_k):
+    if recommender_type == "Collaborative":
+        return collaborative_recommender.recommend(user_id, top_k)
+    elif recommender_type == "Content-Based":
+        return content_based_recommender.recommend(user_id, top_k)
+    elif recommender_type == "Same-Genre":
+        return same_genre_recommender.recommend(user_id, top_k)
+    else:
+        return cold_start_recommender.recommend(user_id, top_k)
+
 if selected_user:
     if recommender_type == "Collaborative":
-        recommendations, recommended_movie_ids, similar_users = collaborative_recommender.recommend(selected_user, RECOMMENDATION_TOP_K)
-    elif recommender_type == "Content-Based":
-        recommendations = content_based_recommender.recommend(selected_user, RECOMMENDATION_TOP_K)
-    elif recommender_type == "Same-Genre":
-        recommendations = same_genre_recommender.recommend(selected_user, RECOMMENDATION_TOP_K)
+        recommendations, recommended_movie_ids, similar_users = get_recommendations(selected_user, recommender_type, RECOMMENDATION_TOP_K)
     else:
-        recommendations = cold_start_recommender.recommend(selected_user, RECOMMENDATION_TOP_K)
+        recommendations = get_recommendations(selected_user, recommender_type, RECOMMENDATION_TOP_K)
     
     if recommender_type == "Cold-Start":
         score_text = "number of users who watched this movie"
