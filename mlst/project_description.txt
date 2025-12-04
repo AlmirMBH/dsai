@@ -1,0 +1,11 @@
+Tourism & smart city analytics (forecasting, personalization)
+Problem statement: Tourism is seasonal and uneven; businesses lack demand forecasts and personalization.
+Objectives / Research questions:
+Forecast city/region demand and RevPAR.
+Recommend itineraries/tours per persona.
+Measure impact on bookings.
+Data and resources: Accommodation bookings, POS flows, flight/bus schedules, events, weather, web analytics.
+AI/ML/DL techniques suggested: Prophet/LGBM/TFT forecasting; collaborative/content-based recommenders; clustering for personas.
+Expected outcomes: Forecast dashboards; itinerary API; +5–10% conversion on partner sites.
+Complexity level: Medium.
+Sustainability and societal Impact: Better distribution of visitors, support for local SMEs.
