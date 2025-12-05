@@ -21,6 +21,7 @@ from generate_weather import generate_weather
 from generate_events import generate_events
 from generate_bus_schedules import generate_bus_schedules
 from generate_bookings import generate_bookings, generate_accommodations
+from generate_web_analytics import generate_web_analytics
 
 def main():
     """Main function to generate all datasets."""
@@ -30,6 +31,7 @@ def main():
     
     accommodations_df = generate_accommodations()
     generate_bookings(accommodations_df)
+    generate_web_analytics()
 
 
 if __name__ == '__main__':
