@@ -12,6 +12,10 @@ import config
 st.title("Tourism Forecasting & Recommendations")
 
 bookings, events, weather = load_data()
+if len(bookings) == 0 or len(events) == 0:
+    st.write("No datasets available. Please generate datasets first.")
+    st.stop()
+
 df = preprocess(bookings, events, weather)
 personas = create_personas(bookings)
 
@@ -75,8 +79,10 @@ with tab3:
     st.header("Event Recommendations")
     guest_id = st.number_input("Guest ID", min_value=1, value=1)
     n = st.slider("Number of recommendations", 1, 20, config.DEFAULT_RECOMMENDATIONS)
+    start_date = st.date_input("Start date", value=None)
+    end_date = st.date_input("End date", value=None)
     
-    recs = recommend_events(events, guest_id, personas, bookings, n)
+    recs = recommend_events(guest_id, n, start_date, end_date)
     if len(recs) > 0:
         st.dataframe(recs[['date', 'type', 'name', 'location', 'expected_attendance']])
     else:
@@ -84,7 +90,7 @@ with tab3:
 
 with tab4:
     st.header("Impact Measurement")
-    sample_recs = recommend_events(events, 1, personas, bookings, config.DEFAULT_RECOMMENDATIONS * 2)
+    sample_recs = recommend_events(1, config.DEFAULT_RECOMMENDATIONS * 2)
     impact = measure_impact(bookings, sample_recs)
     
     st.metric("Conversion Rate", f"{impact['conversion_rate']:.2%}")

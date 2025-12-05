@@ -85,11 +85,22 @@ def content_based_filtering(events, guest_id, personas, bookings, n=config.DEFAU
     top_indices = top_indices[::-1]
     return events_shuffled.iloc[top_indices]
 
-def recommend_events(events, guest_id, personas, bookings, n=config.DEFAULT_RECOMMENDATIONS):
+def recommend_events(guest_id, n=config.DEFAULT_RECOMMENDATIONS, start_date=None, end_date=None):
+    from ingest import load_data
+    from personas import create_personas
+    
+    bookings, events, _ = load_data()
+    personas = create_personas(bookings)
+    
     events = events.copy()
     events['date'] = pd.to_datetime(events['date'])
-    tomorrow = (datetime.now() + timedelta(days=1)).date()
-    events = events[events['date'].dt.date >= tomorrow]
+    if start_date is None:
+        tomorrow = (datetime.now() + timedelta(days=1)).date()
+        events = events[events['date'].dt.date >= tomorrow]
+    else:
+        if end_date is None:
+            end_date = start_date + timedelta(days=30)
+        events = events[(events['date'].dt.date >= start_date) & (events['date'].dt.date <= end_date)]
     
     collab_recs = collaborative_filtering(events.copy(), guest_id, bookings, n)
     content_recs = content_based_filtering(events.copy(), guest_id, personas, bookings, n)

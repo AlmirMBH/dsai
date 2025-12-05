@@ -10,6 +10,9 @@ import config
 app = FastAPI()
 
 bookings, events, weather = load_data()
+if len(bookings) == 0 or len(events) == 0:
+    raise FileNotFoundError("No datasets available. Please generate datasets first.")
+
 df = preprocess(bookings, events, weather)
 personas = create_personas(bookings)
 
@@ -25,12 +28,12 @@ def forecast_revpar(periods: int = config.DEFAULT_FORECAST_PERIODS):
 
 @app.get("/recommend/{guest_id}")
 def recommend(guest_id: int, n: int = config.DEFAULT_RECOMMENDATIONS):
-    recs = recommend_events(events, guest_id, personas, bookings, n)
+    recs = recommend_events(guest_id, n)
     return recs[['event_id', 'date', 'type', 'name', 'location']].to_dict('records')
 
 @app.get("/itinerary/{guest_id}")
 def get_itinerary(guest_id: int, days: int = config.DEFAULT_ITINERARY_DAYS, n_per_day: int = config.DEFAULT_EVENTS_PER_DAY):
-    recs = recommend_events(events, guest_id, personas, bookings, n=days * n_per_day)
+    recs = recommend_events(guest_id, n=days * n_per_day)
     
     if len(recs) == 0:
         return {"itinerary": []}

@@ -11,6 +11,10 @@ from impact import measure_impact
 import config
 
 bookings, events, weather = load_data()
+if len(bookings) == 0 or len(events) == 0:
+    print("No datasets available. Please generate datasets first.")
+    exit(1)
+
 df = preprocess(bookings, events, weather)
 personas = create_personas(bookings)
 
@@ -21,7 +25,7 @@ print("Forecasts generated")
 print(f"Demand forecast: {forecast_demand[['ds', 'yhat']].tail(5)}")
 print(f"RevPAR forecast: {forecast_revpar[['ds', 'yhat']].tail(5)}")
 
-recs = recommend_events(events, 1, personas, bookings, config.DEFAULT_RECOMMENDATIONS)
+recs = recommend_events(1, config.DEFAULT_RECOMMENDATIONS)
 print(f"\nRecommendations for guest 1: {recs[['name', 'date']].head()}")
 
 impact = measure_impact(bookings, recs)
