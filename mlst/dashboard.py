@@ -7,6 +7,7 @@ from recommend import recommend_events
 from impact import measure_impact
 import pandas as pd
 import matplotlib.pyplot as plt
+from datetime import date, timedelta
 import config
 
 st.title("Tourism Forecasting & Recommendations")
@@ -19,7 +20,7 @@ if len(bookings) == 0 or len(events) == 0:
 df = preprocess(bookings, events, weather)
 personas = create_personas(bookings)
 
-tab1, tab2, tab3, tab4 = st.tabs(["EDA", "Forecast", "Recommendations", "Impact"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["EDA", "Forecast", "Recommendations", "Itinerary", "Impact"])
 
 with tab1:
     st.header("Exploratory Data Analysis")
@@ -79,16 +80,38 @@ with tab3:
     st.header("Event Recommendations")
     guest_id = st.number_input("Guest ID", min_value=1, value=1)
     n = st.slider("Number of recommendations", 1, 20, config.DEFAULT_RECOMMENDATIONS)
-    start_date = st.date_input("Start date", value=None)
-    end_date = st.date_input("End date", value=None)
     
-    recs = recommend_events(guest_id, n, start_date, end_date)
+    today = date.today()
+    default_end = today + timedelta(days=config.DEFAULT_RECOMMENDATION_DAYS)
+    start_date = st.date_input("Start date", value=today, min_value=today)
+    end_date = st.date_input("End date", value=default_end, min_value=today)
+    
+    if start_date and end_date:
+        recs = recommend_events(guest_id, n, start_date, end_date)
+    else:
+        recs = pd.DataFrame()
+    
     if len(recs) > 0:
         st.dataframe(recs[['date', 'type', 'name', 'location', 'expected_attendance']])
     else:
         st.write("No available events")
 
 with tab4:
+    st.header("Itinerary")
+    guest_id = st.number_input("Guest ID", min_value=1, value=1, key="itinerary_guest")
+    days = st.slider("Number of days", 1, 10, config.DEFAULT_ITINERARY_DAYS)
+    n_per_day = st.slider("Events per day", 1, 5, config.DEFAULT_EVENTS_PER_DAY)
+    
+    recs = recommend_events(guest_id, n=days * n_per_day)
+    
+    if len(recs) > 0:
+        recs['date'] = pd.to_datetime(recs['date'])
+        recs = recs.sort_values('date')
+        st.dataframe(recs[['date', 'type', 'name', 'location', 'expected_attendance']])
+    else:
+        st.write("No available events")
+
+with tab5:
     st.header("Impact Measurement")
     sample_recs = recommend_events(1, config.DEFAULT_RECOMMENDATIONS * 2)
     impact = measure_impact(bookings, sample_recs)

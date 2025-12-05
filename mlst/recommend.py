@@ -96,10 +96,11 @@ def recommend_events(guest_id, n=config.DEFAULT_RECOMMENDATIONS, start_date=None
     events['date'] = pd.to_datetime(events['date'])
     if start_date is None:
         tomorrow = (datetime.now() + timedelta(days=1)).date()
-        events = events[events['date'].dt.date >= tomorrow]
+        end_date_default = tomorrow + timedelta(days=config.DEFAULT_RECOMMENDATION_DAYS)
+        events = events[(events['date'].dt.date >= tomorrow) & (events['date'].dt.date <= end_date_default)]
     else:
         if end_date is None:
-            end_date = start_date + timedelta(days=30)
+            end_date = start_date + timedelta(days=config.DEFAULT_RECOMMENDATION_DAYS)
         events = events[(events['date'].dt.date >= start_date) & (events['date'].dt.date <= end_date)]
     
     collab_recs = collaborative_filtering(events.copy(), guest_id, bookings, n)
@@ -107,9 +108,12 @@ def recommend_events(guest_id, n=config.DEFAULT_RECOMMENDATIONS, start_date=None
     
     if len(collab_recs) > 0 and len(content_recs) > 0:
         combined = pd.concat([collab_recs, content_recs]).drop_duplicates(subset=['name'])
+        combined = combined.sort_values('date')
         return combined.head(n)
     elif len(collab_recs) > 0:
+        collab_recs = collab_recs.sort_values('date')
         return collab_recs.head(n)
     else:
+        content_recs = content_recs.sort_values('date')
         return content_recs.head(n)
 
