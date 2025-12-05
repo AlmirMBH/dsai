@@ -20,7 +20,7 @@ if len(bookings) == 0 or len(events) == 0:
 df = preprocess(bookings, events, weather)
 personas = create_personas(bookings)
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["EDA", "Forecast", "Recommendations", "Itinerary", "Impact"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["EDA", "Forecast", "Impact", "Recommendations", "Itinerary"])
 
 with tab1:
     st.header("Exploratory Data Analysis")
@@ -77,6 +77,16 @@ with tab2:
     st.pyplot(fig)
 
 with tab3:
+    st.header("Impact Measurement")
+    sample_recs = recommend_events(1, config.DEFAULT_RECOMMENDATIONS * 2)
+    impact = measure_impact(bookings, sample_recs)
+    
+    st.metric("Conversion Rate", f"{impact['conversion_rate']:.2%}")
+    st.metric("Avg Bookings (with recs)", f"{impact['avg_bookings_with_recommendations']:.2f}")
+    st.metric("Avg Bookings (without recs)", f"{impact['avg_bookings_without_recommendations']:.2f}")
+    st.metric("Improvement", f"{impact['improvement']:.2f}%")
+
+with tab4:
     st.header("Event Recommendations")
     guest_id = st.number_input("Guest ID", min_value=1, value=1)
     n = st.slider("Number of recommendations", 1, 20, config.DEFAULT_RECOMMENDATIONS)
@@ -92,11 +102,11 @@ with tab3:
         recs = pd.DataFrame()
     
     if len(recs) > 0:
-        st.dataframe(recs[['date', 'type', 'name', 'location', 'expected_attendance']])
+        st.dataframe(recs[['date', 'type', 'name', 'location', 'expected_attendance']].reset_index(drop=True))
     else:
         st.write("No available events")
 
-with tab4:
+with tab5:
     st.header("Itinerary")
     guest_id = st.number_input("Guest ID", min_value=1, value=1, key="itinerary_guest")
     days = st.slider("Number of days", 1, 10, config.DEFAULT_ITINERARY_DAYS)
@@ -107,17 +117,7 @@ with tab4:
     if len(recs) > 0:
         recs['date'] = pd.to_datetime(recs['date'])
         recs = recs.sort_values('date')
-        st.dataframe(recs[['date', 'type', 'name', 'location', 'expected_attendance']])
+        st.dataframe(recs[['date', 'type', 'name', 'location', 'expected_attendance']].reset_index(drop=True))
     else:
         st.write("No available events")
-
-with tab5:
-    st.header("Impact Measurement")
-    sample_recs = recommend_events(1, config.DEFAULT_RECOMMENDATIONS * 2)
-    impact = measure_impact(bookings, sample_recs)
-    
-    st.metric("Conversion Rate", f"{impact['conversion_rate']:.2%}")
-    st.metric("Avg Bookings (with recs)", f"{impact['avg_bookings_with_recommendations']:.2f}")
-    st.metric("Avg Bookings (without recs)", f"{impact['avg_bookings_without_recommendations']:.2f}")
-    st.metric("Improvement", f"{impact['improvement']:.2f}%")
 
