@@ -112,12 +112,17 @@ with tab5:
     days = st.slider("Number of days", 1, 10, config.DEFAULT_ITINERARY_DAYS)
     n_per_day = st.slider("Events per day", 1, 5, config.DEFAULT_EVENTS_PER_DAY)
     
-    recs = recommend_events(guest_id, n=days * n_per_day)
+    today = date.today()
+    default_end = today + timedelta(days=config.DEFAULT_RECOMMENDATION_DAYS)
+    start_date = st.date_input("Start date", value=today, min_value=today, key="itinerary_start")
+    end_date = st.date_input("End date", value=default_end, min_value=today, key="itinerary_end")
+    
+    if start_date and end_date:
+        recs = recommend_events(guest_id, n=days * n_per_day, start_date=start_date, end_date=end_date)
+    else:
+        recs = pd.DataFrame()
     
     if len(recs) > 0:
-        recs['date'] = pd.to_datetime(recs['date'])
-        recs = recs.sort_values('date')
         st.dataframe(recs[['date', 'type', 'name', 'location', 'expected_attendance']].reset_index(drop=True))
     else:
         st.write("No available events")
-

@@ -3,6 +3,8 @@ import numpy as np
 from datetime import datetime, timedelta
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from ingest import load_data
+from personas import create_personas
 import config
 
 def collaborative_filtering(events, guest_id, bookings, n=config.DEFAULT_RECOMMENDATIONS):
@@ -86,9 +88,6 @@ def content_based_filtering(events, guest_id, personas, bookings, n=config.DEFAU
     return events_shuffled.iloc[top_indices]
 
 def recommend_events(guest_id, n=config.DEFAULT_RECOMMENDATIONS, start_date=None, end_date=None):
-    from ingest import load_data
-    from personas import create_personas
-    
     bookings, events, _ = load_data()
     personas = create_personas(bookings)
     
@@ -107,13 +106,10 @@ def recommend_events(guest_id, n=config.DEFAULT_RECOMMENDATIONS, start_date=None
     content_recs = content_based_filtering(events.copy(), guest_id, personas, bookings, n)
     
     if len(collab_recs) > 0 and len(content_recs) > 0:
-        combined = pd.concat([collab_recs, content_recs]).drop_duplicates(subset=['name'])
-        combined = combined.sort_values('date')
-        return combined.head(n)
+        result = pd.concat([collab_recs, content_recs]).drop_duplicates(subset=['name']).head(n)
     elif len(collab_recs) > 0:
-        collab_recs = collab_recs.sort_values('date')
-        return collab_recs.head(n)
+        result = collab_recs.head(n)
     else:
-        content_recs = content_recs.sort_values('date')
-        return content_recs.head(n)
-
+        result = content_recs.head(n)
+    
+    return result.sort_values('date')

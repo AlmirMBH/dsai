@@ -26,7 +26,6 @@ def preprocess(bookings, events, weather):
     df['rain_flag'] = df['rain_flag'].fillna(0)
     df['temperature_max'] = df['temperature_max'].fillna(df['temperature_max'].mean())
     
-    df['dow'] = df['date'].dt.dayofweek
     df['month'] = df['date'].dt.month
     
     return df

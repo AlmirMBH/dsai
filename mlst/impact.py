@@ -13,7 +13,7 @@ def measure_impact(bookings, recommendations):
     bookings_with_recs = bookings[bookings['date'].isin(recommendations['date'].unique())]
     bookings_without_recs = bookings[~bookings['date'].isin(recommendations['date'].unique())]
     
-    conversion_rate = len(bookings_with_recs) / len(recommendations) if len(recommendations) > 0 else 0
+    conversion_rate = len(bookings_with_recs) / len(recommendations)
     
     avg_bookings_with = bookings_with_recs['rooms_booked'].mean() if len(bookings_with_recs) > 0 else 0
     avg_bookings_without = bookings_without_recs['rooms_booked'].mean() if len(bookings_without_recs) > 0 else 0
@@ -31,4 +31,3 @@ def measure_impact(bookings, recommendations):
     }
     
     return impact
-
