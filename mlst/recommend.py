@@ -9,20 +9,32 @@ import config
 
 def collaborative_filtering(events, guest_id, bookings, n=config.DEFAULT_RECOMMENDATIONS):
     bookings['date'] = pd.to_datetime(bookings['date'])
+    bookings['arrival_date'] = pd.to_datetime(bookings['arrival_date'])
+    bookings['departure_date'] = pd.to_datetime(bookings['departure_date'])
     events['date'] = pd.to_datetime(events['date'])
     
     guest_bookings = bookings[bookings['guest_id'] == guest_id]
     if len(guest_bookings) == 0:
         return pd.DataFrame()
     
-    guest_dates = guest_bookings['date'].unique()
-    guest_events = events[events['date'].isin(guest_dates)]
+    events_key = events.reset_index().copy()
+    events_key['_key'] = 1
+    
+    guest_bookings_key = guest_bookings[['arrival_date', 'departure_date']].copy()
+    guest_bookings_key['_key'] = 1
+    merged = events_key.merge(guest_bookings_key, on='_key')
+    mask = (merged['date'] >= merged['arrival_date']) & (merged['date'] <= merged['departure_date'])
+    guest_events = events[events.index.isin(merged[mask]['index'])].drop_duplicates()
     
     if len(guest_events) == 0:
         return pd.DataFrame()
     
-    user_item = bookings.groupby(['guest_id', 'date']).size().reset_index(name='count')
-    user_item = user_item.merge(events[['date', 'event_id']], on='date', how='inner')
+    bookings_key = bookings[['guest_id', 'arrival_date', 'departure_date']].copy()
+    bookings_key['_key'] = 1
+    merged = events_key.merge(bookings_key, on='_key')
+    mask = (merged['date'] >= merged['arrival_date']) & (merged['date'] <= merged['departure_date'])
+    user_item = merged[mask][['guest_id', 'event_id']].drop_duplicates()
+    user_item['count'] = 1
     user_item_matrix = user_item.pivot_table(index='guest_id', columns='event_id', values='count', fill_value=0)
     
     if guest_id not in user_item_matrix.index:
@@ -55,8 +67,17 @@ def content_based_filtering(events, guest_id, personas, bookings, n=config.DEFAU
     persona_bookings = bookings[bookings['guest_id'].isin(persona_guests)]
     
     if len(persona_bookings) > 0:
-        booked_dates = persona_bookings['date'].unique()
-        persona_events = events_shuffled[events_shuffled['date'].isin(booked_dates)]
+        persona_bookings['arrival_date'] = pd.to_datetime(persona_bookings['arrival_date'])
+        persona_bookings['departure_date'] = pd.to_datetime(persona_bookings['departure_date'])
+        
+        events_with_key = events_shuffled.reset_index().copy()
+        events_with_key['_key'] = 1
+        bookings_with_key = persona_bookings[['arrival_date', 'departure_date']].copy()
+        bookings_with_key['_key'] = 1
+        
+        merged = events_with_key.merge(bookings_with_key, on='_key')
+        mask = (merged['date'] >= merged['arrival_date']) & (merged['date'] <= merged['departure_date'])
+        persona_events = events_shuffled[events_shuffled.index.isin(merged[mask]['index'])].drop_duplicates()
     else:
         return events_shuffled.head(n)
     

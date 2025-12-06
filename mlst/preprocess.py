@@ -2,16 +2,21 @@ import pandas as pd
 
 def preprocess(bookings, events, weather):
     bookings['date'] = pd.to_datetime(bookings['date'])
+    bookings['arrival_date'] = pd.to_datetime(bookings['arrival_date'])
+    bookings['departure_date'] = pd.to_datetime(bookings['departure_date'])
     events['date'] = pd.to_datetime(events['date'])
     weather['date'] = pd.to_datetime(weather['date'])
     
+    bookings['stay_nights'] = (bookings['departure_date'] - bookings['arrival_date']).dt.days
+    bookings['total_revenue'] = bookings['average_daily_rate'] * bookings['stay_nights']
+    
     daily = bookings.groupby('date').agg({
         'rooms_booked': 'sum',
-        'revenue_available_room': 'sum',
+        'total_revenue': 'sum',
         'accommodation_units': 'sum'
     }).reset_index()
     
-    daily['revpar'] = daily['revenue_available_room'] / daily['accommodation_units']
+    daily['revpar'] = daily['total_revenue'] / daily['accommodation_units']
     daily['demand'] = daily['rooms_booked']
     
     event_intensity = events.groupby('date')['expected_attendance'].sum().reset_index()
