@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from ingest import load_data
+from data_loading import get_data
 from preprocess import preprocess
 from forecast import train_forecast
 from personas import create_personas
@@ -10,7 +10,7 @@ import config
 
 app = FastAPI()
 
-bookings, events, weather, _ = load_data()
+bookings, events, weather, _ = get_data()
 if len(bookings) == 0 or len(events) == 0:
     raise FileNotFoundError("No datasets available. Please generate datasets first.")
 

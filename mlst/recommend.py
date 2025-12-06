@@ -3,7 +3,7 @@ import numpy as np
 from datetime import datetime, timedelta
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from ingest import load_data
+from data_loading import get_data
 from personas import create_personas
 import config
 
@@ -109,7 +109,7 @@ def content_based_filtering(events, guest_id, personas, bookings, n=config.DEFAU
     return events_shuffled.iloc[top_indices]
 
 def recommend_events(guest_id, n=config.DEFAULT_RECOMMENDATIONS, start_date=None, end_date=None):
-    bookings, events, _, _ = load_data()
+    bookings, events, _, _ = get_data()
     personas = create_personas(bookings)
     
     events = events.copy()

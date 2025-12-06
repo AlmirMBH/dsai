@@ -2,10 +2,10 @@ import threading
 import uvicorn
 import subprocess
 import sys
-from ingest import load_data
+from data_loading import get_data
 import config
 
-bookings, events, weather, _ = load_data()
+bookings, events, weather, _ = get_data()
 if len(bookings) == 0 or len(events) == 0:
     print("No datasets available. Please generate datasets first.")
     exit(1)

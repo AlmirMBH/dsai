@@ -1,5 +1,5 @@
 import streamlit as st
-from ingest import load_data
+from data_loading import get_data
 from preprocess import preprocess
 from forecast import train_forecast
 from personas import create_personas
@@ -12,7 +12,7 @@ import config
 
 st.title("Tourism Forecasting & Recommendations")
 
-bookings, events, weather, web_analytics = load_data()
+bookings, events, weather, web_analytics = get_data()
 if len(bookings) == 0 or len(events) == 0:
     st.write("No datasets available. Please generate datasets first.")
     st.stop()
