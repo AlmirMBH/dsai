@@ -12,7 +12,7 @@ import config
 
 st.title("Tourism Forecasting & Recommendations")
 
-bookings, events, weather = load_data()
+bookings, events, weather, web_analytics = load_data()
 if len(bookings) == 0 or len(events) == 0:
     st.write("No datasets available. Please generate datasets first.")
     st.stop()
@@ -78,8 +78,7 @@ with tab2:
 
 with tab3:
     st.header("Impact Measurement")
-    sample_recs = recommend_events(1, config.DEFAULT_RECOMMENDATIONS * 2)
-    impact = measure_impact(bookings, sample_recs)
+    impact = measure_impact(bookings, web_analytics)
     
     st.metric("Conversion Rate", f"{impact['conversion_rate']:.2%}")
     st.metric("Avg Bookings (with recs)", f"{impact['avg_bookings_with_recommendations']:.2f}")

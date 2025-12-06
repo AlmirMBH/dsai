@@ -5,7 +5,7 @@ import sys
 from ingest import load_data
 import config
 
-bookings, events, weather = load_data()
+bookings, events, weather, _ = load_data()
 if len(bookings) == 0 or len(events) == 0:
     print("No datasets available. Please generate datasets first.")
     exit(1)

@@ -88,7 +88,7 @@ def content_based_filtering(events, guest_id, personas, bookings, n=config.DEFAU
     return events_shuffled.iloc[top_indices]
 
 def recommend_events(guest_id, n=config.DEFAULT_RECOMMENDATIONS, start_date=None, end_date=None):
-    bookings, events, _ = load_data()
+    bookings, events, _, _ = load_data()
     personas = create_personas(bookings)
     
     events = events.copy()

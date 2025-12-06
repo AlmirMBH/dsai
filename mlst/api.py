@@ -5,11 +5,12 @@ from forecast import train_forecast
 from personas import create_personas
 from recommend import recommend_events
 import pandas as pd
+from datetime import date
 import config
 
 app = FastAPI()
 
-bookings, events, weather = load_data()
+bookings, events, weather, _ = load_data()
 if len(bookings) == 0 or len(events) == 0:
     raise FileNotFoundError("No datasets available. Please generate datasets first.")
 
@@ -27,13 +28,14 @@ def forecast_revpar(periods: int = config.DEFAULT_FORECAST_PERIODS):
     return forecast[['ds', 'yhat']].tail(periods).to_dict('records')
 
 @app.get("/recommend/{guest_id}")
-def recommend(guest_id: int, n: int = config.DEFAULT_RECOMMENDATIONS):
-    recs = recommend_events(guest_id, n)
+def recommend(guest_id: int, start_date: date, end_date: date, n: int = config.DEFAULT_RECOMMENDATIONS):
+    recs = recommend_events(guest_id, n, start_date, end_date)
     return recs[['event_id', 'date', 'type', 'name', 'location']].to_dict('records')
 
 @app.get("/itinerary/{guest_id}")
-def get_itinerary(guest_id: int, days: int = config.DEFAULT_ITINERARY_DAYS, n_per_day: int = config.DEFAULT_EVENTS_PER_DAY):
-    recs = recommend_events(guest_id, n=days * n_per_day)
+def get_itinerary(guest_id: int, start_date: date, end_date: date, n_per_day: int = config.DEFAULT_EVENTS_PER_DAY):
+    days = (end_date - start_date).days + 1
+    recs = recommend_events(guest_id, n=days * n_per_day, start_date=start_date, end_date=end_date)
     
     if len(recs) == 0:
         return {"itinerary": []}
@@ -58,6 +60,9 @@ def get_itinerary(guest_id: int, days: int = config.DEFAULT_ITINERARY_DAYS, n_pe
             }
             current_date = event_date
         
+        if len(day_plan["events"]) >= n_per_day:
+            continue
+        
         day_plan["events"].append({
             "event_id": int(event['event_id']),
             "name": event['name'],
@@ -65,9 +70,6 @@ def get_itinerary(guest_id: int, days: int = config.DEFAULT_ITINERARY_DAYS, n_pe
             "location": event['location'],
             "expected_attendance": int(event['expected_attendance'])
         })
-        
-        if len(itinerary) >= days:
-            break
     
     if day_plan:
         itinerary.append(day_plan)

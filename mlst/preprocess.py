@@ -24,7 +24,7 @@ def preprocess(bookings, events, weather):
     
     df['event_intensity'] = df['event_intensity'].fillna(0)
     df['rain_flag'] = df['rain_flag'].fillna(0)
-    df['temperature_max'] = df['temperature_max'].fillna(df['temperature_max'].mean())
+    df['temperature_max'] = df.groupby(df['date'].dt.month)['temperature_max'].transform(lambda x: x.fillna(x.mean()))
     
     df['month'] = df['date'].dt.month
     
