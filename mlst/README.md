@@ -21,6 +21,7 @@ Synthetic Amsterdam datasets (December 2023 to February 2026):
 - events.csv - Amsterdam events
 - weather.csv - Daily weather data
 - bus_schedules.csv - Bus schedules
+- web_analytics.csv - Recommendation tracking data
 
 Generate datasets:
 ```bash
