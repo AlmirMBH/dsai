@@ -77,6 +77,7 @@ Options:
 **Columns:**
 - `id` - Unique event identifier
 - `date` - Event date (YYYY-MM-DD)
+- `time` - Event time (HH:MM format)
 - `type` - Event type (concert, festival, conference, etc.)
 - `name` - Event name
 - `location` - Event location/venue
@@ -90,6 +91,7 @@ Options:
   - Amsterdam Marathon - October
   - Amsterdam Light Festival - December
 - More events on weekends and in summer
+- Event times based on event type (conferences/education in morning, concerts/music in evening, festivals all-day, etc.)
 - Real Amsterdam venues (Ziggo Dome, RAI Amsterdam, etc.)
 
 ### Weather Dataset

@@ -133,4 +133,4 @@ def recommend_events(guest_id, n=config.DEFAULT_RECOMMENDATIONS, start_date=None
     else:
         result = content_recs.head(n)
     
-    return result.sort_values('date')
+    return result.sort_values(['date', 'time'])

@@ -75,6 +75,21 @@ ADE_WEEKS = {
     2025: {'start': '2025-10-15', 'end': '2025-10-19'}
 }
 
+def get_event_time(event_type):
+    if event_type in ['conference', 'education']:
+        hour = np.random.choice([9, 10, 11])
+    elif event_type in ['exhibition', 'arts']:
+        hour = np.random.choice([13, 14, 15, 16])
+    elif event_type in ['concert', 'music', 'theater', 'comedy']:
+        hour = np.random.choice([19, 20, 21])
+    elif event_type == 'festival':
+        hour = np.random.choice([10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
+    elif event_type == 'sports':
+        hour = np.random.choice([9, 10, 11, 14, 15, 16, 17])
+    else:
+        hour = np.random.choice([14, 15, 16])
+    minute = np.random.choice([0, 15, 30, 45])
+    return f"{hour:02d}:{minute:02d}"
 
 def generate_events():
     output_file = os.path.join(config.DATASETS_PATH, 'events.csv')
@@ -137,6 +152,7 @@ def generate_events():
             events.append({
                 'id': id,
                 'date': date_str,
+                'time': get_event_time(major['type']),
                 'type': major['type'],
                 'name': major['name'],
                 'location': location,
@@ -188,6 +204,7 @@ def generate_events():
             events.append({
                 'id': id,
                 'date': date_str,
+                'time': get_event_time(event_type),
                 'type': event_type,
                 'name': event_name,
                 'location': location,

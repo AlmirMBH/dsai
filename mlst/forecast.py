@@ -30,21 +30,21 @@ def train_forecast(df, target='demand', periods=config.DEFAULT_FORECAST_PERIODS)
         
         if len(future_events) > 0:
             event_intensity = future_events.groupby('date')['expected_attendance'].sum().reset_index()
-            event_intensity.columns = ['ds', 'event_intensity']
-            future = future.merge(event_intensity, on='ds', how='left', suffixes=('', '_f'))
-            future['event_intensity'] = future['event_intensity'].fillna(future['event_intensity_f'])
-            future = future.drop(columns=['event_intensity_f'])
+            event_intensity.columns = ['ds', 'event_intensity_new']
+            future = future.merge(event_intensity, on='ds', how='left')
+            future['event_intensity'] = future['event_intensity'].fillna(future['event_intensity_new'])
+            future = future.drop(columns=['event_intensity_new'])
         
         if len(future_weather) > 0:
             future_weather['rain_flag'] = (future_weather['precipitation'] > 0).astype(int)
             weather_future = future_weather[['date', 'rain_flag', 'temperature_max']].copy()
-            weather_future.columns = ['ds', 'rain_flag', 'temperature_max']
-            future = future.merge(weather_future, on='ds', how='left', suffixes=('', '_f'))
-            future['rain_flag'] = future['rain_flag'].fillna(future['rain_flag_f'])
-            future['temperature_max'] = future['temperature_max'].fillna(future['temperature_max_f'])
-            future = future.drop(columns=['rain_flag_f', 'temperature_max_f'])
+            weather_future.columns = ['ds', 'rain_flag_new', 'temperature_max_new']
+            future = future.merge(weather_future, on='ds', how='left')
+            future['rain_flag'] = future['rain_flag'].fillna(future['rain_flag_new'])
+            future['temperature_max'] = future['temperature_max'].fillna(future['temperature_max_new'])
+            future = future.drop(columns=['rain_flag_new', 'temperature_max_new'])
     
-    # TODO: Handle NaNs in a better way at a later stage
+    # TODO: Handle NaNs in a better way at a later stage (in the preprocess.py file)
     # TODO: Improve default values (0, 0, mean) - consider using forecasts or better heuristics
     future['event_intensity'] = future['event_intensity'].fillna(0)
     future['rain_flag'] = future['rain_flag'].fillna(0)

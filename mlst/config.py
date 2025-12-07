@@ -39,3 +39,10 @@ CONVERSION_BOOST_RATE = 0.15
 BASE_CLICK_RATE = 0.15
 BASE_CONVERSION_RATE = 0.08
 
+# Dataset pollution configuration
+ENABLE_DATASET_POLLUTION = False
+POLLUTION_MISSING_RATE = 0.075  # 5-10% per column (using midpoint)
+POLLUTION_OUTLIER_RATE = 0.015  # 1-2% (using midpoint)
+POLLUTION_DUPLICATE_RATE = 0.015  # 1-2% (using midpoint)
+POLLUTION_TYPE_ERROR_RATE = 0.035  # 2-5% (using midpoint)
+

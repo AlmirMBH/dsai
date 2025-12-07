@@ -106,7 +106,7 @@ with tab4:
         recs = pd.DataFrame()
     
     if len(recs) > 0:
-        st.dataframe(recs[['date', 'type', 'name', 'location', 'expected_attendance']].reset_index(drop=True))
+        st.dataframe(recs[['date', 'time', 'type', 'name', 'location', 'expected_attendance']].reset_index(drop=True))
     else:
         st.write("No available events")
 
@@ -129,6 +129,6 @@ with tab5:
     if len(recs) > 0:
         recs['date_only'] = pd.to_datetime(recs['date']).dt.date
         recs_grouped = recs.groupby('date_only').head(n_per_day)
-        st.dataframe(recs_grouped[['date', 'type', 'name', 'location', 'expected_attendance']].reset_index(drop=True))
+        st.dataframe(recs_grouped[['date', 'time', 'type', 'name', 'location', 'expected_attendance']].reset_index(drop=True))
     else:
         st.write("No available events")
