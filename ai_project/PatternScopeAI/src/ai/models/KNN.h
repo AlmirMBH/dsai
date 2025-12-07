@@ -15,5 +15,6 @@ public:
     void train(const Dataset& dataset) override;
     int predict(const FeatureVector& features) override;
     double getConfidence(const FeatureVector& features) override;
+    void addExample(const FeatureVector& features, int label);
 };
 

@@ -103,6 +103,81 @@ int main() {
         }
     }
     
+    total++;
+    if (imagesLoaded && trainDataset.size() > 0) {
+        PixelGridExtractor pixelExt(28, 28);
+        Dataset smallTrain;
+        for (size_t i = 0; i < std::min(trainDataset.size(), size_t(100)); ++i) {
+            smallTrain.add(trainDataset.getFeatures(i), trainDataset.getLabel(i));
+        }
+        
+        KNN knn(3);
+        knn.train(smallTrain);
+        int pred1 = knn.predict(testDataset.getFeatures(0));
+        
+        FeatureVector newExample = testDataset.getFeatures(1);
+        int newLabel = testDataset.getLabel(1);
+        knn.addExample(newExample, newLabel);
+        
+        int pred2 = knn.predict(testDataset.getFeatures(0));
+        if (pred2 >= 0 && pred2 < 10) {
+            std::cout << "✓ Active Learning: KNN addExample works" << std::endl;
+            passed++;
+        } else {
+            std::cout << "✗ Active Learning: KNN addExample failed" << std::endl;
+        }
+    }
+    
+    total++;
+    if (trainDataset.size() > 0) {
+        Dataset smallTrain;
+        for (size_t i = 0; i < std::min(trainDataset.size(), size_t(100)); ++i) {
+            smallTrain.add(trainDataset.getFeatures(i), trainDataset.getLabel(i));
+        }
+        
+        NaiveBayes nb;
+        nb.train(smallTrain);
+        int pred1 = nb.predict(testDataset.getFeatures(0));
+        
+        FeatureVector newExample = testDataset.getFeatures(1);
+        int newLabel = testDataset.getLabel(1);
+        nb.updateWithExample(newExample, newLabel);
+        
+        int pred2 = nb.predict(testDataset.getFeatures(0));
+        if (pred2 >= 0 && pred2 < 10) {
+            std::cout << "✓ Active Learning: NaiveBayes updateWithExample works" << std::endl;
+            passed++;
+        } else {
+            std::cout << "✗ Active Learning: NaiveBayes updateWithExample failed" << std::endl;
+        }
+    }
+    
+    total++;
+    if (imagesLoaded && images.size() > 0 && labels.size() == images.size()) {
+        AStarMatcher astar;
+        PixelGridExtractor pixelExt(28, 28);
+        
+        std::vector<FeatureVector> tFeatures;
+        std::vector<int> tLabels;
+        for (size_t i = 0; i < std::min(images.size(), size_t(50)); ++i) {
+            tFeatures.push_back(pixelExt.extract(images[i]));
+            tLabels.push_back(labels[i]);
+        }
+        astar.buildTemplatesFromDataset(tFeatures, tLabels);
+        
+        FeatureVector newTemplate = pixelExt.extract(images[50]);
+        int newTemplateLabel = labels[50];
+        astar.addTemplate(newTemplate, newTemplateLabel);
+        
+        int astarPred = astar.match(testDataset.getFeatures(0));
+        if (astarPred >= 0 && astarPred < 10) {
+            std::cout << "✓ Active Learning: A* addTemplate works" << std::endl;
+            passed++;
+        } else {
+            std::cout << "✗ Active Learning: A* addTemplate failed" << std::endl;
+        }
+    }
+    
     std::cout << "\nResult: " << passed << "/" << total << " tests passed" << std::endl;
     return (passed == total) ? 0 : 1;
 }

@@ -1,12 +1,17 @@
 #include "DrawingCanvas.h"
 #include <algorithm>
 #include <cmath>
+#include <string>
 
-DrawingCanvas::DrawingCanvas() : imageSize(28), modelsTrained(false) {
+DrawingCanvas::DrawingCanvas() : imageSize(28), modelsTrained(false),
+    knnPred(-1), nbPred(-1), mlpPred(-1), astarPred(-1), rulePred(-1),
+    knnConf(0.0), nbConf(0.0), mlpConf(0.0), astarConf(0.0), ruleConf(0.0),
+    confidenceThreshold(0.6), activeLearningEnabled(true) {
     enableResizeEvent(true);
     pixels.resize(imageSize, std::vector<bool>(imageSize, false));
     canvasWidth = 0;
     canvasHeight = 0;
+    trainModels();
 }
 
 void DrawingCanvas::onResize(const gui::Size& newSize) {
@@ -82,15 +87,90 @@ void DrawingCanvas::updatePredictions() {
     Image img = getImageFromCanvas();
     FeatureVector features = featureExtractor.extract(img);
     
-    int knnPred = knn.predict(features);
-    int nbPred = nb.predict(features);
-    int mlpPred = mlp.predict(features);
-    int astarPred = astar.match(features);
-    int rulePred = rules.predict(img);
+    knnPred = knn.predict(features);
+    nbPred = nb.predict(features);
+    mlpPred = mlp.predict(features);
+    astarPred = astar.match(features);
+    rulePred = rules.predict(img);
+    
+    knnConf = knn.getConfidence(features);
+    nbConf = nb.getConfidence(features);
+    mlpConf = mlp.getConfidence(features);
+    astarConf = astar.getConfidence(features);
+    ruleConf = rules.getConfidence(img);
     
     reDraw();
 }
 
 void DrawingCanvas::drawPredictions() {
+}
+
+void DrawingCanvas::trainModels() {
+    std::string trainImagesPath = "../mnist/train-images.idx3-ubyte";
+    std::string trainLabelsPath = "../mnist/train-labels.idx1-ubyte";
+    std::string testImagesPath = "../mnist/t10k-images.idx3-ubyte";
+    std::string testLabelsPath = "../mnist/t10k-labels.idx1-ubyte";
+    
+    Dataset trainDataset;
+    if (!MNISTLoader::loadDataset(trainImagesPath, trainLabelsPath, trainDataset)) {
+        modelsTrained = false;
+        return;
+    }
+    
+    Dataset smallTrainDataset;
+    for (size_t i = 0; i < std::min(trainDataset.size(), size_t(1000)); ++i) {
+        smallTrainDataset.add(trainDataset.getFeatures(i), trainDataset.getLabel(i));
+    }
+    
+    knn = KNN(3);
+    knn.train(smallTrainDataset);
+    
+    nb = NaiveBayes();
+    nb.train(smallTrainDataset);
+    
+    mlp = MiniMLP(784, 64, 10);
+    mlp.train(smallTrainDataset);
+    
+    std::vector<Image> images;
+    std::vector<int> labels;
+    if (MNISTLoader::loadImages(testImagesPath, images) && 
+        MNISTLoader::loadLabels(testLabelsPath, labels)) {
+        
+        std::vector<FeatureVector> templateFeatures;
+        std::vector<int> templateLabels;
+        
+        for (size_t i = 0; i < std::min(images.size(), size_t(100)); ++i) {
+            templateFeatures.push_back(featureExtractor.extract(images[i]));
+            templateLabels.push_back(labels[i]);
+        }
+        
+        astar.buildTemplatesFromDataset(templateFeatures, templateLabels);
+    }
+    
+    modelsTrained = true;
+}
+
+bool DrawingCanvas::isLowConfidence() const {
+    if (!modelsTrained) {
+        return false;
+    }
+    
+    double avgConf = (knnConf + nbConf + mlpConf + astarConf + ruleConf) / 5.0;
+    return avgConf < confidenceThreshold;
+}
+
+void DrawingCanvas::updateModelsWithExample(const FeatureVector& features, int label) {
+    if (!modelsTrained || label < 0 || label >= 10) {
+        return;
+    }
+    
+    knn.addExample(features, label);
+    nb.updateWithExample(features, label);
+    astar.addTemplate(features, label);
+}
+
+FeatureVector DrawingCanvas::getCurrentFeatures() const {
+    Image img = getImageFromCanvas();
+    return featureExtractor.extract(img);
 }
 

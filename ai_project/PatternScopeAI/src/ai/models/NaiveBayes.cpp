@@ -131,3 +131,33 @@ double NaiveBayes::getConfidence(const FeatureVector& features) {
     return std::exp(posteriors[predict(features)] - maxPosterior) / sumExp;
 }
 
+void NaiveBayes::updateWithExample(const FeatureVector& features, int label) {
+    incrementalData.push_back(std::make_pair(features, label));
+    
+    if (label >= 0 && label < numClasses && numFeatures > 0) {
+        int n = incrementalData.size();
+        double alpha = 1.0 / (n + 1);
+        
+        for (int j = 0; j < numFeatures; ++j) {
+            double oldMean = means[label][j];
+            means[label][j] = (1.0 - alpha) * oldMean + alpha * features.get(j);
+            
+            double oldVar = variances[label][j];
+            double diff = features.get(j) - means[label][j];
+            variances[label][j] = (1.0 - alpha) * oldVar + alpha * diff * diff;
+            if (variances[label][j] < 1e-9) {
+                variances[label][j] = 1e-9;
+            }
+        }
+        
+        priors[label] = (priors[label] * n + 1.0) / (n + 1);
+        double totalPrior = 0.0;
+        for (int c = 0; c < numClasses; ++c) {
+            totalPrior += priors[c];
+        }
+        for (int c = 0; c < numClasses; ++c) {
+            priors[c] /= totalPrior;
+        }
+    }
+}
+

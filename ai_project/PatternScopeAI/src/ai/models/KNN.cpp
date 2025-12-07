@@ -77,3 +77,7 @@ double KNN::getConfidence(const FeatureVector& features) {
     return static_cast<double>(maxVotes) / kActual;
 }
 
+void KNN::addExample(const FeatureVector& features, int label) {
+    trainingData.push_back(std::make_pair(features, label));
+}
+
