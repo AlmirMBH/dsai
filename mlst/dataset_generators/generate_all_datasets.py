@@ -15,7 +15,6 @@ All datasets focus on: Amsterdam only
 import sys
 import os
 import pandas as pd
-from datetime import datetime
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import config
 from generate_weather import generate_weather

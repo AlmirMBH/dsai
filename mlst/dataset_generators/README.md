@@ -75,7 +75,7 @@ Options:
 ### Events Dataset
 
 **Columns:**
-- `event_id` - Unique event identifier
+- `id` - Unique event identifier
 - `date` - Event date (YYYY-MM-DD)
 - `type` - Event type (concert, festival, conference, etc.)
 - `name` - Event name
@@ -111,7 +111,7 @@ Options:
 ### Bus Schedules Dataset
 
 **Columns:**
-- `trip_id` - Unique trip identifier
+- `id` - Unique trip identifier
 - `date` - Schedule date (YYYY-MM-DD)
 - `time` - Arrival time (HH:MM)
 - `route_id` - Bus route identifier

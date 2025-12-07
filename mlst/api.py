@@ -30,7 +30,7 @@ def forecast_revpar(periods: int = config.DEFAULT_FORECAST_PERIODS):
 @app.get("/recommend/{guest_id}")
 def recommend(guest_id: int, start_date: date, end_date: date, n: int = config.DEFAULT_RECOMMENDATIONS):
     recs = recommend_events(guest_id, n, start_date, end_date)
-    return recs[['event_id', 'date', 'type', 'name', 'location']].to_dict('records')
+    return recs[['id', 'date', 'type', 'name', 'location']].to_dict('records')
 
 @app.get("/itinerary/{guest_id}")
 def get_itinerary(guest_id: int, start_date: date, end_date: date, n_per_day: int = config.DEFAULT_EVENTS_PER_DAY):
@@ -64,7 +64,7 @@ def get_itinerary(guest_id: int, start_date: date, end_date: date, n_per_day: in
             continue
         
         day_plan["events"].append({
-            "event_id": int(event['event_id']),
+            "id": int(event['id']),
             "name": event['name'],
             "type": event['type'],
             "location": event['location'],

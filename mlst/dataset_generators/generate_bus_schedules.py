@@ -137,7 +137,7 @@ def generate_bus_schedules():
     end_date = datetime.strptime(config.DATASET_END_DATE, '%Y-%m-%d')
     print("Generating bus schedules...")
     schedules = []
-    trip_id = 1
+    id = 1
     
     current_date = start_date
     date_range = []
@@ -190,14 +190,14 @@ def generate_bus_schedules():
                     arrival_time = f"{arrival_hours:02d}:{arrival_minutes:02d}"
                     
                     schedules.append({
-                        'trip_id': trip_id,
+                        'id': id,
                         'date': date_str,
                         'time': arrival_time,
                         'route_id': route['route_id'],
                         'stop_id': stop_info['stop_id'],
                         'stop_name': f"{stop_info['stop_name']}, Amsterdam"
                     })
-                trip_id += 1
+                id += 1
     
     df_schedules = pd.DataFrame(schedules)
     df_schedules = df_schedules.sort_values(['date', 'route_id', 'time', 'stop_id'])

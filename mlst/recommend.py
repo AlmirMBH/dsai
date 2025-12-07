@@ -33,9 +33,9 @@ def collaborative_filtering(events, guest_id, bookings, n=config.DEFAULT_RECOMME
     bookings_key['_key'] = 1
     merged = events_key.merge(bookings_key, on='_key')
     mask = (merged['date'] >= merged['arrival_date']) & (merged['date'] <= merged['departure_date'])
-    user_item = merged[mask][['guest_id', 'event_id']].drop_duplicates()
+    user_item = merged[mask][['guest_id', 'id']].drop_duplicates()
     user_item['count'] = 1
-    user_item_matrix = user_item.pivot_table(index='guest_id', columns='event_id', values='count', fill_value=0)
+    user_item_matrix = user_item.pivot_table(index='guest_id', columns='id', values='count', fill_value=0)
     
     if guest_id not in user_item_matrix.index:
         return pd.DataFrame()
@@ -47,11 +47,11 @@ def collaborative_filtering(events, guest_id, bookings, n=config.DEFAULT_RECOMME
     similar_users = user_item_matrix.index[top_indices[1:]]
     
     similar_users_events = user_item_matrix.loc[similar_users].sum()
-    guest_events_ids = set(guest_events['event_id'].values)
+    guest_events_ids = set(guest_events['id'].values)
     similar_users_events = similar_users_events[~similar_users_events.index.isin(guest_events_ids)]
     
     top_event_ids = similar_users_events.nlargest(n).index
-    return events[events['event_id'].isin(top_event_ids)]
+    return events[events['id'].isin(top_event_ids)]
 
 def content_based_filtering(events, guest_id, personas, bookings, n=config.DEFAULT_RECOMMENDATIONS):
     if len(events) == 0:
@@ -64,7 +64,7 @@ def content_based_filtering(events, guest_id, personas, bookings, n=config.DEFAU
         guest_persona = [0]
     
     persona_guests = personas[personas['persona_id'] == guest_persona[0]]['guest_id'].tolist()
-    persona_bookings = bookings[bookings['guest_id'].isin(persona_guests)]
+    persona_bookings = bookings[bookings['guest_id'].isin(persona_guests)].copy()
     
     if len(persona_bookings) > 0:
         persona_bookings['arrival_date'] = pd.to_datetime(persona_bookings['arrival_date'])

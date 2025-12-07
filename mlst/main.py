@@ -2,13 +2,7 @@ import threading
 import uvicorn
 import subprocess
 import sys
-from data_loading import get_data
 import config
-
-bookings, events, weather, _ = get_data()
-if len(bookings) == 0 or len(events) == 0:
-    print("No datasets available. Please generate datasets first.")
-    exit(1)
 
 def run_api():
     uvicorn.run("api:app", host="0.0.0.0", port=config.API_PORT, log_level="info")

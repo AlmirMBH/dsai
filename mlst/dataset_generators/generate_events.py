@@ -82,7 +82,7 @@ def generate_events():
     end_date = datetime.strptime(config.DATASET_END_DATE, '%Y-%m-%d')
     print("Generating events...")
     events = []
-    event_id = 1
+    id = 1
     
     current_date = start_date
     date_range = []
@@ -135,14 +135,14 @@ def generate_events():
             location = f"{venue}, Amsterdam"
             
             events.append({
-                'event_id': event_id,
+                'id': id,
                 'date': date_str,
                 'type': major['type'],
                 'name': major['name'],
                 'location': location,
                 'expected_attendance': major['attendance']
             })
-            event_id += 1
+            id += 1
             n_events -= 1  # Already added major event
         
         # Generate additional regular events
@@ -186,17 +186,17 @@ def generate_events():
             expected_attendance = np.random.randint(min_att, max_att)
             
             events.append({
-                'event_id': event_id,
+                'id': id,
                 'date': date_str,
                 'type': event_type,
                 'name': event_name,
                 'location': location,
                 'expected_attendance': expected_attendance
             })
-            event_id += 1
+            id += 1
     
     df_events = pd.DataFrame(events)
-    df_events = df_events.sort_values(['date', 'event_id'])
+    df_events = df_events.sort_values(['date', 'id'])
     os.makedirs(config.DATASETS_PATH, exist_ok=True)
     df_events.to_csv(output_file, index=False)
     print(f"Generated {len(df_events)} events -> {output_file}")

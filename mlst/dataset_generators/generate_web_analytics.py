@@ -30,11 +30,11 @@ def generate_web_analytics():
     control_group = set(np.random.choice(unique_guests, size=n_control, replace=False))
     
     analytics = []
-    recommendation_id = 1
+    id = 1
     
     events_by_date = {}
     for date, group in events.groupby('date'):
-        events_by_date[date] = group['event_id'].tolist()
+        events_by_date[date] = group['id'].tolist()
     
     for _, booking in bookings.iterrows():
         booking_date = booking['date']
@@ -84,14 +84,14 @@ def generate_web_analytics():
                 converted = np.random.random() < base_conversion_rate
             
             analytics.append({
-                'recommendation_id': recommendation_id,
+                'id': id,
                 'guest_id': int(guest_id),
                 'event_id': int(event_id),
                 'date_shown': rec_date_str,
                 'clicked': int(clicked),
                 'converted': int(converted)
             })
-            recommendation_id += 1
+            id += 1
     
     df = pd.DataFrame(analytics)
     df.to_csv(output_file, index=False)
