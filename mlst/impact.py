@@ -31,18 +31,18 @@ def measure_impact(bookings, web_analytics):
     treatment_after = bookings_after_equal[bookings_after_equal['guest_id'].isin(treatment_group)]
     control_after = bookings_after_equal[bookings_after_equal['guest_id'].isin(control_group)]
     
-    avg_treatment_after = treatment_after.groupby('guest_id').size().reindex(treatment_group, fill_value=0).mean()
-    avg_control_after = control_after.groupby('guest_id').size().reindex(control_group, fill_value=0).mean()
+    avg_treatment_after = treatment_after['guest_id'].value_counts().reindex(treatment_group, fill_value=0).mean()
+    avg_control_after = control_after['guest_id'].value_counts().reindex(control_group, fill_value=0).mean()
     
     treatment_before = bookings_before[bookings_before['guest_id'].isin(treatment_group)]
     control_before = bookings_before[bookings_before['guest_id'].isin(control_group)]
     treatment_after_full = bookings_after[bookings_after['guest_id'].isin(treatment_group)]
     control_after_full = bookings_after[bookings_after['guest_id'].isin(control_group)]
     
-    avg_treatment_before = treatment_before.groupby('guest_id').size().reindex(treatment_group, fill_value=0).mean()
-    avg_treatment_after_full = treatment_after_full.groupby('guest_id').size().reindex(treatment_group, fill_value=0).mean()
-    avg_control_before = control_before.groupby('guest_id').size().reindex(control_group, fill_value=0).mean()
-    avg_control_after_full = control_after_full.groupby('guest_id').size().reindex(control_group, fill_value=0).mean()
+    avg_treatment_before = treatment_before['guest_id'].value_counts().reindex(treatment_group, fill_value=0).mean()
+    avg_treatment_after_full = treatment_after_full['guest_id'].value_counts().reindex(treatment_group, fill_value=0).mean()
+    avg_control_before = control_before['guest_id'].value_counts().reindex(control_group, fill_value=0).mean()
+    avg_control_after_full = control_after_full['guest_id'].value_counts().reindex(control_group, fill_value=0).mean()
     
     treatment_before_rate = avg_treatment_before / months_before
     treatment_after_rate = avg_treatment_after_full / months_after
