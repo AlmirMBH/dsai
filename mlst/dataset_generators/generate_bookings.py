@@ -110,6 +110,57 @@ def generate_accommodations(n_accommodations=None):
 
 
 
+def create_booking(guest_id, guest_info, booking_date, accommodations_df, booking_id):
+    """Create a single booking."""
+    acc = accommodations_df.sample(1).iloc[0]
+    
+    days_until_arrival = np.random.randint(0, 90)
+    arrival_date = booking_date + timedelta(days=days_until_arrival)
+    stay_nights = np.random.randint(1, 14)
+    departure_date = arrival_date + timedelta(days=stay_nights)
+    
+    rooms_booked = np.random.randint(1, 5)
+    number_of_guests = np.random.choice(['single', 'couple', 'family', 'group'], 
+                                      p=[0.2, 0.4, 0.3, 0.1])
+    
+    base_rate = 50 + (acc['stars'] * 20) + np.random.randint(-20, 50)
+    average_daily_rate = max(30, base_rate) * 100
+    revenue_available_room = (average_daily_rate * stay_nights) // rooms_booked
+    
+    created_at = booking_date - timedelta(days=np.random.randint(0, 30))
+    updated_at = created_at + timedelta(days=np.random.randint(0, 5))
+    deleted_at = None if np.random.random() > 0.05 else updated_at + timedelta(days=np.random.randint(1, 30))
+    
+    return {
+        'id': booking_id,
+        'uuid': str(uuid.uuid4()),
+        'accommodation_id': acc['accommodation_id'],
+        'accommodation_code': acc['accommodation_code'],
+        'accommodation_name': acc['accommodation_name'],
+        'address': acc['address'],
+        'stars': acc['stars'],
+        'capacity_type': acc['capacity_type'],
+        'accommodation_units': acc['accommodation_units'],
+        'type': acc['type'],
+        'guest_id': guest_id,
+        'first_name': guest_info['first_name'],
+        'last_name': guest_info['last_name'],
+        'email': guest_info['email'],
+        'age': guest_info['age'],
+        'country_id': guest_info['country_id'],
+        'date': booking_date.strftime('%Y-%m-%d'),
+        'rooms_booked': rooms_booked,
+        'number_of_guests': number_of_guests,
+        'average_daily_rate': average_daily_rate,
+        'revenue_available_room': revenue_available_room,
+        'arrival_date': arrival_date.strftime('%Y-%m-%d'),
+        'departure_date': departure_date.strftime('%Y-%m-%d'),
+        'guest_country': guest_info['country'],
+        'created_at': created_at.strftime('%Y-%m-%d %H:%M:%S'),
+        'updated_at': updated_at.strftime('%Y-%m-%d %H:%M:%S'),
+        'deleted_at': deleted_at.strftime('%Y-%m-%d %H:%M:%S') if deleted_at else None
+    }
+
 def calculate_booking_multiplier(date_str, events_by_date, weather_by_date):
     """Calculate booking multiplier based on events and weather."""
     multiplier = 1.0
@@ -189,6 +240,18 @@ def generate_bookings(accommodations_df):
     guest_id_counter = 1
     guest_pool = {}  # Reuse guest IDs for repeat visitors
     
+    # Recreate control group using same random seed as web_analytics generation
+    recommendation_start_date = datetime.strptime(config.RECOMMENDATION_START_DATE, '%Y-%m-%d')
+    np.random.seed(config.RANDOM_STATE)
+    # Estimate total guests (will be refined as we generate)
+    estimated_total_guests = int(len(date_range) * config.DATASET_BASE_BOOKINGS_PER_DAY * 0.7)  # ~70% new guests
+    control_group_set = set()
+    if estimated_total_guests > 0:
+        control_guest_ids = np.random.choice(range(1, estimated_total_guests + 1), 
+                                            size=int(estimated_total_guests * config.CONTROL_GROUP_PERCENTAGE), 
+                                            replace=False)
+        control_group_set = set(control_guest_ids)
+    
     base_bookings_per_day = config.DATASET_BASE_BOOKINGS_PER_DAY
     
     for date in date_range:
@@ -200,19 +263,36 @@ def generate_bookings(accommodations_df):
         n_bookings_today = np.clip(n_bookings_today, config.DATASET_MIN_BOOKINGS_PER_DAY, config.DATASET_MAX_BOOKINGS_PER_DAY)
         
         for _ in range(n_bookings_today):
-            # Select random accommodation
-            acc = accommodations_df.sample(1).iloc[0]
-            
             # Generate or reuse guest information
-            if np.random.random() < 0.3:  # 30% chance of repeat guest
+            # Dynamic repeat probability: higher for treatment guests after recommendations start
+            is_after_recommendations = date >= recommendation_start_date
+            
+            # Base repeat probability
+            repeat_probability = config.BASE_REPEAT_PROBABILITY
+            
+            reuse_guest = False
+            if np.random.random() < repeat_probability and len(guest_pool) > 0:  # Dynamic chance of repeat guest
                 guest_id = np.random.choice(list(guest_pool.keys()))
                 guest_info = guest_pool[guest_id]
-                first_name = guest_info['first_name']
-                last_name = guest_info['last_name']
-                email = guest_info['email']
-                age = guest_info['age']
-                guest_country = guest_info['country']
-                country_id = guest_info['country_id']
+                
+                # Boost repeat probability for treatment guests after recommendations start
+                if is_after_recommendations:
+                    is_treatment_guest = guest_id not in control_group_set if guest_id <= estimated_total_guests else True
+                    if is_treatment_guest:
+                        # Treatment guests: keep reuse (recommendations help retention)
+                        reuse_guest = True
+                    else:
+                        # Control guests: lower retention (no recommendations)
+                        if np.random.random() < config.CONTROL_RETENTION_DROP:
+                            reuse_guest = False
+                        else:
+                            reuse_guest = True
+                else:
+                    reuse_guest = True
+            
+            if reuse_guest:
+                # Reuse existing guest (already set above)
+                pass
             else:
                 # New guest
                 first_name = np.random.choice(FIRST_NAMES)
@@ -222,7 +302,7 @@ def generate_bookings(accommodations_df):
                 guest_country = np.random.choice(GUEST_COUNTRIES)
                 country_id = GUEST_COUNTRIES.index(guest_country) + 1
                 guest_id = guest_id_counter
-                guest_pool[guest_id] = {
+                guest_info = {
                     'first_name': first_name,
                     'last_name': last_name,
                     'email': email,
@@ -230,64 +310,10 @@ def generate_bookings(accommodations_df):
                     'country': guest_country,
                     'country_id': country_id
                 }
+                guest_pool[guest_id] = guest_info
                 guest_id_counter += 1
             
-            # Generate booking dates
-            booking_date = date
-            # Arrival can be same day or up to 90 days in future
-            days_until_arrival = np.random.randint(0, 90)
-            arrival_date = booking_date + timedelta(days=days_until_arrival)
-            # Stay duration: 1-14 nights
-            stay_nights = np.random.randint(1, 14)
-            departure_date = arrival_date + timedelta(days=stay_nights)
-            
-            # Generate booking details
-            rooms_booked = np.random.randint(1, 5)
-            number_of_guests = np.random.choice(['single', 'couple', 'family', 'group'], 
-                                              p=[0.2, 0.4, 0.3, 0.1])
-            
-            # Generate pricing (based on stars and type)
-            base_rate = 50 + (acc['stars'] * 20) + np.random.randint(-20, 50)
-            average_daily_rate = max(30, base_rate) * 100  # Store as integer (price * 100)
-            
-            # Revenue per available room
-            revenue_available_room = (average_daily_rate * stay_nights) // rooms_booked
-            
-            # Timestamps
-            created_at = booking_date - timedelta(days=np.random.randint(0, 30))
-            updated_at = created_at + timedelta(days=np.random.randint(0, 5))
-            deleted_at = None if np.random.random() > 0.05 else updated_at + timedelta(days=np.random.randint(1, 30))
-            
-            booking = {
-                'id': booking_id,
-                'uuid': str(uuid.uuid4()),
-                'accommodation_id': acc['accommodation_id'],
-                'accommodation_code': acc['accommodation_code'],
-                'accommodation_name': acc['accommodation_name'],
-                'address': acc['address'],
-                'stars': acc['stars'],
-                'capacity_type': acc['capacity_type'],
-                'accommodation_units': acc['accommodation_units'],
-                'type': acc['type'],
-                'guest_id': guest_id,
-                'first_name': first_name,
-                'last_name': last_name,
-                'email': email,
-                'age': age,
-                'country_id': country_id,
-                'date': booking_date.strftime('%Y-%m-%d'),
-                'rooms_booked': rooms_booked,
-                'number_of_guests': number_of_guests,
-                'average_daily_rate': average_daily_rate,
-                'revenue_available_room': revenue_available_room,
-                'arrival_date': arrival_date.strftime('%Y-%m-%d'),
-                'departure_date': departure_date.strftime('%Y-%m-%d'),
-                'guest_country': guest_country,
-                'created_at': created_at.strftime('%Y-%m-%d %H:%M:%S'),
-                'updated_at': updated_at.strftime('%Y-%m-%d %H:%M:%S'),
-                'deleted_at': deleted_at.strftime('%Y-%m-%d %H:%M:%S') if deleted_at else None
-            }
-            
+            booking = create_booking(guest_id, guest_info, date, accommodations_df, booking_id)
             bookings.append(booking)
             booking_id += 1
     
@@ -296,6 +322,60 @@ def generate_bookings(accommodations_df):
     df_bookings.to_csv(output_file, index=False)
     print(f"Generated {len(df_bookings)} bookings -> {output_file}")
     return df_bookings
+
+
+def generate_additional_bookings(accommodations_df, existing_bookings_df):
+    """Generate additional bookings for converted guests from web_analytics."""
+    web_analytics_file = os.path.join(config.DATASETS_PATH, 'web_analytics.csv')
+    if not os.path.exists(web_analytics_file):
+        return []
+    
+    web_analytics = pd.read_csv(web_analytics_file)
+    web_analytics['date_shown'] = pd.to_datetime(web_analytics['date_shown'])
+    recommendation_start_date = pd.to_datetime(config.RECOMMENDATION_START_DATE)
+    
+    converted = web_analytics[web_analytics['converted'] == 1].copy()
+    if len(converted) == 0:
+        return []
+    
+    converted['days_since_start'] = (converted['date_shown'] - recommendation_start_date).dt.days
+    converted['is_after_start'] = converted['days_since_start'] >= 0
+    
+    base_rate = config.CONVERSION_BASE_RATE
+    boost_rate = config.CONVERSION_BOOST_RATE
+    converted['conversion_prob'] = converted['is_after_start'].map({True: boost_rate, False: base_rate})
+    
+    mask = np.random.random(len(converted)) < converted['conversion_prob']
+    converted = converted[mask].drop_duplicates(subset='guest_id')
+    
+    guest_info_map = {}
+    for _, booking in existing_bookings_df.iterrows():
+        guest_id = booking['guest_id']
+        if guest_id not in guest_info_map:
+            guest_info_map[guest_id] = {
+                'first_name': booking['first_name'],
+                'last_name': booking['last_name'],
+                'email': booking['email'],
+                'age': booking['age'],
+                'country': booking['guest_country'],
+                'country_id': booking['country_id']
+            }
+    
+    additional_bookings = []
+    booking_id = existing_bookings_df['id'].max() + 1
+    
+    for _, rec in converted.iterrows():
+        guest_id = rec['guest_id']
+        if guest_id not in guest_info_map:
+            continue
+        
+        booking_date = rec['date_shown'] + timedelta(days=np.random.randint(1, 30))
+        guest_info = guest_info_map[guest_id]
+        booking = create_booking(guest_id, guest_info, booking_date, accommodations_df, booking_id)
+        additional_bookings.append(booking)
+        booking_id += 1
+    
+    return additional_bookings
 
 
 def main():

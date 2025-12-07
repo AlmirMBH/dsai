@@ -81,9 +81,14 @@ with tab3:
     impact = measure_impact(bookings, web_analytics)
     
     st.metric("Conversion Rate", f"{impact['conversion_rate']:.2%}")
-    st.metric("Avg Bookings (with recs)", f"{impact['avg_bookings_with_recommendations']:.2f}")
-    st.metric("Avg Bookings (without recs)", f"{impact['avg_bookings_without_recommendations']:.2f}")
-    st.metric("Improvement", f"{impact['improvement']:.2f}%")
+    
+    st.subheader("A/B Test Comparison")
+    st.metric("Avg Bookings (Treatment)", f"{impact['ab_test']['avg_treatment']:.4f}")
+    st.metric("Avg Bookings (Control)", f"{impact['ab_test']['avg_control']:.4f}")
+    st.metric("Improvement", f"{impact['ab_test']['improvement']:.4f}%")
+    
+    st.subheader("Difference-in-Differences")
+    st.metric("Causal Impact", f"{impact['did']['improvement']:.4f}%")
 
 with tab4:
     st.header("Event Recommendations")

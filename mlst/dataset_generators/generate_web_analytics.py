@@ -23,6 +23,12 @@ def generate_web_analytics():
     bookings['date'] = pd.to_datetime(bookings['date'])
     events['date'] = pd.to_datetime(events['date'])
     
+    recommendation_start_date = pd.to_datetime(config.RECOMMENDATION_START_DATE)
+    
+    unique_guests = bookings['guest_id'].unique()
+    n_control = int(len(unique_guests) * config.CONTROL_GROUP_PERCENTAGE)
+    control_group = set(np.random.choice(unique_guests, size=n_control, replace=False))
+    
     analytics = []
     recommendation_id = 1
     
@@ -34,14 +40,17 @@ def generate_web_analytics():
         booking_date = booking['date']
         guest_id = booking['guest_id']
         
+        if booking_date < recommendation_start_date:
+            continue
+        
+        if guest_id in control_group:
+            continue
+        
         rec_date = booking_date - timedelta(days=np.random.randint(1, 8))
         rec_date_str = rec_date.strftime('%Y-%m-%d')
         rec_datetime = pd.to_datetime(rec_date)
         
-        if rec_datetime not in events_by_date:
-            continue
-        
-        available_events = events_by_date[rec_datetime]
+        available_events = events_by_date.get(rec_datetime, [])
         if len(available_events) == 0:
             continue
         
@@ -57,8 +66,8 @@ def generate_web_analytics():
         rooms_multiplier = 1.0 + (rooms_booked - 1) * 0.25
         
         for event_id in recommended_events:
-            base_click_rate = 0.15
-            base_conversion_rate = 0.08 * rooms_multiplier
+            base_click_rate = config.BASE_CLICK_RATE
+            base_conversion_rate = config.BASE_CONVERSION_RATE * rooms_multiplier
             
             if is_weekend:
                 base_click_rate *= 1.3

@@ -126,7 +126,7 @@ def generate_events():
             base_events *= 1.5
         
         # Generate number of events (Poisson distribution)
-        n_events = max(0, int(np.random.poisson(base_events)))
+        n_events = max(1, int(np.random.poisson(base_events)))
         
         # Add major event if it's a major event day
         if is_major_event_day:
