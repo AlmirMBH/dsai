@@ -1,7 +1,7 @@
 from prophet import Prophet
 import pandas as pd
 import config
-from data_loading import get_data
+from data_ingestion import get_data
 
 def train_forecast(df, target='demand', periods=config.DEFAULT_FORECAST_PERIODS):
     df_prophet = df[['date', target, 'event_intensity', 'rain_flag', 'temperature_max']].copy()

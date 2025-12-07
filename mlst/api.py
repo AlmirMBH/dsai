@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from data_loading import get_data
+from data_ingestion import get_data
 from preprocess import preprocess
 from forecast import train_forecast
 from personas import create_personas

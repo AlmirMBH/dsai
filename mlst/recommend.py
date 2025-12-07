@@ -3,7 +3,7 @@ import numpy as np
 from datetime import datetime, timedelta
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from data_loading import get_data
+from data_ingestion import get_data
 from personas import create_personas
 import config
 
