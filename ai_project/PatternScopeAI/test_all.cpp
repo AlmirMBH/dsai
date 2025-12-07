@@ -1,0 +1,109 @@
+#include <iostream>
+#include <iomanip>
+#include "src/data/Image.h"
+#include "src/data/FeatureVector.h"
+#include "src/data/Dataset.h"
+#include "src/data/MNISTLoader.h"
+#include "src/ai/features/PixelGridExtractor.h"
+#include "src/ai/features/EdgeMapExtractor.h"
+#include "src/ai/features/HOGExtractor.h"
+#include "src/ai/models/KNN.h"
+#include "src/ai/models/NaiveBayes.h"
+#include "src/ai/models/MiniMLP.h"
+#include "src/ai/search/AStarMatcher.h"
+#include "src/ai/rules/RuleEngine.h"
+#include "src/ai/rules/StructuralFeatures.h"
+
+int main() {
+    std::cout << "=== PatternScope AI - Quick Test ===" << std::endl;
+    
+    int passed = 0;
+    int total = 0;
+    
+    std::string testImagesPath = "../mnist/t10k-images.idx3-ubyte";
+    std::string testLabelsPath = "../mnist/t10k-labels.idx1-ubyte";
+    std::string trainImagesPath = "../mnist/train-images.idx3-ubyte";
+    std::string trainLabelsPath = "../mnist/train-labels.idx1-ubyte";
+    
+    total++;
+    Dataset testDataset;
+    if (MNISTLoader::loadDataset(testImagesPath, testLabelsPath, testDataset) && testDataset.size() > 0) {
+        std::cout << "✓ Data loading: " << testDataset.size() << " samples" << std::endl;
+        passed++;
+    } else {
+        std::cout << "✗ Data loading failed" << std::endl;
+        return 1;
+    }
+    
+    total++;
+    std::vector<Image> images;
+    std::vector<int> labels;
+    bool imagesLoaded = MNISTLoader::loadImages(testImagesPath, images) && 
+                        MNISTLoader::loadLabels(testLabelsPath, labels) && 
+                        images.size() > 0;
+    if (imagesLoaded) {
+        PixelGridExtractor pixelExt(28, 28);
+        FeatureVector fv = pixelExt.extract(images[0]);
+        if (fv.size() == 784) {
+            std::cout << "✓ Feature extraction: " << fv.size() << " features" << std::endl;
+            passed++;
+        }
+    }
+    
+    total++;
+    Dataset trainDataset;
+    if (MNISTLoader::loadDataset(trainImagesPath, trainLabelsPath, trainDataset)) {
+        Dataset smallTrain;
+        for (size_t i = 0; i < std::min(trainDataset.size(), size_t(500)); ++i) {
+            smallTrain.add(trainDataset.getFeatures(i), trainDataset.getLabel(i));
+        }
+        
+        KNN knn(3);
+        knn.train(smallTrain);
+        int pred = knn.predict(testDataset.getFeatures(0));
+        if (pred >= 0 && pred < 10) {
+            std::cout << "✓ ML Models: KNN=" << pred << std::endl;
+            passed++;
+        }
+    }
+    
+    total++;
+    if (imagesLoaded && images.size() > 0 && labels.size() == images.size()) {
+        AStarMatcher astar;
+        std::vector<FeatureVector> tFeatures;
+        std::vector<int> tLabels;
+        PixelGridExtractor pixelExt(28, 28);
+        for (size_t i = 0; i < std::min(images.size(), size_t(50)); ++i) {
+            tFeatures.push_back(pixelExt.extract(images[i]));
+            tLabels.push_back(labels[i]);
+        }
+        if (tFeatures.size() > 0 && tLabels.size() == tFeatures.size()) {
+            astar.buildTemplatesFromDataset(tFeatures, tLabels);
+            int astarPred = astar.match(testDataset.getFeatures(0));
+            if (astarPred >= 0 && astarPred < 10) {
+                std::cout << "✓ A* Matching: " << astarPred << std::endl;
+                passed++;
+            } else {
+                std::cout << "✗ A* Matching failed (pred: " << astarPred << ")" << std::endl;
+            }
+        } else {
+            std::cout << "✗ A* Matching: no templates built" << std::endl;
+        }
+    } else {
+        std::cout << "✗ A* Matching: no images loaded" << std::endl;
+    }
+    
+    total++;
+    if (images.size() > 0) {
+        RuleEngine rules;
+        int rulePred = rules.predict(images[0]);
+        if (rulePred >= -1) {
+            std::cout << "✓ Rule Engine: " << rulePred << std::endl;
+            passed++;
+        }
+    }
+    
+    std::cout << "\nResult: " << passed << "/" << total << " tests passed" << std::endl;
+    return (passed == total) ? 0 : 1;
+}
+

@@ -1,0 +1,4 @@
+/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles/patternScopeAI.dir
+/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles/test_all.dir
+/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles/edit_cache.dir
+/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles/rebuild_cache.dir
