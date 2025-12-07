@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include "data/Image.h"
 #include "data/FeatureVector.h"
@@ -136,14 +137,41 @@ int main(int argc, const char* argv[]) {
     std::cout << "\nKNN Confusion Matrix:" << std::endl;
     knnCM.print(std::cout);
     std::cout << "Accuracy: " << (100.0 * knnCM.getAccuracy()) << "%" << std::endl;
+    std::cout << "\nPer-class metrics:" << std::endl;
+    std::cout << "Class | Precision | Recall | F1-Score" << std::endl;
+    std::cout << "------|-----------|--------|---------" << std::endl;
+    for (int c = 0; c < 10; ++c) {
+        std::cout << std::setw(5) << c << " | " 
+                  << std::fixed << std::setprecision(3) << std::setw(9) << knnCM.getPrecision(c) << " | "
+                  << std::setw(6) << knnCM.getRecall(c) << " | "
+                  << std::setw(8) << knnCM.getF1Score(c) << std::endl;
+    }
     
     std::cout << "\nNaiveBayes Confusion Matrix:" << std::endl;
     nbCM.print(std::cout);
     std::cout << "Accuracy: " << (100.0 * nbCM.getAccuracy()) << "%" << std::endl;
+    std::cout << "\nPer-class metrics:" << std::endl;
+    std::cout << "Class | Precision | Recall | F1-Score" << std::endl;
+    std::cout << "------|-----------|--------|---------" << std::endl;
+    for (int c = 0; c < 10; ++c) {
+        std::cout << std::setw(5) << c << " | " 
+                  << std::fixed << std::setprecision(3) << std::setw(9) << nbCM.getPrecision(c) << " | "
+                  << std::setw(6) << nbCM.getRecall(c) << " | "
+                  << std::setw(8) << nbCM.getF1Score(c) << std::endl;
+    }
     
     std::cout << "\nMiniMLP Confusion Matrix:" << std::endl;
     mlpCM.print(std::cout);
     std::cout << "Accuracy: " << (100.0 * mlpCM.getAccuracy()) << "%" << std::endl;
+    std::cout << "\nPer-class metrics:" << std::endl;
+    std::cout << "Class | Precision | Recall | F1-Score" << std::endl;
+    std::cout << "------|-----------|--------|---------" << std::endl;
+    for (int c = 0; c < 10; ++c) {
+        std::cout << std::setw(5) << c << " | " 
+                  << std::fixed << std::setprecision(3) << std::setw(9) << mlpCM.getPrecision(c) << " | "
+                  << std::setw(6) << mlpCM.getRecall(c) << " | "
+                  << std::setw(8) << mlpCM.getF1Score(c) << std::endl;
+    }
     
     if (testDataset.size() > 0) {
         std::cout << "\nSample prediction (first test sample):" << std::endl;

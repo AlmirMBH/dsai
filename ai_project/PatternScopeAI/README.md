@@ -65,7 +65,8 @@ PatternScopeAI/
 │   │   ├── Image.h/cpp
 │   │   ├── FeatureVector.h/cpp
 │   │   ├── Dataset.h/cpp
-│   │   └── MNISTLoader.h/cpp
+│   │   ├── MNISTLoader.h/cpp
+│   │   └── ConfusionMatrix.h/cpp
 │   ├── gui/             # GUI components (requires natID)
 │   │   ├── Application.h
 │   │   ├── MainWindow.h
@@ -103,6 +104,16 @@ Three descriptor types:
 - Fallback when ML confidence is low
 - Features: edges, corners, aspect ratio, symmetry
 
+### 5. Active Learning
+- Confidence threshold detection
+- User feedback collection for low-confidence predictions
+- Incremental model updates (KNN, NaiveBayes, A*)
+
+### 6. Evaluation Metrics
+- Confusion matrix calculation and display
+- Per-class precision, recall, F1-score
+- Model comparison and analysis
+
 
 ## Dataset
 
@@ -113,29 +124,6 @@ MNIST dataset files in `mnist/` directory:
 - `t10k-labels.idx1-ubyte`
 
 Path: `../mnist/` relative to build directory.
-
-## Current Status
-
-✅ **Phases Complete:**
-
-- ✅ Phase 1: Data structures
-- ✅ Phase 2: Feature extraction
-- ✅ Phase 3: ML models
-- ✅ Phase 4: A* template matching
-- ✅ Phase 5: Rule-based reasoning
-- ✅ Phase 6: Console integration
-- ⚠️ Phase 7: GUI structure created, requires natID setup
-
-### Test Results
-
-- **test_all**: 5/5 passed
-- **test_integration**: All passed
-- **test_all_phases**: 13/13 passed
-
-Model accuracy on 100 test samples:
-- **KNN**: 83%
-- **NaiveBayes**: 56%
-- **MiniMLP**: 70%
 
 ## Known Limitations
 
@@ -150,10 +138,9 @@ Model accuracy on 100 test samples:
 - Train on full MNIST dataset
 - Implement additional feature extractors (SIFT, SURF)
 - Combine predictions with weighted voting
-- Implement incremental learning
 - Complete natID GUI integration
 - Extend to geometric shapes and custom symbols
-- Add evaluation metrics (confusion matrix, precision, recall, F1-score)
+- Add confusion matrix visualization to GUI
 
 ## Contact
 

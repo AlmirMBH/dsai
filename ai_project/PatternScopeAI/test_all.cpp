@@ -233,6 +233,31 @@ int main() {
         }
     }
     
+    total++;
+    ConfusionMatrix metricsCM(10);
+    metricsCM.addPrediction(0, 0);
+    metricsCM.addPrediction(0, 0);
+    metricsCM.addPrediction(0, 1);
+    metricsCM.addPrediction(1, 1);
+    metricsCM.addPrediction(1, 1);
+    metricsCM.addPrediction(1, 0);
+    
+    double prec0 = metricsCM.getPrecision(0);
+    double rec0 = metricsCM.getRecall(0);
+    double f1_0 = metricsCM.getF1Score(0);
+    double prec1 = metricsCM.getPrecision(1);
+    double rec1 = metricsCM.getRecall(1);
+    double f1_1 = metricsCM.getF1Score(1);
+    
+    if (prec0 >= 0.0 && prec0 <= 1.0 && rec0 >= 0.0 && rec0 <= 1.0 && 
+        f1_0 >= 0.0 && f1_0 <= 1.0 && prec1 >= 0.0 && prec1 <= 1.0 &&
+        rec1 >= 0.0 && rec1 <= 1.0 && f1_1 >= 0.0 && f1_1 <= 1.0) {
+        std::cout << "✓ Enhanced Metrics: Precision, Recall, F1-Score calculations work" << std::endl;
+        passed++;
+    } else {
+        std::cout << "✗ Enhanced Metrics: Precision, Recall, F1-Score calculations failed" << std::endl;
+    }
+    
     std::cout << "\nResult: " << passed << "/" << total << " tests passed" << std::endl;
     return (passed == total) ? 0 : 1;
 }
