@@ -226,10 +226,24 @@ CMakeFiles/test_all.dir/src/ai/search/Template.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/test_all.dir/src/ai/search/Template.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/ai/search/Template.cpp -o CMakeFiles/test_all.dir/src/ai/search/Template.cpp.s
 
+CMakeFiles/test_all.dir/src/data/ConfusionMatrix.cpp.o: CMakeFiles/test_all.dir/flags.make
+CMakeFiles/test_all.dir/src/data/ConfusionMatrix.cpp.o: /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/data/ConfusionMatrix.cpp
+CMakeFiles/test_all.dir/src/data/ConfusionMatrix.cpp.o: CMakeFiles/test_all.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/test_all.dir/src/data/ConfusionMatrix.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_all.dir/src/data/ConfusionMatrix.cpp.o -MF CMakeFiles/test_all.dir/src/data/ConfusionMatrix.cpp.o.d -o CMakeFiles/test_all.dir/src/data/ConfusionMatrix.cpp.o -c /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/data/ConfusionMatrix.cpp
+
+CMakeFiles/test_all.dir/src/data/ConfusionMatrix.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/test_all.dir/src/data/ConfusionMatrix.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/data/ConfusionMatrix.cpp > CMakeFiles/test_all.dir/src/data/ConfusionMatrix.cpp.i
+
+CMakeFiles/test_all.dir/src/data/ConfusionMatrix.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/test_all.dir/src/data/ConfusionMatrix.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/data/ConfusionMatrix.cpp -o CMakeFiles/test_all.dir/src/data/ConfusionMatrix.cpp.s
+
 CMakeFiles/test_all.dir/src/data/Dataset.cpp.o: CMakeFiles/test_all.dir/flags.make
 CMakeFiles/test_all.dir/src/data/Dataset.cpp.o: /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/data/Dataset.cpp
 CMakeFiles/test_all.dir/src/data/Dataset.cpp.o: CMakeFiles/test_all.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/test_all.dir/src/data/Dataset.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/test_all.dir/src/data/Dataset.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_all.dir/src/data/Dataset.cpp.o -MF CMakeFiles/test_all.dir/src/data/Dataset.cpp.o.d -o CMakeFiles/test_all.dir/src/data/Dataset.cpp.o -c /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/data/Dataset.cpp
 
 CMakeFiles/test_all.dir/src/data/Dataset.cpp.i: cmake_force
@@ -243,7 +257,7 @@ CMakeFiles/test_all.dir/src/data/Dataset.cpp.s: cmake_force
 CMakeFiles/test_all.dir/src/data/FeatureVector.cpp.o: CMakeFiles/test_all.dir/flags.make
 CMakeFiles/test_all.dir/src/data/FeatureVector.cpp.o: /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/data/FeatureVector.cpp
 CMakeFiles/test_all.dir/src/data/FeatureVector.cpp.o: CMakeFiles/test_all.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/test_all.dir/src/data/FeatureVector.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/test_all.dir/src/data/FeatureVector.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_all.dir/src/data/FeatureVector.cpp.o -MF CMakeFiles/test_all.dir/src/data/FeatureVector.cpp.o.d -o CMakeFiles/test_all.dir/src/data/FeatureVector.cpp.o -c /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/data/FeatureVector.cpp
 
 CMakeFiles/test_all.dir/src/data/FeatureVector.cpp.i: cmake_force
@@ -257,7 +271,7 @@ CMakeFiles/test_all.dir/src/data/FeatureVector.cpp.s: cmake_force
 CMakeFiles/test_all.dir/src/data/Image.cpp.o: CMakeFiles/test_all.dir/flags.make
 CMakeFiles/test_all.dir/src/data/Image.cpp.o: /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/data/Image.cpp
 CMakeFiles/test_all.dir/src/data/Image.cpp.o: CMakeFiles/test_all.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/test_all.dir/src/data/Image.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/test_all.dir/src/data/Image.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_all.dir/src/data/Image.cpp.o -MF CMakeFiles/test_all.dir/src/data/Image.cpp.o.d -o CMakeFiles/test_all.dir/src/data/Image.cpp.o -c /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/data/Image.cpp
 
 CMakeFiles/test_all.dir/src/data/Image.cpp.i: cmake_force
@@ -271,7 +285,7 @@ CMakeFiles/test_all.dir/src/data/Image.cpp.s: cmake_force
 CMakeFiles/test_all.dir/src/data/MNISTLoader.cpp.o: CMakeFiles/test_all.dir/flags.make
 CMakeFiles/test_all.dir/src/data/MNISTLoader.cpp.o: /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/data/MNISTLoader.cpp
 CMakeFiles/test_all.dir/src/data/MNISTLoader.cpp.o: CMakeFiles/test_all.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/test_all.dir/src/data/MNISTLoader.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/test_all.dir/src/data/MNISTLoader.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test_all.dir/src/data/MNISTLoader.cpp.o -MF CMakeFiles/test_all.dir/src/data/MNISTLoader.cpp.o.d -o CMakeFiles/test_all.dir/src/data/MNISTLoader.cpp.o -c /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/data/MNISTLoader.cpp
 
 CMakeFiles/test_all.dir/src/data/MNISTLoader.cpp.i: cmake_force
@@ -295,6 +309,7 @@ test_all_OBJECTS = \
 "CMakeFiles/test_all.dir/src/ai/rules/StructuralFeatures.cpp.o" \
 "CMakeFiles/test_all.dir/src/ai/search/AStarMatcher.cpp.o" \
 "CMakeFiles/test_all.dir/src/ai/search/Template.cpp.o" \
+"CMakeFiles/test_all.dir/src/data/ConfusionMatrix.cpp.o" \
 "CMakeFiles/test_all.dir/src/data/Dataset.cpp.o" \
 "CMakeFiles/test_all.dir/src/data/FeatureVector.cpp.o" \
 "CMakeFiles/test_all.dir/src/data/Image.cpp.o" \
@@ -314,13 +329,14 @@ test_all: CMakeFiles/test_all.dir/src/ai/rules/RuleEngine.cpp.o
 test_all: CMakeFiles/test_all.dir/src/ai/rules/StructuralFeatures.cpp.o
 test_all: CMakeFiles/test_all.dir/src/ai/search/AStarMatcher.cpp.o
 test_all: CMakeFiles/test_all.dir/src/ai/search/Template.cpp.o
+test_all: CMakeFiles/test_all.dir/src/data/ConfusionMatrix.cpp.o
 test_all: CMakeFiles/test_all.dir/src/data/Dataset.cpp.o
 test_all: CMakeFiles/test_all.dir/src/data/FeatureVector.cpp.o
 test_all: CMakeFiles/test_all.dir/src/data/Image.cpp.o
 test_all: CMakeFiles/test_all.dir/src/data/MNISTLoader.cpp.o
 test_all: CMakeFiles/test_all.dir/build.make
 test_all: CMakeFiles/test_all.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Linking CXX executable test_all"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Linking CXX executable test_all"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/test_all.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

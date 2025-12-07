@@ -412,6 +412,33 @@ src/ai/search/Template.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_all.dir/build.make CMakeFiles/test_all.dir/src/ai/search/Template.cpp.s
 .PHONY : src/ai/search/Template.cpp.s
 
+src/data/ConfusionMatrix.o: src/data/ConfusionMatrix.cpp.o
+.PHONY : src/data/ConfusionMatrix.o
+
+# target to build an object file
+src/data/ConfusionMatrix.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/patternScopeAI.dir/build.make CMakeFiles/patternScopeAI.dir/src/data/ConfusionMatrix.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_all.dir/build.make CMakeFiles/test_all.dir/src/data/ConfusionMatrix.cpp.o
+.PHONY : src/data/ConfusionMatrix.cpp.o
+
+src/data/ConfusionMatrix.i: src/data/ConfusionMatrix.cpp.i
+.PHONY : src/data/ConfusionMatrix.i
+
+# target to preprocess a source file
+src/data/ConfusionMatrix.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/patternScopeAI.dir/build.make CMakeFiles/patternScopeAI.dir/src/data/ConfusionMatrix.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_all.dir/build.make CMakeFiles/test_all.dir/src/data/ConfusionMatrix.cpp.i
+.PHONY : src/data/ConfusionMatrix.cpp.i
+
+src/data/ConfusionMatrix.s: src/data/ConfusionMatrix.cpp.s
+.PHONY : src/data/ConfusionMatrix.s
+
+# target to generate assembly for a file
+src/data/ConfusionMatrix.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/patternScopeAI.dir/build.make CMakeFiles/patternScopeAI.dir/src/data/ConfusionMatrix.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_all.dir/build.make CMakeFiles/test_all.dir/src/data/ConfusionMatrix.cpp.s
+.PHONY : src/data/ConfusionMatrix.cpp.s
+
 src/data/Dataset.o: src/data/Dataset.cpp.o
 .PHONY : src/data/Dataset.o
 
@@ -608,6 +635,9 @@ help:
 	@echo "... src/ai/search/Template.o"
 	@echo "... src/ai/search/Template.i"
 	@echo "... src/ai/search/Template.s"
+	@echo "... src/data/ConfusionMatrix.o"
+	@echo "... src/data/ConfusionMatrix.i"
+	@echo "... src/data/ConfusionMatrix.s"
 	@echo "... src/data/Dataset.o"
 	@echo "... src/data/Dataset.i"
 	@echo "... src/data/Dataset.s"

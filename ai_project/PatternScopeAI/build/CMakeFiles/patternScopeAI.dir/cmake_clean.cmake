@@ -19,6 +19,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/patternScopeAI.dir/src/ai/search/AStarMatcher.cpp.o.d"
   "CMakeFiles/patternScopeAI.dir/src/ai/search/Template.cpp.o"
   "CMakeFiles/patternScopeAI.dir/src/ai/search/Template.cpp.o.d"
+  "CMakeFiles/patternScopeAI.dir/src/data/ConfusionMatrix.cpp.o"
+  "CMakeFiles/patternScopeAI.dir/src/data/ConfusionMatrix.cpp.o.d"
   "CMakeFiles/patternScopeAI.dir/src/data/Dataset.cpp.o"
   "CMakeFiles/patternScopeAI.dir/src/data/Dataset.cpp.o.d"
   "CMakeFiles/patternScopeAI.dir/src/data/FeatureVector.cpp.o"

@@ -4,6 +4,7 @@
 #include "data/FeatureVector.h"
 #include "data/Dataset.h"
 #include "data/MNISTLoader.h"
+#include "data/ConfusionMatrix.h"
 #include "ai/features/FeatureExtractor.h"
 #include "ai/features/PixelGridExtractor.h"
 #include "ai/features/EdgeMapExtractor.h"
@@ -101,6 +102,10 @@ int main(int argc, const char* argv[]) {
     int testCount = std::min(100, static_cast<int>(testDataset.size()));
     int knnCorrect = 0, nbCorrect = 0, mlpCorrect = 0;
     
+    ConfusionMatrix knnCM(10);
+    ConfusionMatrix nbCM(10);
+    ConfusionMatrix mlpCM(10);
+    
     for (int i = 0; i < testCount; ++i) {
         const FeatureVector& features = testDataset.getFeatures(i);
         int trueLabel = testDataset.getLabel(i);
@@ -112,6 +117,10 @@ int main(int argc, const char* argv[]) {
         if (knnPred == trueLabel) knnCorrect++;
         if (nbPred == trueLabel) nbCorrect++;
         if (mlpPred == trueLabel) mlpCorrect++;
+        
+        knnCM.addPrediction(trueLabel, knnPred);
+        nbCM.addPrediction(trueLabel, nbPred);
+        mlpCM.addPrediction(trueLabel, mlpPred);
     }
     
     std::cout << "\nResults on " << testCount << " test samples:" << std::endl;
@@ -121,6 +130,20 @@ int main(int argc, const char* argv[]) {
               << (100.0 * nbCorrect / testCount) << "%)" << std::endl;
     std::cout << "MiniMLP: " << mlpCorrect << "/" << testCount << " (" 
               << (100.0 * mlpCorrect / testCount) << "%)" << std::endl;
+    
+    std::cout << "\n=== Confusion Matrices ===" << std::endl;
+    
+    std::cout << "\nKNN Confusion Matrix:" << std::endl;
+    knnCM.print(std::cout);
+    std::cout << "Accuracy: " << (100.0 * knnCM.getAccuracy()) << "%" << std::endl;
+    
+    std::cout << "\nNaiveBayes Confusion Matrix:" << std::endl;
+    nbCM.print(std::cout);
+    std::cout << "Accuracy: " << (100.0 * nbCM.getAccuracy()) << "%" << std::endl;
+    
+    std::cout << "\nMiniMLP Confusion Matrix:" << std::endl;
+    mlpCM.print(std::cout);
+    std::cout << "Accuracy: " << (100.0 * mlpCM.getAccuracy()) << "%" << std::endl;
     
     if (testDataset.size() > 0) {
         std::cout << "\nSample prediction (first test sample):" << std::endl;

@@ -19,6 +19,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/test_all.dir/src/ai/search/AStarMatcher.cpp.o.d"
   "CMakeFiles/test_all.dir/src/ai/search/Template.cpp.o"
   "CMakeFiles/test_all.dir/src/ai/search/Template.cpp.o.d"
+  "CMakeFiles/test_all.dir/src/data/ConfusionMatrix.cpp.o"
+  "CMakeFiles/test_all.dir/src/data/ConfusionMatrix.cpp.o.d"
   "CMakeFiles/test_all.dir/src/data/Dataset.cpp.o"
   "CMakeFiles/test_all.dir/src/data/Dataset.cpp.o.d"
   "CMakeFiles/test_all.dir/src/data/FeatureVector.cpp.o"

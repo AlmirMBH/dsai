@@ -88,12 +88,12 @@ clean: CMakeFiles/test_all.dir/clean
 CMakeFiles/patternScopeAI.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/patternScopeAI.dir/build.make CMakeFiles/patternScopeAI.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/patternScopeAI.dir/build.make CMakeFiles/patternScopeAI.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 "Built target patternScopeAI"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17 "Built target patternScopeAI"
 .PHONY : CMakeFiles/patternScopeAI.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/patternScopeAI.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles 16
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles 17
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/patternScopeAI.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles 0
 .PHONY : CMakeFiles/patternScopeAI.dir/rule
@@ -105,7 +105,7 @@ patternScopeAI: CMakeFiles/patternScopeAI.dir/rule
 # codegen rule for target.
 CMakeFiles/patternScopeAI.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/patternScopeAI.dir/build.make CMakeFiles/patternScopeAI.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 "Finished codegen for target patternScopeAI"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17 "Finished codegen for target patternScopeAI"
 .PHONY : CMakeFiles/patternScopeAI.dir/codegen
 
 # clean rule for target.
@@ -120,12 +120,12 @@ CMakeFiles/patternScopeAI.dir/clean:
 CMakeFiles/test_all.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_all.dir/build.make CMakeFiles/test_all.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_all.dir/build.make CMakeFiles/test_all.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles --progress-num=17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32 "Built target test_all"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles --progress-num=18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34 "Built target test_all"
 .PHONY : CMakeFiles/test_all.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/test_all.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles 16
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles 17
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/test_all.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles 0
 .PHONY : CMakeFiles/test_all.dir/rule
@@ -137,7 +137,7 @@ test_all: CMakeFiles/test_all.dir/rule
 # codegen rule for target.
 CMakeFiles/test_all.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_all.dir/build.make CMakeFiles/test_all.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles --progress-num=17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32 "Finished codegen for target test_all"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/build/CMakeFiles --progress-num=18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34 "Finished codegen for target test_all"
 .PHONY : CMakeFiles/test_all.dir/codegen
 
 # clean rule for target.

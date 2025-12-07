@@ -4,6 +4,7 @@
 #include "src/data/FeatureVector.h"
 #include "src/data/Dataset.h"
 #include "src/data/MNISTLoader.h"
+#include "src/data/ConfusionMatrix.h"
 #include "src/ai/features/PixelGridExtractor.h"
 #include "src/ai/features/EdgeMapExtractor.h"
 #include "src/ai/features/HOGExtractor.h"
@@ -175,6 +176,60 @@ int main() {
             passed++;
         } else {
             std::cout << "✗ Active Learning: A* addTemplate failed" << std::endl;
+        }
+    }
+    
+    total++;
+    ConfusionMatrix cm(10);
+    cm.addPrediction(0, 0);
+    cm.addPrediction(0, 0);
+    cm.addPrediction(1, 1);
+    cm.addPrediction(1, 2);
+    cm.addPrediction(2, 2);
+    if (cm.getTotalSamples() == 5 && cm.getAccuracy() > 0.0) {
+        std::cout << "✓ Confusion Matrix: Basic operations work" << std::endl;
+        passed++;
+    } else {
+        std::cout << "✗ Confusion Matrix: Basic operations failed" << std::endl;
+    }
+    
+    total++;
+    double accuracy = cm.getAccuracy();
+    double precision = cm.getPrecision(0);
+    double recall = cm.getRecall(0);
+    if (accuracy >= 0.0 && accuracy <= 1.0 && 
+        precision >= 0.0 && precision <= 1.0 &&
+        recall >= 0.0 && recall <= 1.0) {
+        std::cout << "✓ Confusion Matrix: Metrics calculation works" << std::endl;
+        passed++;
+    } else {
+        std::cout << "✗ Confusion Matrix: Metrics calculation failed" << std::endl;
+    }
+    
+    total++;
+    if (trainDataset.size() > 0 && testDataset.size() > 0) {
+        Dataset smallTrain;
+        for (size_t i = 0; i < std::min(trainDataset.size(), size_t(100)); ++i) {
+            smallTrain.add(trainDataset.getFeatures(i), trainDataset.getLabel(i));
+        }
+        
+        KNN knn(3);
+        knn.train(smallTrain);
+        
+        ConfusionMatrix testCM(10);
+        int testCount = std::min(50, static_cast<int>(testDataset.size()));
+        for (int i = 0; i < testCount; ++i) {
+            int trueLabel = testDataset.getLabel(i);
+            int pred = knn.predict(testDataset.getFeatures(i));
+            testCM.addPrediction(trueLabel, pred);
+        }
+        
+        double testAccuracy = testCM.getAccuracy();
+        if (testAccuracy >= 0.0 && testAccuracy <= 1.0 && testCM.getTotalSamples() == testCount) {
+            std::cout << "✓ Confusion Matrix: Integration with models works" << std::endl;
+            passed++;
+        } else {
+            std::cout << "✗ Confusion Matrix: Integration with models failed" << std::endl;
         }
     }
     
