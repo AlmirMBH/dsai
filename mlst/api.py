@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from data_ingestion import get_data
-from preprocess import preprocess
+from dataset_aggregation_by_day import preprocess
 from forecast import train_forecast
 from personas import create_personas
 from recommend import recommend_events
@@ -76,4 +76,3 @@ def get_itinerary(guest_id: int, start_date: date, end_date: date, n_per_day: in
         itinerary.append(day_plan)
     
     return {"itinerary": itinerary}
-

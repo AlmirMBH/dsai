@@ -1,6 +1,6 @@
 # Amsterdam Dataset Generators
 
-This directory contains scripts to generate synthetic datasets for the MLST project, all focused on Amsterdam and spanning November 2023 - November 2025.
+This directory contains scripts to generate synthetic datasets for the MLST project, all focused on Amsterdam and spanning December 2023 - February 2026.
 
 ## Datasets Generated
 
@@ -8,20 +8,24 @@ This directory contains scripts to generate synthetic datasets for the MLST proj
 2. **weather.csv** - Amsterdam weather data (temperature, precipitation, humidity)
 3. **bus_schedules.csv** - GVB bus schedules with time-of-day
 4. **bookings.csv** - Hotel/accommodation bookings correlated with events and weather
+5. **web_analytics.csv** - Recommendation tracking data (clicks, conversions)
 
 ## Quick Start
 
-### Generate All Datasets (Recommended)
+### Generate All Datasets
 
 ```bash
 python generate_all_datasets.py
 ```
 
-This will generate all datasets in the correct order:
+This generates all datasets in order:
 1. Weather (foundation)
 2. Events
 3. Bus Schedules
 4. Bookings (correlated with events & weather)
+5. Web Analytics (generated from bookings)
+6. Additional Bookings (from conversions)
+7. Dataset Pollution (if enabled in config.py)
 
 ### Generate Individual Datasets
 
@@ -60,7 +64,7 @@ Options:
 python generate_bookings.py
 ```
 
-**Important:** Bookings should be generated AFTER events and weather to enable correlations.
+Bookings should be generated after events and weather to enable correlations.
 
 Options:
 - `--start-date YYYY-MM-DD` (default: 2023-11-01)
@@ -75,16 +79,16 @@ Options:
 ### Events Dataset
 
 **Columns:**
-- `id` - Unique event identifier
+- `id` - Event identifier
 - `date` - Event date (YYYY-MM-DD)
 - `time` - Event time (HH:MM format)
 - `type` - Event type (concert, festival, conference, etc.)
 - `name` - Event name
 - `location` - Event location/venue
-- `expected_attendance` - Estimated number of attendees
+- `expected_attendance` - Number of attendees
 
 **Features:**
-- Includes major Amsterdam events:
+- Includes Amsterdam events:
   - King's Day (April 27)
   - Amsterdam Dance Event (ADE) - October
   - Amsterdam Pride - August
@@ -105,9 +109,9 @@ Options:
 - `humidity` - Humidity percentage
 
 **Features:**
-- Realistic Amsterdam maritime climate
+- Amsterdam maritime climate
 - Seasonal temperature patterns
-- Realistic precipitation patterns
+- Precipitation patterns
 - Humidity included
 
 ### Bus Schedules Dataset
@@ -121,8 +125,8 @@ Options:
 - `stop_name` - Stop name with location
 
 **Features:**
-- Real GVB routes (Lines 15, 18, 21, 22, 24, 26, 48, 65)
-- Real Amsterdam stops (Centraal Station, Dam, Leidseplein, etc.)
+- GVB routes (Lines 15, 18, 21, 22, 24, 26, 48, 65)
+- Amsterdam stops (Centraal Station, Dam, Leidseplein, etc.)
 - Time-of-day included
 - More trips on weekdays
 - Operating hours: 05:30 - 00:30
@@ -140,15 +144,15 @@ Options:
 **Features:**
 - Amsterdam addresses only
 - Guests from around the world
-- Correlated with events (more bookings during major events)
-- Correlated with weather (more bookings in good weather)
+- Correlated with events (more bookings during events)
+- Correlated with weather (more bookings in warm weather)
 - 50-200 bookings per day (varies based on events/weather)
-- Real Amsterdam street names and districts
+- Amsterdam street names and districts
 
 ## Data Consistency
 
 All datasets:
-- Share the same date range: 2023-11-01 to 2025-11-30
+- Share the same date range: 2023-12-01 to 2026-02-28 (configurable in config.py)
 - Focus on Amsterdam only
 - Are date-aligned for easy joins
 - Use consistent date formats (YYYY-MM-DD)
@@ -175,10 +179,16 @@ python generate_bus_schedules.py
 python generate_bookings.py  # This uses events.csv and weather.csv
 ```
 
+## Dataset Pollution
+
+Datasets are automatically polluted with data quality issues (missing values, type errors, outliers, duplicates, invalid values) at a 5% rate. This is controlled by `ENABLE_DATASET_POLLUTION` in `config.py`. The pollution is applied by `dataset_polluter.py` after all clean datasets are generated.
+
 ## Notes
 
 - All scripts use random seed 42 for reproducibility
 - Bookings generation requires events.csv and weather.csv to be present for correlations
 - If events/weather files are missing, bookings will still generate but without correlations
-- All datasets are saved as CSV files in the current directory
+- Web analytics generation requires bookings.csv to be present
+- All datasets are saved as CSV files in the `datasets/` directory
+- Dataset pollution is applied automatically if enabled in config.py
 

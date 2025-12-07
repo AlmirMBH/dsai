@@ -37,4 +37,3 @@ def preprocess(bookings, events, weather):
     df['month'] = df['date'].dt.month
     
     return df
-

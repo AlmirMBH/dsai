@@ -52,4 +52,3 @@ def train_forecast(df, target='demand', periods=config.DEFAULT_FORECAST_PERIODS)
     
     forecast = model.predict(future)
     return model, forecast
-

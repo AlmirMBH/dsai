@@ -21,4 +21,3 @@ def create_personas(bookings):
     guests['persona_id'] = kmeans.fit_predict(x_scaled)
     
     return guests[['guest_id', 'persona_id']]
-

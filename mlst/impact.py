@@ -3,7 +3,7 @@ import numpy as np
 import config
 
 def measure_impact(bookings, web_analytics):
-    web_analytics['date_shown'] = pd.to_datetime(web_analytics['date_shown'])
+    # Data is already cleaned by data_cleaning.py, dates are already datetime
     bookings['date'] = pd.to_datetime(bookings['date'])
     recommendation_start_date = pd.to_datetime(config.RECOMMENDATION_START_DATE)
     

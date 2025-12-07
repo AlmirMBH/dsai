@@ -15,4 +15,3 @@ threading.Thread(target=run_api, daemon=True).start()
 threading.Thread(target=run_dashboard, daemon=True).start()
 print(f"API server running at http://localhost:{config.API_PORT}")
 print(f"Dashboard running at http://localhost:{config.DASHBOARD_PORT}")
-

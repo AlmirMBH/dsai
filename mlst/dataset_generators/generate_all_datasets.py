@@ -22,6 +22,7 @@ from generate_events import generate_events
 from generate_bus_schedules import generate_bus_schedules
 from generate_bookings import generate_bookings, generate_accommodations, generate_additional_bookings
 from generate_web_analytics import generate_web_analytics
+from dataset_polluter import pollute_dataset
 
 def main():
     """Main function to generate all datasets."""
@@ -41,6 +42,23 @@ def main():
         all_bookings = pd.concat([existing_bookings, additional_df], ignore_index=True)
         all_bookings.to_csv(bookings_file, index=False)
         print(f"Added {len(additional_bookings)} additional bookings from conversions")
+    
+    # Pollute datasets if enabled
+    if config.ENABLE_DATASET_POLLUTION:
+        print("Polluting datasets...")
+        datasets = [
+            ('bookings.csv', 'bookings'),
+            ('events.csv', 'events'),
+            ('weather.csv', 'weather'),
+            ('web_analytics.csv', 'web_analytics')
+        ]
+        for filename, dataset_type in datasets:
+            filepath = os.path.join(config.DATASETS_PATH, filename)
+            if os.path.exists(filepath):
+                df = pd.read_csv(filepath)
+                df_polluted = pollute_dataset(df, dataset_type)
+                df_polluted.to_csv(filepath, index=False)
+                print(f"Polluted {filename}")
 
 
 if __name__ == '__main__':
