@@ -790,16 +790,17 @@ CMakeFiles/patternScopeAI.dir/src/main.cpp.o: \
   /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/data/Dataset.h \
   /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/data/MNISTLoader.h \
   /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/data/ConfusionMatrix.h \
+  /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/data/Mode.h \
+  /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/data/ShapeDatasetGenerator.h \
+  /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/data/SymbolDatasetGenerator.h \
+  /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/ai/features/PixelGridExtractor.h \
   /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/ai/features/FeatureExtractor.h \
   /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/ai/features/../../data/Image.h \
   /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/ai/features/../../data/FeatureVector.h \
-  /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/ai/features/PixelGridExtractor.h \
-  /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/ai/features/EdgeMapExtractor.h \
-  /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/ai/features/HOGExtractor.h \
+  /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/ai/models/KNN.h \
   /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/ai/models/Model.h \
   /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/ai/models/../../data/Dataset.h \
   /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/ai/models/../../data/FeatureVector.h \
-  /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/ai/models/KNN.h \
   /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/ai/models/NaiveBayes.h \
   /Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/ai/models/MiniMLP.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/random \

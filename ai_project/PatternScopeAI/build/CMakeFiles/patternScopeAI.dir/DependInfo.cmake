@@ -8,8 +8,6 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/ai/features/EdgeMapExtractor.cpp" "CMakeFiles/patternScopeAI.dir/src/ai/features/EdgeMapExtractor.cpp.o" "gcc" "CMakeFiles/patternScopeAI.dir/src/ai/features/EdgeMapExtractor.cpp.o.d"
-  "/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/ai/features/HOGExtractor.cpp" "CMakeFiles/patternScopeAI.dir/src/ai/features/HOGExtractor.cpp.o" "gcc" "CMakeFiles/patternScopeAI.dir/src/ai/features/HOGExtractor.cpp.o.d"
   "/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/ai/features/PixelGridExtractor.cpp" "CMakeFiles/patternScopeAI.dir/src/ai/features/PixelGridExtractor.cpp.o" "gcc" "CMakeFiles/patternScopeAI.dir/src/ai/features/PixelGridExtractor.cpp.o.d"
   "/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/ai/models/KNN.cpp" "CMakeFiles/patternScopeAI.dir/src/ai/models/KNN.cpp.o" "gcc" "CMakeFiles/patternScopeAI.dir/src/ai/models/KNN.cpp.o.d"
   "/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/ai/models/MiniMLP.cpp" "CMakeFiles/patternScopeAI.dir/src/ai/models/MiniMLP.cpp.o" "gcc" "CMakeFiles/patternScopeAI.dir/src/ai/models/MiniMLP.cpp.o.d"
@@ -22,7 +20,10 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/data/Dataset.cpp" "CMakeFiles/patternScopeAI.dir/src/data/Dataset.cpp.o" "gcc" "CMakeFiles/patternScopeAI.dir/src/data/Dataset.cpp.o.d"
   "/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/data/FeatureVector.cpp" "CMakeFiles/patternScopeAI.dir/src/data/FeatureVector.cpp.o" "gcc" "CMakeFiles/patternScopeAI.dir/src/data/FeatureVector.cpp.o.d"
   "/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/data/Image.cpp" "CMakeFiles/patternScopeAI.dir/src/data/Image.cpp.o" "gcc" "CMakeFiles/patternScopeAI.dir/src/data/Image.cpp.o.d"
+  "/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/data/ImageLoader.cpp" "CMakeFiles/patternScopeAI.dir/src/data/ImageLoader.cpp.o" "gcc" "CMakeFiles/patternScopeAI.dir/src/data/ImageLoader.cpp.o.d"
   "/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/data/MNISTLoader.cpp" "CMakeFiles/patternScopeAI.dir/src/data/MNISTLoader.cpp.o" "gcc" "CMakeFiles/patternScopeAI.dir/src/data/MNISTLoader.cpp.o.d"
+  "/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/data/ShapeDatasetGenerator.cpp" "CMakeFiles/patternScopeAI.dir/src/data/ShapeDatasetGenerator.cpp.o" "gcc" "CMakeFiles/patternScopeAI.dir/src/data/ShapeDatasetGenerator.cpp.o.d"
+  "/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/data/SymbolDatasetGenerator.cpp" "CMakeFiles/patternScopeAI.dir/src/data/SymbolDatasetGenerator.cpp.o" "gcc" "CMakeFiles/patternScopeAI.dir/src/data/SymbolDatasetGenerator.cpp.o.d"
   "/Users/almirmustafic/Documents/Projects/dsai/dsai/ai_project/PatternScopeAI/src/main.cpp" "CMakeFiles/patternScopeAI.dir/src/main.cpp.o" "gcc" "CMakeFiles/patternScopeAI.dir/src/main.cpp.o.d"
   )
 

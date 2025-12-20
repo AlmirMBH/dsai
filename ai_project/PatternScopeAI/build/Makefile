@@ -142,60 +142,6 @@ test_all/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_all.dir/build.make CMakeFiles/test_all.dir/build
 .PHONY : test_all/fast
 
-src/ai/features/EdgeMapExtractor.o: src/ai/features/EdgeMapExtractor.cpp.o
-.PHONY : src/ai/features/EdgeMapExtractor.o
-
-# target to build an object file
-src/ai/features/EdgeMapExtractor.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/patternScopeAI.dir/build.make CMakeFiles/patternScopeAI.dir/src/ai/features/EdgeMapExtractor.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_all.dir/build.make CMakeFiles/test_all.dir/src/ai/features/EdgeMapExtractor.cpp.o
-.PHONY : src/ai/features/EdgeMapExtractor.cpp.o
-
-src/ai/features/EdgeMapExtractor.i: src/ai/features/EdgeMapExtractor.cpp.i
-.PHONY : src/ai/features/EdgeMapExtractor.i
-
-# target to preprocess a source file
-src/ai/features/EdgeMapExtractor.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/patternScopeAI.dir/build.make CMakeFiles/patternScopeAI.dir/src/ai/features/EdgeMapExtractor.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_all.dir/build.make CMakeFiles/test_all.dir/src/ai/features/EdgeMapExtractor.cpp.i
-.PHONY : src/ai/features/EdgeMapExtractor.cpp.i
-
-src/ai/features/EdgeMapExtractor.s: src/ai/features/EdgeMapExtractor.cpp.s
-.PHONY : src/ai/features/EdgeMapExtractor.s
-
-# target to generate assembly for a file
-src/ai/features/EdgeMapExtractor.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/patternScopeAI.dir/build.make CMakeFiles/patternScopeAI.dir/src/ai/features/EdgeMapExtractor.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_all.dir/build.make CMakeFiles/test_all.dir/src/ai/features/EdgeMapExtractor.cpp.s
-.PHONY : src/ai/features/EdgeMapExtractor.cpp.s
-
-src/ai/features/HOGExtractor.o: src/ai/features/HOGExtractor.cpp.o
-.PHONY : src/ai/features/HOGExtractor.o
-
-# target to build an object file
-src/ai/features/HOGExtractor.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/patternScopeAI.dir/build.make CMakeFiles/patternScopeAI.dir/src/ai/features/HOGExtractor.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_all.dir/build.make CMakeFiles/test_all.dir/src/ai/features/HOGExtractor.cpp.o
-.PHONY : src/ai/features/HOGExtractor.cpp.o
-
-src/ai/features/HOGExtractor.i: src/ai/features/HOGExtractor.cpp.i
-.PHONY : src/ai/features/HOGExtractor.i
-
-# target to preprocess a source file
-src/ai/features/HOGExtractor.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/patternScopeAI.dir/build.make CMakeFiles/patternScopeAI.dir/src/ai/features/HOGExtractor.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_all.dir/build.make CMakeFiles/test_all.dir/src/ai/features/HOGExtractor.cpp.i
-.PHONY : src/ai/features/HOGExtractor.cpp.i
-
-src/ai/features/HOGExtractor.s: src/ai/features/HOGExtractor.cpp.s
-.PHONY : src/ai/features/HOGExtractor.s
-
-# target to generate assembly for a file
-src/ai/features/HOGExtractor.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/patternScopeAI.dir/build.make CMakeFiles/patternScopeAI.dir/src/ai/features/HOGExtractor.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_all.dir/build.make CMakeFiles/test_all.dir/src/ai/features/HOGExtractor.cpp.s
-.PHONY : src/ai/features/HOGExtractor.cpp.s
-
 src/ai/features/PixelGridExtractor.o: src/ai/features/PixelGridExtractor.cpp.o
 .PHONY : src/ai/features/PixelGridExtractor.o
 
@@ -520,6 +466,33 @@ src/data/Image.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_all.dir/build.make CMakeFiles/test_all.dir/src/data/Image.cpp.s
 .PHONY : src/data/Image.cpp.s
 
+src/data/ImageLoader.o: src/data/ImageLoader.cpp.o
+.PHONY : src/data/ImageLoader.o
+
+# target to build an object file
+src/data/ImageLoader.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/patternScopeAI.dir/build.make CMakeFiles/patternScopeAI.dir/src/data/ImageLoader.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_all.dir/build.make CMakeFiles/test_all.dir/src/data/ImageLoader.cpp.o
+.PHONY : src/data/ImageLoader.cpp.o
+
+src/data/ImageLoader.i: src/data/ImageLoader.cpp.i
+.PHONY : src/data/ImageLoader.i
+
+# target to preprocess a source file
+src/data/ImageLoader.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/patternScopeAI.dir/build.make CMakeFiles/patternScopeAI.dir/src/data/ImageLoader.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_all.dir/build.make CMakeFiles/test_all.dir/src/data/ImageLoader.cpp.i
+.PHONY : src/data/ImageLoader.cpp.i
+
+src/data/ImageLoader.s: src/data/ImageLoader.cpp.s
+.PHONY : src/data/ImageLoader.s
+
+# target to generate assembly for a file
+src/data/ImageLoader.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/patternScopeAI.dir/build.make CMakeFiles/patternScopeAI.dir/src/data/ImageLoader.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_all.dir/build.make CMakeFiles/test_all.dir/src/data/ImageLoader.cpp.s
+.PHONY : src/data/ImageLoader.cpp.s
+
 src/data/MNISTLoader.o: src/data/MNISTLoader.cpp.o
 .PHONY : src/data/MNISTLoader.o
 
@@ -546,6 +519,60 @@ src/data/MNISTLoader.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/patternScopeAI.dir/build.make CMakeFiles/patternScopeAI.dir/src/data/MNISTLoader.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_all.dir/build.make CMakeFiles/test_all.dir/src/data/MNISTLoader.cpp.s
 .PHONY : src/data/MNISTLoader.cpp.s
+
+src/data/ShapeDatasetGenerator.o: src/data/ShapeDatasetGenerator.cpp.o
+.PHONY : src/data/ShapeDatasetGenerator.o
+
+# target to build an object file
+src/data/ShapeDatasetGenerator.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/patternScopeAI.dir/build.make CMakeFiles/patternScopeAI.dir/src/data/ShapeDatasetGenerator.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_all.dir/build.make CMakeFiles/test_all.dir/src/data/ShapeDatasetGenerator.cpp.o
+.PHONY : src/data/ShapeDatasetGenerator.cpp.o
+
+src/data/ShapeDatasetGenerator.i: src/data/ShapeDatasetGenerator.cpp.i
+.PHONY : src/data/ShapeDatasetGenerator.i
+
+# target to preprocess a source file
+src/data/ShapeDatasetGenerator.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/patternScopeAI.dir/build.make CMakeFiles/patternScopeAI.dir/src/data/ShapeDatasetGenerator.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_all.dir/build.make CMakeFiles/test_all.dir/src/data/ShapeDatasetGenerator.cpp.i
+.PHONY : src/data/ShapeDatasetGenerator.cpp.i
+
+src/data/ShapeDatasetGenerator.s: src/data/ShapeDatasetGenerator.cpp.s
+.PHONY : src/data/ShapeDatasetGenerator.s
+
+# target to generate assembly for a file
+src/data/ShapeDatasetGenerator.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/patternScopeAI.dir/build.make CMakeFiles/patternScopeAI.dir/src/data/ShapeDatasetGenerator.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_all.dir/build.make CMakeFiles/test_all.dir/src/data/ShapeDatasetGenerator.cpp.s
+.PHONY : src/data/ShapeDatasetGenerator.cpp.s
+
+src/data/SymbolDatasetGenerator.o: src/data/SymbolDatasetGenerator.cpp.o
+.PHONY : src/data/SymbolDatasetGenerator.o
+
+# target to build an object file
+src/data/SymbolDatasetGenerator.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/patternScopeAI.dir/build.make CMakeFiles/patternScopeAI.dir/src/data/SymbolDatasetGenerator.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_all.dir/build.make CMakeFiles/test_all.dir/src/data/SymbolDatasetGenerator.cpp.o
+.PHONY : src/data/SymbolDatasetGenerator.cpp.o
+
+src/data/SymbolDatasetGenerator.i: src/data/SymbolDatasetGenerator.cpp.i
+.PHONY : src/data/SymbolDatasetGenerator.i
+
+# target to preprocess a source file
+src/data/SymbolDatasetGenerator.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/patternScopeAI.dir/build.make CMakeFiles/patternScopeAI.dir/src/data/SymbolDatasetGenerator.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_all.dir/build.make CMakeFiles/test_all.dir/src/data/SymbolDatasetGenerator.cpp.i
+.PHONY : src/data/SymbolDatasetGenerator.cpp.i
+
+src/data/SymbolDatasetGenerator.s: src/data/SymbolDatasetGenerator.cpp.s
+.PHONY : src/data/SymbolDatasetGenerator.s
+
+# target to generate assembly for a file
+src/data/SymbolDatasetGenerator.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/patternScopeAI.dir/build.make CMakeFiles/patternScopeAI.dir/src/data/SymbolDatasetGenerator.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_all.dir/build.make CMakeFiles/test_all.dir/src/data/SymbolDatasetGenerator.cpp.s
+.PHONY : src/data/SymbolDatasetGenerator.cpp.s
 
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
@@ -605,12 +632,6 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... patternScopeAI"
 	@echo "... test_all"
-	@echo "... src/ai/features/EdgeMapExtractor.o"
-	@echo "... src/ai/features/EdgeMapExtractor.i"
-	@echo "... src/ai/features/EdgeMapExtractor.s"
-	@echo "... src/ai/features/HOGExtractor.o"
-	@echo "... src/ai/features/HOGExtractor.i"
-	@echo "... src/ai/features/HOGExtractor.s"
 	@echo "... src/ai/features/PixelGridExtractor.o"
 	@echo "... src/ai/features/PixelGridExtractor.i"
 	@echo "... src/ai/features/PixelGridExtractor.s"
@@ -647,9 +668,18 @@ help:
 	@echo "... src/data/Image.o"
 	@echo "... src/data/Image.i"
 	@echo "... src/data/Image.s"
+	@echo "... src/data/ImageLoader.o"
+	@echo "... src/data/ImageLoader.i"
+	@echo "... src/data/ImageLoader.s"
 	@echo "... src/data/MNISTLoader.o"
 	@echo "... src/data/MNISTLoader.i"
 	@echo "... src/data/MNISTLoader.s"
+	@echo "... src/data/ShapeDatasetGenerator.o"
+	@echo "... src/data/ShapeDatasetGenerator.i"
+	@echo "... src/data/ShapeDatasetGenerator.s"
+	@echo "... src/data/SymbolDatasetGenerator.o"
+	@echo "... src/data/SymbolDatasetGenerator.i"
+	@echo "... src/data/SymbolDatasetGenerator.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
