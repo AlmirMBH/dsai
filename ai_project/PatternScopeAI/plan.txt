@@ -1,10 +1,11 @@
-MAINTENANCE:
-- [DONE] Fix predictor accuracy: Implement image resizing (28x28) and update RuleEngine thresholds.
-
-PHASE 1: natID GUI IMPLEMENTATION
-- Integrate backend Engine with natID screens and components.
-- Implement Interactive drawing and image canvas.
-- Implement Prediction panel with real-time confidence scores.
-- Implement Model comparison panel (KNN, Naive Bayes, Mini-MLP, A*, Rules).
-- Implement Confusion matrix view.
-- Implement Mode-selection screen.
+1. [DONE] Implement Model Serialization (save/load for all models).
+2. [DONE] Implement Offline Trainer Tool (src/trainer.cpp).
+3. [DONE] Implement Unified AI Engine Class (Engine.h/cpp) with lazy loading.
+4. [DONE] Refactor main.cpp to use the new Engine.
+5. [DONE] Implement real-time image prediction tool (src/predictor.cpp).
+6. [DONE] Fix predictor accuracy: Implement image resizing (28x28) and update RuleEngine thresholds.
+7. [DONE] Implement Backend-Frontend (natID) GUI application.
+   - [DONE] StartView for mode selection.
+   - [DONE] MainView with live prediction panels.
+   - [DONE] DrawingCanvas with auto-scaling.
+   - [DONE] Integrated all 5 models (KNN, NB, MLP, A*, Rules).

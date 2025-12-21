@@ -40,6 +40,25 @@ The real-time predictor tool (`./predictor`) allows users to upload custom image
   - If running from the `PatternScopeAI/` folder, use: `testing_samples/sample_a.png`
 
 
+## GUI Application (PatternVision++)
+
+The project includes a native GUI application built using the **natID** framework. It provides an interactive way to test the recognition engine.
+
+### Features
+- **Mode Selection**: Choose between Digits, Geometric Shapes, or Custom Symbols upon startup.
+- **Interactive Canvas**: Draw patterns directly using your mouse.
+- **Live Prediction**: Get instant results from the hybrid ensemble and rule-based fallback.
+- **Detailed Comparison**: View individual predictions and confidence scores from all models (KNN, Naive Bayes, MLP, A*).
+- **Active Learning Feedback**: Provide "Yes/No" feedback to help the engine learn from new samples at runtime.
+- **Metrics View**: Check real-time accuracy and performance stats.
+
+### How to Run (GUI)
+```bash
+cd PatternScopeAI/build
+(open PatternVision.app   # Only macOS)
+./PatternVision          # On Linux/Windows
+```
+
 ## Backend-Frontend (natID) Integration Guide
 
 All models functionality is exposed through the `Engine` class (located in `src/ai/Engine.h` and `src/ai/Engine.cpp`).
