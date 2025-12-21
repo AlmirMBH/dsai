@@ -18,5 +18,8 @@ public:
     double getRecall(int classIndex) const;
     double getF1Score(int classIndex) const;
     int getTotalSamples() const { return totalSamples; }
+
+    void save(std::ostream& os) const;
+    void load(std::istream& is);
 };
 

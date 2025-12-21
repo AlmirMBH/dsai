@@ -1,27 +1,27 @@
 #pragma once
-#include "Model.h"
 #include "../../data/FeatureVector.h"
+#include "../../data/Dataset.h"
 #include <vector>
-#include <cmath>
-#include <utility>
+#include <iostream>
 
-class NaiveBayes : public Model {
-private:
+class NaiveBayes {
     std::vector<std::vector<double>> means;
     std::vector<std::vector<double>> variances;
     std::vector<double> priors;
     int numClasses;
     int numFeatures;
-    std::vector<std::pair<FeatureVector, int>> incrementalData;
+    int totalSamples;
 
 public:
-    NaiveBayes();
-    void train(const Dataset& dataset) override;
-    int predict(const FeatureVector& features) override;
-    double getConfidence(const FeatureVector& features) override;
-    void updateWithExample(const FeatureVector& features, int label);
-    
-private:
-    double gaussianPDF(double x, double mean, double variance);
+    NaiveBayes() : numClasses(10), numFeatures(0) { 
+        means.resize(numClasses); 
+        variances.resize(numClasses); 
+        priors.resize(numClasses); 
+    }
+    void train(const Dataset& dataset);
+    void addExample(const FeatureVector& features, int label);
+    int predict(const FeatureVector& features);
+    double getConfidence(const FeatureVector& features);
+    void save(std::ostream& os) const;
+    void load(std::istream& is);
 };
-

@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <iostream>
 
 class FeatureVector {
 private:
@@ -14,6 +15,9 @@ public:
     double get(size_t index) const;
     void set(size_t index, double value);
     void add(double value);
+    
+    void save(std::ostream& os) const;
+    void load(std::istream& is);
     
     const std::vector<double>& getFeatures() const { return features; }
     std::vector<double>& getFeatures() { return features; }

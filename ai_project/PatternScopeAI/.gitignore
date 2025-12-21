@@ -1,0 +1,23 @@
+# Build artifacts
+build/
+bin/
+*.o
+*.d
+*.bin
+patternScopeAI
+test_all
+trainer
+
+# Datasets
+datasets/
+mnist/
+*.npy
+
+# Model files (if they are large or generated)
+# models/
+
+# IDE files
+.DS_Store
+.vscode/
+.idea/
+

@@ -1,28 +1,33 @@
 #pragma once
-#include "Model.h"
+#include "../../data/FeatureVector.h"
+#include "../../data/Dataset.h"
 #include <vector>
+#include <iostream>
 #include <cmath>
-#include <random>
 
-class MiniMLP : public Model {
-private:
+class MiniMLP {
     int inputSize;
     int hiddenSize;
     int outputSize;
-    
     std::vector<std::vector<double>> weights1;
     std::vector<std::vector<double>> weights2;
     std::vector<double> bias1;
     std::vector<double> bias2;
     
-    double sigmoid(double x);
-    double sigmoidDerivative(double x);
-    void initializeWeights();
+    double sig(double x) { return 1.0 / (1.0 + std::exp(-x)); }
 
 public:
-    MiniMLP(int inputSize = 784, int hiddenSize = 64, int outputSize = 10);
-    void train(const Dataset& dataset) override;
-    int predict(const FeatureVector& features) override;
-    double getConfidence(const FeatureVector& features) override;
+    MiniMLP(int input = 784, int hidden = 64, int output = 10) 
+        : inputSize(input), hiddenSize(hidden), outputSize(output) {
+        weights1.resize(hiddenSize, std::vector<double>(inputSize)); 
+        weights2.resize(outputSize, std::vector<double>(hiddenSize));
+        bias1.assign(hiddenSize, 0.0); 
+        bias2.assign(outputSize, 0.0);
+    }
+    void train(const Dataset& dataset);
+    void addExample(const FeatureVector& features, int label);
+    int predict(const FeatureVector& features);
+    double getConfidence(const FeatureVector& features);
+    void save(std::ostream& out) const;
+    void load(std::istream& in);
 };
-

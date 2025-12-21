@@ -1,23 +1,20 @@
 #pragma once
-#include "StructuralFeatures.h"
 #include "../../data/Image.h"
 #include <vector>
 #include <functional>
 
-struct Rule {
+struct RecognitionRule {
     std::function<bool(const std::vector<double>&)> condition;
-    int predictedLabel;
+    int label;
     double confidence;
 };
 
 class RuleEngine {
-private:
-    std::vector<Rule> rules;
+    std::vector<RecognitionRule> rules;
+    std::vector<double> extractFeatures(const Image& image);
 
 public:
     RuleEngine();
-    void addRule(const Rule& rule);
     int predict(const Image& image);
     double getConfidence(const Image& image);
 };
-

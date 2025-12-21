@@ -1,163 +1,137 @@
 #include "NaiveBayes.h"
+#include <cmath>
 #include <algorithm>
 
-NaiveBayes::NaiveBayes() : numClasses(10), numFeatures(0) {
-    means.resize(numClasses);
-    variances.resize(numClasses);
-    priors.resize(numClasses, 0.0);
-}
-
-double NaiveBayes::gaussianPDF(double x, double mean, double variance) {
-    if (variance < 1e-9) {
-        variance = 1e-9;
-    }
-    double diff = x - mean;
-    return std::exp(-(diff * diff) / (2.0 * variance)) / std::sqrt(2.0 * M_PI * variance);
-}
-
 void NaiveBayes::train(const Dataset& dataset) {
-    if (dataset.size() == 0) {
-        return;
-    }
-    
-    numFeatures = dataset.getFeatures(0).size();
-    
-    for (int c = 0; c < numClasses; ++c) {
-        means[c].resize(numFeatures, 0.0);
-        variances[c].resize(numFeatures, 0.0);
-    }
-    
+    if (dataset.size() == 0) return;
+    numFeatures = 784;
     std::vector<int> classCounts(numClasses, 0);
     
-    for (size_t i = 0; i < dataset.size(); ++i) {
-        int label = dataset.getLabel(i);
-        if (label >= 0 && label < numClasses) {
-            classCounts[label]++;
-            const FeatureVector& fv = dataset.getFeatures(i);
-            for (int j = 0; j < numFeatures; ++j) {
-                means[label][j] += fv.get(j);
+    for (int classIndex = 0; classIndex < numClasses; classIndex++) {
+        means[classIndex].assign(numFeatures, 0.0);
+        variances[classIndex].assign(numFeatures, 0.0);
+        priors[classIndex] = 0.0;
+    }
+    
+    for (size_t sampleIndex = 0; sampleIndex < dataset.size(); sampleIndex++) {
+        int label = dataset.getLabel(sampleIndex);
+        classCounts[label]++;
+        for (int featureIndex = 0; featureIndex < numFeatures; featureIndex++) {
+            means[label][featureIndex] += dataset.getFeatures(sampleIndex).get(featureIndex);
+        }
+    }
+    
+    for (int classIndex = 0; classIndex < numClasses; classIndex++) {
+        priors[classIndex] = (double)classCounts[classIndex] / dataset.size();
+        if (classCounts[classIndex] > 0) {
+            for (int featureIndex = 0; featureIndex < numFeatures; featureIndex++) {
+                means[classIndex][featureIndex] /= classCounts[classIndex];
             }
         }
     }
     
-    for (int c = 0; c < numClasses; ++c) {
-        if (classCounts[c] > 0) {
-            priors[c] = static_cast<double>(classCounts[c]) / dataset.size();
-            for (int j = 0; j < numFeatures; ++j) {
-                means[c][j] /= classCounts[c];
-            }
+    for (size_t sampleIndex = 0; sampleIndex < dataset.size(); sampleIndex++) {
+        int label = dataset.getLabel(sampleIndex);
+        for (int featureIndex = 0; featureIndex < numFeatures; featureIndex++) {
+            double difference = dataset.getFeatures(sampleIndex).get(featureIndex) - means[label][featureIndex];
+            variances[label][featureIndex] += difference * difference;
         }
     }
     
-    for (size_t i = 0; i < dataset.size(); ++i) {
-        int label = dataset.getLabel(i);
-        if (label >= 0 && label < numClasses) {
-            const FeatureVector& fv = dataset.getFeatures(i);
-            for (int j = 0; j < numFeatures; ++j) {
-                double diff = fv.get(j) - means[label][j];
-                variances[label][j] += diff * diff;
+    for (int classIndex = 0; classIndex < numClasses; classIndex++) {
+        if (classCounts[classIndex] > 0) {
+            for (int featureIndex = 0; featureIndex < numFeatures; featureIndex++) {
+                variances[classIndex][featureIndex] = std::max(1e-9, variances[classIndex][featureIndex] / classCounts[classIndex]);
             }
         }
     }
+}
+
+void NaiveBayes::addExample(const FeatureVector& features, int label) {
+    if (label < 0 || label >= numClasses) return;
     
-    for (int c = 0; c < numClasses; ++c) {
-        if (classCounts[c] > 0) {
-            for (int j = 0; j < numFeatures; ++j) {
-                variances[c][j] /= classCounts[c];
-                if (variances[c][j] < 1e-9) {
-                    variances[c][j] = 1e-9;
-                }
-            }
-        }
+    totalSamples++;
+    double alpha = 1.0 / totalSamples; 
+    
+    for (int featureIndex = 0; featureIndex < numFeatures; featureIndex++) {
+        double difference = features.get(featureIndex) - means[label][featureIndex];
+        means[label][featureIndex] += alpha * difference;
+        variances[label][featureIndex] = (1.0 - alpha) * variances[label][featureIndex] + alpha * difference * difference;
+        variances[label][featureIndex] = std::max(1e-9, variances[label][featureIndex]);
+    }
+    
+    for (int classIndex = 0; classIndex < numClasses; classIndex++) {
+        if (classIndex == label) priors[classIndex] = (1.0 - alpha) * priors[classIndex] + alpha;
+        else priors[classIndex] = (1.0 - alpha) * priors[classIndex];
     }
 }
 
 int NaiveBayes::predict(const FeatureVector& features) {
-    if (numFeatures == 0 || features.size() != numFeatures) {
-        return -1;
-    }
-    
-    std::vector<double> posteriors(numClasses, 0.0);
-    
-    for (int c = 0; c < numClasses; ++c) {
-        double likelihood = std::log(priors[c] + 1e-10);
-        for (int j = 0; j < numFeatures; ++j) {
-            double prob = gaussianPDF(features.get(j), means[c][j], variances[c][j]);
-            likelihood += std::log(prob + 1e-10);
-        }
-        posteriors[c] = likelihood;
-    }
-    
+    double bestProbability = -1e100;
     int bestClass = 0;
-    double maxPosterior = posteriors[0];
-    for (int c = 1; c < numClasses; ++c) {
-        if (posteriors[c] > maxPosterior) {
-            maxPosterior = posteriors[c];
-            bestClass = c;
+    const double pi = 3.14159265358979323846;
+    
+    for (int classIndex = 0; classIndex < numClasses; classIndex++) {
+        double currentLogProbability = std::log(priors[classIndex] + 1e-10);
+        for (int featureIndex = 0; featureIndex < numFeatures; featureIndex++) {
+            double variance = std::max(1e-4, variances[classIndex][featureIndex]);
+            double difference = features.get(featureIndex) - means[classIndex][featureIndex];
+            currentLogProbability += -0.5 * (std::log(2 * pi * variance) + (difference * difference) / variance);
+        }
+        if (currentLogProbability > bestProbability) {
+            bestProbability = currentLogProbability;
+            bestClass = classIndex;
         }
     }
-    
     return bestClass;
 }
 
 double NaiveBayes::getConfidence(const FeatureVector& features) {
-    if (numFeatures == 0 || features.size() != numFeatures) {
-        return 0.0;
-    }
+    std::vector<double> logProbabilities(numClasses);
+    double maxLogProbability = -1e100;
+    const double pi = 3.14159265358979323846;
     
-    std::vector<double> posteriors(numClasses, 0.0);
-    
-    for (int c = 0; c < numClasses; ++c) {
-        double likelihood = std::log(priors[c] + 1e-10);
-        for (int j = 0; j < numFeatures; ++j) {
-            double prob = gaussianPDF(features.get(j), means[c][j], variances[c][j]);
-            likelihood += std::log(prob + 1e-10);
+    for (int classIndex = 0; classIndex < numClasses; classIndex++) {
+        logProbabilities[classIndex] = std::log(priors[classIndex] + 1e-10);
+        for (int featureIndex = 0; featureIndex < numFeatures; featureIndex++) {
+            double variance = std::max(1e-4, variances[classIndex][featureIndex]);
+            double difference = features.get(featureIndex) - means[classIndex][featureIndex];
+            logProbabilities[classIndex] += -0.5 * (std::log(2 * pi * variance) + (difference * difference) / variance);
         }
-        posteriors[c] = likelihood;
+        if (logProbabilities[classIndex] > maxLogProbability) maxLogProbability = logProbabilities[classIndex];
     }
     
-    double maxPosterior = posteriors[0];
-    double sumExp = 0.0;
-    for (int c = 0; c < numClasses; ++c) {
-        if (posteriors[c] > maxPosterior) {
-            maxPosterior = posteriors[c];
-        }
+    double sumExponentials = 0.0;
+    for (int classIndex = 0; classIndex < numClasses; classIndex++) {
+        sumExponentials += std::exp(std::max(-700.0, logProbabilities[classIndex] - maxLogProbability));
     }
     
-    for (int c = 0; c < numClasses; ++c) {
-        sumExp += std::exp(posteriors[c] - maxPosterior);
-    }
-    
-    return std::exp(posteriors[predict(features)] - maxPosterior) / sumExp;
+    int predictedClass = predict(features);
+    double confidence = std::exp(std::max(-700.0, logProbabilities[predictedClass] - maxLogProbability)) / sumExponentials;
+    return std::isnan(confidence) ? 0.0 : confidence;
 }
 
-void NaiveBayes::updateWithExample(const FeatureVector& features, int label) {
-    incrementalData.push_back(std::make_pair(features, label));
-    
-    if (label >= 0 && label < numClasses && numFeatures > 0) {
-        int n = incrementalData.size();
-        double alpha = 1.0 / (n + 1);
-        
-        for (int j = 0; j < numFeatures; ++j) {
-            double oldMean = means[label][j];
-            means[label][j] = (1.0 - alpha) * oldMean + alpha * features.get(j);
-            
-            double oldVar = variances[label][j];
-            double diff = features.get(j) - means[label][j];
-            variances[label][j] = (1.0 - alpha) * oldVar + alpha * diff * diff;
-            if (variances[label][j] < 1e-9) {
-                variances[label][j] = 1e-9;
-            }
-        }
-        
-        priors[label] = (priors[label] * n + 1.0) / (n + 1);
-        double totalPrior = 0.0;
-        for (int c = 0; c < numClasses; ++c) {
-            totalPrior += priors[c];
-        }
-        for (int c = 0; c < numClasses; ++c) {
-            priors[c] /= totalPrior;
-        }
+void NaiveBayes::save(std::ostream& outputStream) const {
+    outputStream << numClasses << " " << numFeatures << "\n";
+    for (int classIndex = 0; classIndex < numClasses; classIndex++) {
+        for (int featureIndex = 0; featureIndex < numFeatures; featureIndex++) outputStream << means[classIndex][featureIndex] << " ";
+        outputStream << "\n";
+        for (int featureIndex = 0; featureIndex < numFeatures; featureIndex++) outputStream << variances[classIndex][featureIndex] << " ";
+        outputStream << "\n";
     }
+    for (int classIndex = 0; classIndex < numClasses; classIndex++) outputStream << priors[classIndex] << " ";
 }
 
+void NaiveBayes::load(std::istream& inputStream) {
+    inputStream >> numClasses >> numFeatures;
+    means.resize(numClasses);
+    variances.resize(numClasses);
+    priors.resize(numClasses);
+    for (int classIndex = 0; classIndex < numClasses; classIndex++) {
+        means[classIndex].resize(numFeatures);
+        variances[classIndex].resize(numFeatures);
+        for (int featureIndex = 0; featureIndex < numFeatures; featureIndex++) inputStream >> means[classIndex][featureIndex];
+        for (int featureIndex = 0; featureIndex < numFeatures; featureIndex++) inputStream >> variances[classIndex][featureIndex];
+    }
+    for (int classIndex = 0; classIndex < numClasses; classIndex++) inputStream >> priors[classIndex];
+}

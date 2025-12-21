@@ -38,3 +38,16 @@ double FeatureVector::distance(const FeatureVector& other) const {
     return std::sqrt(sum);
 }
 
+void FeatureVector::save(std::ostream& os) const {
+    size_t s = features.size();
+    os.write(reinterpret_cast<const char*>(&s), sizeof(s));
+    os.write(reinterpret_cast<const char*>(features.data()), s * sizeof(double));
+}
+
+void FeatureVector::load(std::istream& is) {
+    size_t s;
+    is.read(reinterpret_cast<char*>(&s), sizeof(s));
+    features.resize(s);
+    is.read(reinterpret_cast<char*>(features.data()), s * sizeof(double));
+}
+

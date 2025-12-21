@@ -1,0 +1,12 @@
+PHASE 1: 
+Add comments for every single method: plain English, no adjectives, no parameters,
+explaining what exactly the function does.
+Allow terminal upload of images to see real-time Prediction
+
+PHASE 2: natID GUI IMPLEMENTATION
+- Integrate backend Engine with natID screens and components.
+- Implement Interactive drawing and image canvas.
+- Implement Prediction panel with real-time confidence scores.
+- Implement Model comparison panel (KNN, Naive Bayes, Mini-MLP, A*, Rules).
+- Implement Confusion matrix view.
+- Implement Mode-selection screen.

@@ -1,69 +1,53 @@
 #include "AStarMatcher.h"
 #include <algorithm>
-#include <limits>
 
-double AStarMatcher::heuristic(const FeatureVector& current, const FeatureVector& target) {
-    return current.distance(target);
-}
-
-void AStarMatcher::addTemplate(const FeatureVector& features, int label) {
-    templates.push_back(Template(features, label));
-}
-
-void AStarMatcher::buildTemplatesFromDataset(const std::vector<FeatureVector>& features, 
-                                             const std::vector<int>& labels) {
+void AStarMatcher::buildTemplatesFromDataset(const std::vector<FeatureVector>& featureVectors, const std::vector<int>& labels) {
     templates.clear();
-    if (features.size() != labels.size()) {
-        return;
-    }
-    
-    for (size_t i = 0; i < features.size(); ++i) {
-        templates.push_back(Template(features[i], labels[i]));
+    for (size_t templateIndex = 0; templateIndex < featureVectors.size(); templateIndex++) {
+        templates.push_back({featureVectors[templateIndex], labels[templateIndex]});
     }
 }
 
 int AStarMatcher::match(const FeatureVector& query) {
-    if (templates.empty()) {
-        return -1;
+    if (templates.empty()) return -1;
+    
+    std::priority_queue<AStarNode, std::vector<AStarNode>, std::greater<AStarNode>> openList;
+    for (int templateIndex = 0; templateIndex < (int)templates.size(); templateIndex++) {
+        double distance = query.distance(templates[templateIndex].features);
+        openList.push({templateIndex, 0.0, distance});
     }
     
-    std::priority_queue<AStarNode, std::vector<AStarNode>, std::greater<AStarNode>> openSet;
-    
-    for (size_t i = 0; i < templates.size(); ++i) {
-        AStarNode node;
-        node.templateIndex = i;
-        node.gCost = 0.0;
-        node.hCost = heuristic(query, templates[i].getFeatures());
-        openSet.push(node);
-    }
-    
-    if (openSet.empty()) {
-        return -1;
-    }
-    
-    AStarNode best = openSet.top();
-    return templates[best.templateIndex].getLabel();
+    return templates[openList.top().templateIndex].label;
 }
 
 double AStarMatcher::getConfidence(const FeatureVector& query) {
-    if (templates.empty()) {
-        return 0.0;
-    }
+    if (templates.empty()) return 0.0;
     
-    double minDistance = std::numeric_limits<double>::max();
-    double sumDistances = 0.0;
-    
-    for (const auto& template_ : templates) {
-        double dist = template_.distance(query);
-        if (dist < minDistance) {
-            minDistance = dist;
-        }
-        sumDistances += dist;
+    double minDistanceValue = 1e10;
+    for (int templateIndex = 0; templateIndex < (int)templates.size(); templateIndex++) {
+        double currentDistance = templates[templateIndex].features.distance(query);
+        if (currentDistance < minDistanceValue) minDistanceValue = currentDistance;
     }
-    
-    if (sumDistances > 0) {
-        return 1.0 / (1.0 + minDistance);
-    }
-    return 0.0;
+    return 1.0 / (1.0 + minDistanceValue);
 }
 
+void AStarMatcher::save(std::ostream& outputStream) const {
+    outputStream << templates.size() << "\n";
+    for (int templateIndex = 0; templateIndex < (int)templates.size(); templateIndex++) {
+        for (double featureValue : templates[templateIndex].features.getFeatures()) outputStream << featureValue << " ";
+        outputStream << templates[templateIndex].label << "\n";
+    }
+}
+
+void AStarMatcher::load(std::istream& inputStream) {
+    size_t numTemplates;
+    inputStream >> numTemplates;
+    templates.clear();
+    for (size_t templateIndex = 0; templateIndex < numTemplates; templateIndex++) {
+        std::vector<double> featureValues(784);
+        for (int featureIndex = 0; featureIndex < 784; featureIndex++) inputStream >> featureValues[featureIndex];
+        int labelValue;
+        inputStream >> labelValue;
+        templates.push_back({FeatureVector(featureValues), labelValue});
+    }
+}
