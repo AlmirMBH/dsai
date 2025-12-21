@@ -10,6 +10,7 @@ private:
 
 public:
     ConfusionMatrix(int numClasses = 10);
+
     void addPrediction(int trueLabel, int predictedLabel);
     void reset();
     void print(std::ostream& os) const;

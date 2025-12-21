@@ -3,8 +3,14 @@
 #include <fstream>
 #include <map>
 
+/**
+ * Load the pre-trained models from the disk for the selected mode. 
+ * Avoid reloading if the mode is already active.
+ */
 void Engine::loadModels(Mode mode) {
-    if (currentMode == mode) return;
+    if (currentMode == mode) {
+        return;
+    }
     currentMode = mode; 
     performanceStats.clear();
     
@@ -25,6 +31,11 @@ void Engine::loadModels(Mode mode) {
     astar.load(astarFile);
 }
 
+/**
+ * Use all models to guess what pattern is in the image. 
+ * Combine results into a final answer. Use the rule system 
+ * as a fallback if the main models are not certain.
+ */
 PredictionResult Engine::predict(Mode mode, const Image& image) {
     loadModels(mode);
     
@@ -72,10 +83,12 @@ PredictionResult Engine::predict(Mode mode, const Image& image) {
     }
 
     result.finalLabel = bestLabel;
+    // Divide by 4.0 because the total score is combined from four different models.
     result.finalConfidence = maxScore / 4.0;
     result.finalModelName = "Hybrid Ensemble";
 
     // Rule-Based Fallback
+    // If the models are not confident (less than 40%), use the rule system instead.
     if (result.finalConfidence < 0.4 && ruleLabel != -1) {
         result.finalLabel = ruleLabel;
         result.finalConfidence = ruleConf;
@@ -85,6 +98,10 @@ PredictionResult Engine::predict(Mode mode, const Image& image) {
     return result;
 }
 
+/**
+ * Add a new example to the models during runtime. 
+ * Make the system smarter based on user feedback.
+ */
 void Engine::updateModel(Mode mode, const Image& image, int correctLabel) {
     loadModels(mode);
     PixelGridExtractor extractor(28, 28); 
@@ -95,10 +112,16 @@ void Engine::updateModel(Mode mode, const Image& image, int correctLabel) {
     mlp.addExample(features, correctLabel);
 }
 
+/**
+ * Retrieve the performance results for a specific model. 
+ * Load the data from the stats files.
+ */
 std::shared_ptr<ConfusionMatrix> Engine::getMetrics(Mode mode, const std::string& modelName) {
     loadModels(mode);
     
-    if (performanceStats.count(modelName)) return performanceStats[modelName];
+    if (performanceStats.count(modelName)) {
+        return performanceStats[modelName];
+    }
     
     std::string modeDirectory = "models/" + std::string(mode == Mode::DIGITS ? "digits" : (mode == Mode::SHAPES ? "shapes" : "symbols"));
     std::string statsFile = modeDirectory + "/" + (modelName == "KNN" ? "knn_stats.txt" : 

@@ -11,9 +11,12 @@ COMPLETED (BACKEND ONLY)
 - DataManager: MNIST loading, real Quick Draw dataset loading (.npy), Image loading (stb_image)
 - Performance metrics retrieval for all models
 - Offline trainer tool for pre-training models
-- All core AI components integrated and passing CLI tests (93%+ accuracy on real drawings)
-- Code refactored to junior-level readability with full variable names
-- Math-based generators replaced with real-world dataset loaders for higher production value
+- All core AI components integrated and passing CLI tests
+- Code refactored for readability with full documentation
+- Real-time `predictor` tool for terminal-based image recognition
+- Image Intelligence: Automatic resizing (28x28), inversion (for light backgrounds),
+and dynamic aspect-ratio calculation for recognition
+- Documentation: Complete integration guide and dataflow explanation in README.md
 
 PENDING
 ================================================================================

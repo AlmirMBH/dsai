@@ -10,6 +10,7 @@ class KNN {
 
 public:
     KNN(int k = 3) : k(k) {}
+
     void train(const Dataset& dataset);
     void addExample(const FeatureVector& features, int label);
     int predict(const FeatureVector& features);

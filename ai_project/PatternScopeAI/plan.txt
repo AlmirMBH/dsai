@@ -1,9 +1,7 @@
-PHASE 1: 
-Add comments for every single method: plain English, no adjectives, no parameters,
-explaining what exactly the function does.
-Allow terminal upload of images to see real-time Prediction
+MAINTENANCE:
+- [DONE] Fix predictor accuracy: Implement image resizing (28x28) and update RuleEngine thresholds.
 
-PHASE 2: natID GUI IMPLEMENTATION
+PHASE 1: natID GUI IMPLEMENTATION
 - Integrate backend Engine with natID screens and components.
 - Implement Interactive drawing and image canvas.
 - Implement Prediction panel with real-time confidence scores.

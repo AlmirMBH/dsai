@@ -36,6 +36,7 @@ class Engine {
 
 public:
     Engine() : currentMode((Mode)-1) {}
+
     PredictionResult predict(Mode mode, const Image& image);
     void updateModel(Mode mode, const Image& image, int correctLabel);
     std::shared_ptr<ConfusionMatrix> getMetrics(Mode mode, const std::string& modelName);

@@ -14,7 +14,6 @@ public:
     
     const FeatureVector& getFeatures(size_t index) const;
     int getLabel(size_t index) const;
-    
     std::vector<int> getLabels() const;
     void clear();
 };

@@ -18,6 +18,7 @@ public:
         variances.resize(numClasses); 
         priors.resize(numClasses); 
     }
+
     void train(const Dataset& dataset);
     void addExample(const FeatureVector& features, int label);
     int predict(const FeatureVector& features);

@@ -8,6 +8,9 @@ FeatureVector::FeatureVector(const std::vector<double>& f) : features(f) {}
 
 FeatureVector::FeatureVector(size_t size) : features(size, 0.0) {}
 
+/**
+ * Retrieve a specific value from the list of numbers.
+ */
 double FeatureVector::get(size_t index) const {
     if (index < features.size()) {
         return features[index];
@@ -15,16 +18,25 @@ double FeatureVector::get(size_t index) const {
     return 0.0;
 }
 
+/**
+ * Set a specific value in the list of numbers.
+ */
 void FeatureVector::set(size_t index, double value) {
     if (index < features.size()) {
         features[index] = value;
     }
 }
 
+/**
+ * Add a new value to the end of the list.
+ */
 void FeatureVector::add(double value) {
     features.push_back(value);
 }
 
+/**
+ * Calculate how different two lists of numbers are.
+ */
 double FeatureVector::distance(const FeatureVector& other) const {
     if (features.size() != other.features.size()) {
         return 1e10;
@@ -38,16 +50,28 @@ double FeatureVector::distance(const FeatureVector& other) const {
     return std::sqrt(sum);
 }
 
+/**
+ * Save the list of numbers to a text file.
+ */
 void FeatureVector::save(std::ostream& os) const {
-    size_t s = features.size();
-    os.write(reinterpret_cast<const char*>(&s), sizeof(s));
-    os.write(reinterpret_cast<const char*>(features.data()), s * sizeof(double));
+    os << features.size() << " ";
+    for (double featureValue : features) {
+        os << featureValue << " ";
+    }
+    os << "\n";
 }
 
+/**
+ * Load a list of numbers from a text file.
+ */
 void FeatureVector::load(std::istream& is) {
-    size_t s;
-    is.read(reinterpret_cast<char*>(&s), sizeof(s));
-    features.resize(s);
-    is.read(reinterpret_cast<char*>(features.data()), s * sizeof(double));
+    size_t dataSize;
+    if (!(is >> dataSize)) {
+        return;
+    }
+    features.resize(dataSize);
+    for (size_t featureIndex = 0; featureIndex < dataSize; ++featureIndex) {
+        is >> features[featureIndex];
+    }
 }
 

@@ -4,13 +4,21 @@
 #include "data/DataManager.h"
 #include "ai/Engine.h"
 
+/**
+ * This is the entry point for the backend testing tool. Load 
+ * the selected dataset and run the recognition engine on a small number of samples. 
+ * Display individual model guesses and the final accuracy in the terminal.
+ */
 int main(int argc, const char* argv[]) {
     Mode recognitionMode = Mode::DIGITS;
     
     if (argc > 1) { 
         std::string modeArgument = argv[1]; 
-        if (modeArgument == "shapes") recognitionMode = Mode::SHAPES; 
-        else if (modeArgument == "symbols") recognitionMode = Mode::SYMBOLS; 
+        if (modeArgument == "shapes") {
+            recognitionMode = Mode::SHAPES; 
+        } else if (modeArgument == "symbols") {
+            recognitionMode = Mode::SYMBOLS; 
+        }
     }
     
     Engine recognitionEngine; 
@@ -45,7 +53,7 @@ int main(int argc, const char* argv[]) {
             correctPredictionCount++;
         }
         
-        if (sampleIndex < 5) { // Show details for first 5
+        if (sampleIndex < 5) {
             std::string recognitionType = (recognitionMode == Mode::DIGITS) ? "number" : "pattern";
             std::cout << "Testing " << recognitionType << " " << testDataset.getLabel(sampleIndex) 
                       << " | True Label: " << testDataset.getLabel(sampleIndex) 

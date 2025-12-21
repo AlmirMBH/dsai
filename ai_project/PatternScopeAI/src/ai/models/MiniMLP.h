@@ -24,6 +24,7 @@ public:
         bias1.assign(hiddenSize, 0.0); 
         bias2.assign(outputSize, 0.0);
     }
+
     void train(const Dataset& dataset);
     void addExample(const FeatureVector& features, int label);
     int predict(const FeatureVector& features);

@@ -16,3 +16,6 @@ target_include_directories(test_all PRIVATE ${SOURCE_ROOT}/src)
 
 add_executable(trainer src/trainer.cpp ${SOURCES})
 target_include_directories(trainer PRIVATE ${SOURCE_ROOT}/src)
+
+add_executable(predictor src/predictor.cpp ${SOURCES})
+target_include_directories(predictor PRIVATE ${SOURCE_ROOT}/src)

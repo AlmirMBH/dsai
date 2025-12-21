@@ -16,7 +16,6 @@ public:
     int getHeight() const { return height; }
     uint8_t getPixel(int x, int y) const;
     void setPixel(int x, int y, uint8_t value);
-    
     std::vector<uint8_t> getData() const;
     void normalize();
 };
