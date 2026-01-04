@@ -40,6 +40,9 @@ class ContentBasedRecommender:
                 user_movie_indices.append(idx)
         
         user_vectors = self.movie_vectors[user_movie_indices]        
+        if user_vectors.shape[0] == 0:
+            return []
+            
         all_movies = set(self.graph.get_movie_ids())
         unseen_movies = all_movies - user_movies
         

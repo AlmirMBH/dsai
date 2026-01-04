@@ -46,14 +46,15 @@ class SameGenreRecommender:
             shared_genres = user_genres & movie_genres
             
             if len(shared_genres) > 0:
-                ratings = []
                 users_who_watched = self.graph.get_movie_users(movie_id)
                 
-                for user_id_who_watched in users_who_watched:
-                    rating = self.graph.get_rating(user_id_who_watched, movie_id)
-                    ratings.append(rating)
-            
-                movie_scores[movie_id] = sum(ratings) / len(ratings) if ratings else 0
+                if len(users_who_watched) >= 30:
+                    ratings = []
+                    for user_id_who_watched in users_who_watched:
+                        rating = self.graph.get_rating(user_id_who_watched, movie_id)
+                        ratings.append(rating)
+                
+                    movie_scores[movie_id] = sum(ratings) / len(ratings) if ratings else 0
         
         return sorted(movie_scores.items(), key=lambda item: item[1], reverse=True)[:top_k]
 

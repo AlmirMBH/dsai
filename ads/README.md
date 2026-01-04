@@ -59,15 +59,38 @@ This structure enables recommendations if User A and User B both rated the same 
 ## Recommender algorithms
 - **Collaborative**: Finds users who watched the same movies as the selected user. It calculates similarity between the selected user and each similar user once per user pair using Jaccard (common movies divided by total unique movies both users watched). For each movie that the selected user has not watched, scores it by summing (similarity × rating) contributions. The similarity is between the selected user and a similar user, and rating is the similar user's rating of that specific unseen movie. Then, it ranks all unseen movies by total score and recommends the top k.
 - **Content-Based**: This is an extra feature. It vectorizes all movie titles using TF-IDF. For each movie that the user has not watched, it calculates cosine similarity (range 0-1, unitless ratio) between that movie's title vector and the title vectors of movies the user watched, taking the maximum similarity. Then, it ranks unseen movies by similarity score and recommends the top ones.
-- **Same-Genre**: This is an extra feature. It scores movies by average rating, but only includes movies sharing genres with movies that a user watched.
+- **Same-Genre**: This is an extra feature. It scores movies by average rating, but only includes movies sharing genres with movies that a user watched. To ensure recommendation quality, only movies with at least 30 ratings are considered.
 - **Cold-Start**: This is an extra feature. It scores movies by how many users rated them (most popular movies).
+
+## Evaluations
+The evaluation script `evaluate.py` measures the performance of all four algorithms using an 80/20 split of the ratings data. For each user in the test set, the script hides 20% of their actual ratings and hits the algorithms to predict them.
+
+### Evaluation Metrics
+- **Precision@K**: The percentage of recommended movies that were actually watched by the user in the test set.
+- **Recall@K**: The percentage of the user's actual test-set movies that were successfully found in the recommendations.
+- **F1@K**: The harmonic mean of Precision and Recall.
+- **Hit Rate**: The percentage of users for whom at least one recommended movie was a correct prediction.
+
+### Running Evaluations
+Evaluations can be run in two ways:
+1. **In-Browser**: Navigate to the **"Evaluations"** tab in the Streamlit UI, select the number of users and K value, and click **"Evaluate"**.
+2. **Terminal**: Run the evaluation script (configured to sample 10 users for speed):
+```bash
+source venv/bin/activate && python evaluate.py
+```
 
 ## Frontend
 
-The frontend is built using Streamlit. The application runs as a single-page application where users can select a user ID and recommendation algorithm from dropdown menus. The interface displays the top-k movie recommendations with their relevance scores. For the collaborative filtering algorithm, an interactive graph shows the bipartite graph structure with color-coded nodes (red for selected user, light blue for similar users, green for recommended movies).
+The frontend is built using Streamlit and is organized into two tabs:
+1. **Recommendations**: The main interface where users can select a user ID and recommendation algorithm. It displays the top-k movie recommendations and a bipartite graph for the collaborative filtering algorithm.
+2. **Evaluations**: An interface for running performance tests and viewing the results in a table.
 
 ## How to use UI
-**Dropdowns:**
+**Tabs:**
+- **Recommendations**: The main page for getting personalized movie suggestions.
+- **Evaluations**: The page for testing algorithm performance.
+
+**Recommendations Tab Dropdowns:**
 - **Select User ID**: Choose user to get recommendations for
 - **Recommender**: Select recommendation algorithm (Collaborative, Content-Based, Same-Genre, Cold-Start). Only the collaborative (bipartite) algorithm will have the graph displayed.
 
@@ -77,6 +100,11 @@ The frontend is built using Streamlit. The application runs as a single-page app
 - Red = selected user
 - Light blue = similar users
 - Green = recommended movies
+
+**Evaluations Tab:**
+- **Users to test**: Select how many users from the test set to evaluate (max 10).
+- **K value**: Select the size of the recommendation list for testing (max 10).
+- **Evaluate Button**: Triggers the evaluation process (takes ~2 minutes).
 
 
 ## Three Unique Features
@@ -98,7 +126,6 @@ The frontend is built using Streamlit. The application runs as a single-page app
 ## Next Steps
 
 Future improvements for the recommendation system:
-- **Evaluation metrics**: Implement evaluation metrics such as precision, recall, RMSE (Root Mean Square Error), and user studies to measure recommendation quality and user satisfaction.
 - **Scaling improvements**: Migrate from in-memory data structures to persistent databases to improve performance with large datasets.
 - **Algorithm enhancements**: Explore advanced techniques such as matrix factorization (e.g. SVD), hybrid recommendation approaches combining multiple algorithms, and deep learning-based methods for better personalization.
 - **Feature enhancements**: Integrate user feedback mechanisms, support real-time rating updates, expand content-based filtering to include movie descriptions and metadata, and implement A/B testing for algorithm comparison.
