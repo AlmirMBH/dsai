@@ -33,6 +33,9 @@ source venv/bin/activate && pip install -r requirements.txt
 source venv/bin/activate && streamlit run app.py --server.port 8510
 ```
 
+## Project Startup Note
+The first time the project is run, loading the datasets and performing initial evaluations may take 2–3 minutes before the project is fully operational.
+
 ## Stop Project
 Stop: `pkill -f "streamlit run app.py"` or `Ctrl+C`
 
@@ -59,7 +62,7 @@ This structure enables recommendations if User A and User B both rated the same 
 ## Recommender algorithms
 - **Collaborative**: Finds users who watched the same movies as the selected user. It calculates similarity between the selected user and each similar user once per user pair using Jaccard (common movies divided by total unique movies both users watched). For each movie that the selected user has not watched, scores it by summing (similarity × rating) contributions. The similarity is between the selected user and a similar user, and rating is the similar user's rating of that specific unseen movie. Then, it ranks all unseen movies by total score and recommends the top k.
 - **Content-Based**: This is an extra feature. It vectorizes all movie titles using TF-IDF. For each movie that the user has not watched, it calculates cosine similarity (range 0-1, unitless ratio) between that movie's title vector and the title vectors of movies the user watched, taking the maximum similarity. Then, it ranks unseen movies by similarity score and recommends the top ones.
-- **Same-Genre**: This is an extra feature. It scores movies by average rating, but only includes movies sharing genres with movies that a user watched. To ensure recommendation quality, only movies with at least 30 ratings are considered.
+- The SameGenreRecommender is based on the user's past movie genres to identify their category preferences. It filters the dataset for unseen movies sharing at least one common genre and ranks them by their average rating from other users, while ensuring quality by only considering movies with at least 30 ratings.
 - **Cold-Start**: This is an extra feature. It scores movies by how many users rated them (most popular movies).
 
 ## Evaluations

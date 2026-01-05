@@ -1,24 +1,48 @@
 import streamlit as st
-import matplotlib.pyplot as plt
-import networkx as nx
-import pandas as pd
 import time
-from graph import BipartiteGraph
-from collaborative import CollaborativeRecommender
-from cold_start import ColdStartRecommender
-from content_based import ContentBasedRecommender
-from same_genre import SameGenreRecommender
-from config import RATINGS_FILE, MOVIES_FILE, RECOMMENDATION_TOP_K, MAX_USERS, DEFAULT_DROP_DOWN_USER_ID
-from evaluate import evaluate
 
-@st.cache_resource
+@st.cache_resource(show_spinner="Please wait until the datasets are loaded and evaluations performed")
 def initialize_recommendation_system():
-    ratings_dataframe = pd.read_csv(RATINGS_FILE)
-    movies_dataframe = pd.read_csv(MOVIES_FILE)
-    bipartite_graph = BipartiteGraph(ratings_dataframe)
-    return ratings_dataframe, movies_dataframe, bipartite_graph
+    import pandas
+    import matplotlib.pyplot as matplotlib_pyplot
+    import networkx
+    from graph import BipartiteGraph
+    from collaborative import CollaborativeRecommender
+    from cold_start import ColdStartRecommender
+    from content_based import ContentBasedRecommender
+    from same_genre import SameGenreRecommender
+    from evaluate import evaluate
+    from config import RATINGS_FILE, MOVIES_FILE, RECOMMENDATION_TOP_K, MAX_USERS, DEFAULT_DROP_DOWN_USER_ID
 
-ratings_dataframe, movies_dataframe, graph = initialize_recommendation_system()
+    ratings_dataframe = pandas.read_csv(RATINGS_FILE)
+    movies_dataframe = pandas.read_csv(MOVIES_FILE)
+    bipartite_graph = BipartiteGraph(ratings_dataframe)
+    shuffled_ratings = ratings_dataframe.sample(frac=1, random_state=42)
+    split_index = int(len(shuffled_ratings) * 0.8)
+    training_dataframe = shuffled_ratings.iloc[:split_index]
+    testing_dataframe = shuffled_ratings.iloc[split_index:]
+    evaluation_graph = BipartiteGraph(training_dataframe)
+    evaluation_recommenders = {
+        "Collaborative": CollaborativeRecommender(evaluation_graph),
+        "Content-Based": ContentBasedRecommender(evaluation_graph, movies_dataframe),
+        "Same-Genre": SameGenreRecommender(evaluation_graph, movies_dataframe),
+        "Cold-Start": ColdStartRecommender(evaluation_graph)
+    }
+    start_time = time.time()
+    results = {name: evaluate(recommender, testing_dataframe, 10, 7) for name, recommender in evaluation_recommenders.items()}
+    return (ratings_dataframe, movies_dataframe, bipartite_graph, results, time.time() - start_time,
+            pandas, matplotlib_pyplot, networkx, BipartiteGraph, CollaborativeRecommender, 
+            ColdStartRecommender, ContentBasedRecommender, SameGenreRecommender, evaluate,
+            RECOMMENDATION_TOP_K, MAX_USERS, DEFAULT_DROP_DOWN_USER_ID)
+
+(ratings_dataframe, movies_dataframe, graph, initial_results, initial_duration,
+ pandas, matplotlib_pyplot, networkx, BipartiteGraph, CollaborativeRecommender, 
+ ColdStartRecommender, ContentBasedRecommender, SameGenreRecommender, evaluate,
+ RECOMMENDATION_TOP_K, MAX_USERS, DEFAULT_DROP_DOWN_USER_ID) = initialize_recommendation_system()
+
+if "evaluation_results" not in st.session_state:
+    st.session_state.evaluation_results = initial_results
+    st.session_state.evaluation_duration = initial_duration
 
 collaborative_recommender = CollaborativeRecommender(graph)
 cold_start_recommender = ColdStartRecommender(graph)
@@ -28,7 +52,7 @@ same_genre_recommender = SameGenreRecommender(graph, movies_dataframe)
 recommendation_tab, evaluation_tab = st.tabs(["Recommendations", "Evaluations"])
 
 with evaluation_tab:
-    user_limit = st.selectbox("Users to test", range(1, 11), index=4)
+    user_limit = st.selectbox("Users to test", range(1, 11), index=6)
     top_k_value = st.selectbox("K value", range(1, 11), index=9)
     if st.button("Evaluate"):
         with st.status("Wait while evaluations are processed, this will take around 2 minutes"):
@@ -42,10 +66,12 @@ with evaluation_tab:
                 "Same-Genre": SameGenreRecommender(evaluation_graph, movies_dataframe),
                 "Cold-Start": ColdStartRecommender(evaluation_graph)
             }
-            results = {name: evaluate(recommender, testing_dataframe, top_k_value, user_limit) for name, recommender in evaluation_recommenders.items()}
-            duration = time.time() - start_time
-        st.table(pd.DataFrame(results, index=["Precision", "Recall", "F1", "HitRate"]).T)
-        st.write(f"Total time: {duration:.2f} seconds")
+            st.session_state.evaluation_results = {name: evaluate(recommender, testing_dataframe, top_k_value, user_limit) for name, recommender in evaluation_recommenders.items()}
+            st.session_state.evaluation_duration = time.time() - start_time
+    
+    if "evaluation_results" in st.session_state:
+        st.table(pandas.DataFrame(st.session_state.evaluation_results, index=["Precision", "Recall", "F1", "HitRate"]).T)
+        st.write(f"Total time: {st.session_state.evaluation_duration:.2f} seconds")
 
 with recommendation_tab:
     st.title("Movie Recommendation System")
@@ -72,7 +98,7 @@ with recommendation_tab:
         else:
             recommendations = get_recommendations(selected_user, recommender_type, RECOMMENDATION_TOP_K)
         
-        score_texts = {"Cold-Start": "number of users who watched this movie", "Collaborative": "similar users and their ratings of the movie", "Content-Based": "similarity to your past watches", "Same-Genre": "average rating"}
+        score_texts = {"Cold-Start": "number of users who watched this movie", "Collaborative": "similar users and their ratings of the movie", "Content-Based": "similarity to your past watches", "Same-Genre": "same genre movies and their average rating"}
         score_text = score_texts.get(recommender_type, "")
 
         st.subheader(f"Top {RECOMMENDATION_TOP_K} Recommendations")
@@ -91,7 +117,7 @@ with recommendation_tab:
         
         if recommender_type == "Collaborative":
             st.subheader("Graph Visualization")
-            graph_visualization = nx.Graph()
+            graph_visualization = networkx.Graph()
             selected_user_node = f"U{selected_user}"
             graph_visualization.add_node(selected_user_node, node_type="selected_user")
             for user_id in similar_users:
@@ -105,11 +131,11 @@ with recommendation_tab:
                     if graph_visualization.has_node(f"M{movie_id}"):
                         graph_visualization.add_edge(user_node_id, f"M{movie_id}")
             
-            node_positions = nx.spring_layout(graph_visualization, k=1, iterations=50)
-            nx.draw_networkx_nodes(graph_visualization, node_positions, nodelist=[selected_user_node], node_color='red', node_size=200)
-            nx.draw_networkx_nodes(graph_visualization, node_positions, nodelist=[node_id for node_id, node_data in graph_visualization.nodes(data=True) if node_data.get('node_type') == 'similar_user'], node_color='lightblue', node_size=100)
-            nx.draw_networkx_nodes(graph_visualization, node_positions, nodelist=[node_id for node_id, node_data in graph_visualization.nodes(data=True) if node_data.get('node_type') == 'recommended_movie'], node_color='green', node_size=150)
-            nx.draw_networkx_edges(graph_visualization, node_positions)
-            plt.legend(['Selected User', 'Similar Users', 'Recommended Movies'], loc='upper right', fontsize=6)
-            plt.axis('off')
-            st.pyplot(plt)
+            node_positions = networkx.spring_layout(graph_visualization, k=1, iterations=50)
+            networkx.draw_networkx_nodes(graph_visualization, node_positions, nodelist=[selected_user_node], node_color='red', node_size=200)
+            networkx.draw_networkx_nodes(graph_visualization, node_positions, nodelist=[node_id for node_id, node_data in graph_visualization.nodes(data=True) if node_data.get('node_type') == 'similar_user'], node_color='lightblue', node_size=100)
+            networkx.draw_networkx_nodes(graph_visualization, node_positions, nodelist=[node_id for node_id, node_data in graph_visualization.nodes(data=True) if node_data.get('node_type') == 'recommended_movie'], node_color='green', node_size=150)
+            networkx.draw_networkx_edges(graph_visualization, node_positions)
+            matplotlib_pyplot.legend(['Selected User', 'Similar Users', 'Recommended Movies'], loc='upper right', fontsize=6)
+            matplotlib_pyplot.axis('off')
+            st.pyplot(matplotlib_pyplot)
