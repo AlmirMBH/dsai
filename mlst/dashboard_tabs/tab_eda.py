@@ -4,13 +4,12 @@ from data_ingestion import get_data
 from dataset_aggregation_by_day import preprocess
 
 def render_eda():
-    """Render EDA tab."""
-    bookings, events, weather, _ = get_data()
+    bookings, events, weather, _, bus_schedules = get_data()
     if len(bookings) == 0 or len(events) == 0:
         st.write("No datasets available. Please generate datasets first.")
         return
     
-    df = preprocess(bookings, events, weather)
+    df = preprocess(bookings, events, weather, bus_schedules)
     st.header("Exploratory Data Analysis")
     
     fig1, ax1 = plt.subplots(figsize=(12, 4))
@@ -41,5 +40,14 @@ def render_eda():
     
     fig5, ax5 = plt.subplots(figsize=(10, 4))
     df.boxplot(column='demand', by='event_intensity', ax=ax5)
+    plt.suptitle('')
     ax5.set_title('Rooms Sold by Event Intensity')
     st.pyplot(fig5)
+
+    st.subheader("Transport Analysis")
+    fig6, ax6 = plt.subplots(figsize=(10, 4))
+    df.plot.scatter(x='bus_trip_count', y='demand', ax=ax6)
+    ax6.set_title('Rooms Sold vs Total Bus Arrivals')
+    ax6.set_xlabel('Total Bus Arrivals')
+    ax6.set_ylabel('Rooms Sold')
+    st.pyplot(fig6)

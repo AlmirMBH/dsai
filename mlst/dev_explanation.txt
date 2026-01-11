@@ -1,0 +1,131 @@
+SYSTEM CONFIGURATION
+- Control: The file `config.py` acts as the single source of truth for the entire project. It allows adins to change how the 'world' behaves without touching any of the code in files.
+- Simulation Timeline: Sets the exact start and end dates for the data generation and defines the date when the AI recommendations "go live", see RECOMMENDATION_START_DATE.
+- Business Rules: Defines the success rates of the system, such as the 15% conversion boost for recommendations and the 30% base loyalty rate for guests.
+- Limits: Sets the boundaries for "clean" data, such as the maximum guest age (120) and the maximum event attendance (100,000). The cleaning tools in `data_cleaning.py` use these rules to find and remove errors.
+- Dashboard Defaults: Sets the standard view for the user, such as the default 30-day forecast period and the 5 recommended events per guest.
+
+STARTUP
+- The file `main.py` starts both the API and the Dashboard at the same time.
+
+ENDPOINTS
+- The file `api.py` allows other tools to get recommendations and itineraries.
+
+TECHNOLOGIES
+- Python
+- Streamlit: Frontend.
+- FastAPI: Backend.
+- Pandas: Manages tables.
+- Scikit-learn: A tool for grouping guests and calculating similarities. It provides the mathematical rules for the K-Means and Cosine Similarity methods.
+- Prophet: A model for demand prediction. It identifies patterns in past dates to calculate future booking numbers.
+- Matplotlib: Used for charts and graphs. It draws the lines and bars for the visual reports in the dashboard.
+- Uvicorn: A server that runs the background processes.
+- LRU Caching (Technology): After the system cleans the datasets once, it remembers the clean version so the dashboard stays fast and does not repeat the process every time you switch tabs.
+
+METHODS USED IN DATASETS GENERATION
+- Sine-Wave (Function) [https://en.wikipedia.org/wiki/Sine_wave]: A formula used to simulate cycles in `dataset_generators/generate_weather.py`. For example, it creates a rise and fall in temperature that peaks in July and hits the lowest point in January.
+- Poisson Distribution [https://en.wikipedia.org/wiki/Poisson_distribution]: A rule used to decide how many events happen in a day in `dataset_generators/generate_events.py`. For example, if the average is 2, it might generate 1 event today and 3 tomorrow so the schedule varies.
+- Normal Distribution (Bell Curve) [https://en.wikipedia.org/wiki/Normal_distribution]: A method used to add noise in `dataset_generators/generate_weather.py`. For example, it ensures that summer days are slightly cooler or hotter than the average.
+- Extra bookings: We generate bookings in two steps in `dataset_generators/generate_bookings.py` because of a logical dependency. First, we create "Normal Bookings" to see who is visiting. We must do this first because the system can only suggest events to guests who are already registered. Finally, we generate "Success Bookings" for guests who liked the suggestions and booked another stay. We do this twice because we cannot know who the "Success" guests are until the suggestions are finished.
+
+METHODS USED IN THE APPLICATION
+- Prophet (Model) [https://facebook.github.io/prophet/]: Predicts future hotel room demand in `forecast.py`. For example, if bookings spike on Saturdays, the model learns this pattern and predicts higher numbers for future Saturdays to calculate the future booking and revenue numbers.
+- K-Means (Method) [https://en.wikipedia.org/wiki/K-means_clustering]: Groups guests into "Personas" in `personas.py` based on similar habits. It analyzes three features: age, average spending per night, and total rooms booked. For example, it identifies that a group of guests are around age 25, spend similar amounts, and book a similar number of rooms, so it places them in the same category to suggest events that worked well for that specific group.
+- TF-IDF (Technique) [https://en.wikipedia.org/wiki/Tf%E2%80%93idf]: Identifies what makes a user unique in `recommend.py` by finding words they use often that are rare in the rest of the city. For example, once it identifies that "Jazz" is a defining interest for one guest because it appears in their history but not in others, the system uses this rare word to find and suggest events containing "Jazz" as perfect matches to find the important words in event descriptions.
+- Cosine Similarity (Concept) [https://en.wikipedia.org/wiki/Cosine_similarity]: Measures closeness between items in `recommend.py`. For example, if two guests both enjoy "Rock Concerts" and "Museums," the system gives them a high score and treats them as similar to calculate how well an event matches a guest's interests.
+- Difference-in-Differences (DID) [https://en.wikipedia.org/wiki/Difference_in_differences]: A logic used to find the impact of suggestions in `impact.py`. For example, if everyone's bookings go up by 10% in July, but the group with suggestions goes up by 15%, the system identifies that the suggestions caused the extra 5% to calculate the extra bookings specifically caused by recommendations.
+- Hybrid Filtering: A method that uses two ways to suggest events in `recommend.py`. For example, it combines what other similar guests liked with what matches the guest's personal interests to provide a list of activities. This combines preferences specific to the guest's Persona with individual interests for better suggestions.
+- Seasonal Mean Imputation [https://en.wikipedia.org/wiki/Imputation_(statistics)]: A method used to fill holes in the data. For example, if a temperature is missing in December, the system fills it with the average of all other Decembers in the file. We use this method in `forecast.py` and `dataset_aggregation_by_day.py` to fill in missing city information, like temperature and city activity, so the forecasting model can calculate a prediction without crashing or making a mistake.
+- Data Standardization (Z-Score) [https://en.wikipedia.org/wiki/Standard_score]: A method that scales numbers to a common range in `personas.py`. For example, it turns Age 25 and Price 500 into small decimals so the mathematical models can compare them fairly to make numbers like age and price comparable for the models.
+
+ALGORITHMS USED IN DATA GENERATION
+- Deterministic Group Assignment [https://en.wikipedia.org/wiki/A/B_testing]: Uses a math rule (ID % 100) to split guests into "Control" and "Treatment" groups. Defined in `config.py` as 20% for the "Control" group to follow standard A/B testing rules. For example, if the result is 25 (higher than 20), the guest is in the "Treatment" group. We use this algorithm in `generate_web_analytics.py`, `generate_bookings.py`, and `impact.py` to keep the test groups consistent.
+- Seasonal Sine-Wave Simulation [https://en.wikipedia.org/wiki/Sine_wave]: A formula used to calculate realistic city temperatures. For example, it forces the temperature to rise slowly during spring and fall slowly during autumn to create a smooth curve for the year. We use this algorithm in `generate_weather.py` to create the natural weather patterns in the dataset.
+- Demand Scaling: Calculates hotel demand by multiplying a base number by city factors. Defined in `config.py` as 100 base bookings per day to create a manageable simulation. For example, it starts with 100 bookings, adds +25% if a festival is happening, and adds a random daily fluctuation (+/- 15%) for realism. We use this algorithm in `generate_bookings.py` to decide how many people visit the hotel.
+- Loyalty Selection: Decides if a guest returns to the hotel. Defined in `config.py` as a 30% base chance to match real-world hotel loyalty averages. For example, the system starts with a 30% chance but drops it to 9% for guests who received no suggestions. We use this algorithm in `generate_bookings.py` to simulate how recommendations build guest loyalty.
+- Schedule Generation: Calculates bus arrivals using time patterns with a random 5% daily variance. For example, it creates a trip every 7 minutes during the morning rush but only every 25 minutes late at night, with some trips added or cancelled daily to simulate real service. We use this algorithm in `generate_bus_schedules.py` to create a realistic city transport schedule.
+- Data Pollution: Adds errors until 5% of the data is corrupted. Defined in `config.py` at 5% to match real-world averages for dirty data. For example, it loops through the file until exactly 5% of the cells contain mistakes. We use this algorithm in `dataset_polluter.py` to test our data cleaning tools.
+
+ALGORITHMS USED IN THE APPLICATION
+- Location Matching: Links events to buses by matching words. For example, an event at "Ziggo Dome" is linked to the "Ziggo Dome" bus stop because the names share the same words. We use this algorithm in `recommend.py` to provide transport suggestions for every event.
+- Cartesian Product Date Filtering [https://en.wikipedia.org/wiki/Cartesian_product]: Joins every city event with every guest booking to create a master list of all possible matches. It is like pairing every single event name with every single guest name to see what sticks. For example, it checks every city event against a guest's stay to see if a "Jazz Night" happens between their arrival and departure dates. We use this algorithm in `recommend.py` to ensure suggested events happen while the guest is in the city.
+- Time-Series Reindexing [https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.reindex.html]: A logic that fills gaps in the calendar. For example, if no one booked a room on a Tuesday, the system adds that date to the list with a "0" demand so the model understands the quiet day. We use this algorithm in `dataset_aggregation_by_day.py` to prepare the data for the forecasting model.
+- Persona Matching: A logic that identifies group interests in `recommend.py`. For example, it calculates the "average interest" of a Persona (guests) to suggest new events that match the profile of that specific group. We use this algorithm to make suggestions even for guests with very little personal history.
+
+DATA PRE-PROCESSING
+- Step 1 (Ingestion): Loads the raw files into the memory. This happens in `data_ingestion.py`.
+- Step 2 (Deduplication): Removes duplicate rows to ensure every record is unique. For example, if a booking appears twice by mistake, the system keeps only one copy. This logic is inside `data_cleaning.py`.
+- Step 3 (Type Correction): Fixes formatting errors where text is mixed with numbers. For example, it removes extra words like "years" from ages, "event" from event names, or "C" from temperatures so the computer can treat them as pure numbers. This logic is inside `data_cleaning.py`.
+- Step 4 (Validation): Corrects or removes rows with impossible logic. For example, it fixes bookings where the departure date is before arrival, removes dates that fall outside the simulation period, and ensures numbers like rainfall are never negative. This logic is inside `data_cleaning.py`.
+- Step 5 (Outlier Removal): Finds impossible values using the rules in `config.py`. For example, it removes guests older than 120, event crowds larger than 100,000, or temperatures that are physically impossible for the city. This logic is inside `data_cleaning.py`.
+- Step 6 (Imputation): Fills holes in the data using the middle value (median) or labels. For example, it fills missing prices and temperatures with the median, missing countries with the text "Unknown," and missing clicks with "0." Columns that are allowed to be empty, like "deleted_at" are skipped. This logic is inside `data_cleaning.py`. For forecasting, the system uses a more advanced method in `dataset_aggregation_by_day.py` to fill missing temperatures with the monthly average.
+- Step 7 (Final Formatting): Ensures all columns are in the correct format. For example, it turns text dates into proper computer dates so they can be sorted and filtered. This logic is inside `data_cleaning.py`.
+- Step 8 (Quality Measurement): Calculates how "complete" the data is after all steps are finished. For example, it checks if 100% of the cells (excluding the "deleted_at" column) are now filled so the user can see the improvement on the "Data Processing" tab. This happens at the end of `data_cleaning.py`.
+
+EDA
+- Step 1 (Daily Aggregation): Groups thousands of individual bookings into daily totals for the whole hotel. This happens in `dataset_aggregation_by_day.py`.
+- Step 2 (Gap Filling): Uses Time-Series Reindexing to add missing dates where zero rooms were sold. This ensures the graphs show a continuous timeline. This happens in `dataset_aggregation_by_day.py`.
+- Step 3 (Metric Calculation): Calculates performance numbers like ADR (Average Daily Rate) and RevPAR (Revenue per Available Room). For example, it divides total money by total rooms to find the hotel's efficiency. This happens in `dataset_aggregation_by_day.py`.
+- Step 4 (Event Intensity): Calculates how "busy" a day is by summing the expected attendance of every city event. This is more accurate than just counting events because one large festival with 50,000 guests has a much bigger impact on room demand than three small art shows with 100 guests each. This happens in `dataset_aggregation_by_day.py`.
+- Step 5 (Correlation Merging): Combines sales, weather, city activity, and bus trip counts into a single daily table. This allows the system to "connect the dots" between different factors. For example, it provides the "Influencing Factors" (Regressors). These are the extra clues the model uses to understand that a festival or sunny weather will increase sales, while rain might decrease them. This happens in `dataset_aggregation_by_day.py`.
+- Step 6 (Visualization): Turns the merged data into charts. This happens in `dashboard_tabs/tab_eda.py`.
+
+Graphs:
+1. Rooms Sold Over Time: Shows the ups and downs of hotel occupancy across the entire simulation period.
+2. Rooms Sold by Month: Identifies which months are the busiest (seasonal trends).
+3. Price (ADR) Distribution: Shows the most common prices guests paid for their rooms.
+4. Revenue (RevPAR) Trend: Shows the real money earned per room over time.
+5. Sales vs Temperature: shows if people book more rooms when it is warm outside.
+6. Sales vs Event Intensity: Shows how much major city festivals boost hotel demand.
+    7. Sales vs Total Bus Arrivals: Shows if hotel demand follows the general movement of the city.
+
+FORECAST
+- Step 1 (Historical Analysis): Takes the last 12 months of daily room sales and revenue data. This happens in `forecast.py`.
+- Step 2 (Pattern Learning): Teaches the Prophet model the natural cycles of the hotel, such as busy weekends or quiet weeknights. This happens in `forecast.py`.
+- Step 3 (Influencing Factors): Adds "Regressors" (clues) like festivals, rain, and temperature to the model. For example, it tells the model that a major festival usually leads to more bookings so it can adjust its guess. This happens in `forecast.py`.
+- Step 4 (Future Logic): Guesses the future weather and city activity using "Seasonal Mean Imputation." For example, it looks at the average of all past Decembers to guess the weather for next December so the model has "future clues" to work with. This happens in `forecast.py`.
+- Step 5 (Prediction Calculation): Generates a forecast for both room demand and hotel revenue. By default, it predicts the next 30 days, but the user can adjust this period in the dashboard. This happens in `forecast.py`.
+- Step 6 (Visualization): Turns the predictions into charts showing the expected future performance of the hotel. This happens in `dashboard_tabs/tab_forecast.py`.
+
+IMPACT
+- Step 1 (Group Identification): Uses the Deterministic Group Assignment rule (ID % 100) to split guests into "Control" and "Treatment" groups. Defined in `config.py` as a 20% / 80% split to provide a large enough testing group while keeping a clear baseline. For example, any guest with an ID ending in 00 to 19 is in the "Control" group (no suggestions), while IDs 20 to 99 are in the "Treatment" group. This allows the system to accurately reconstruct these groups for comparison without saving them in a database. This happens in `impact.py`.
+- Step 2 (Conversion Tracking): Calculates the percentage of simulated suggestions that turned into real clicks and bookings. This measures the success rate of the recommendations by tracking if guests are actually interested in the specific events suggested. For example, if 100 people see a "Jazz Night" suggestion and 8 of them click and book it, the system records an 8% conversion rate to show that the suggestions are relevant. This happens in `impact.py`.
+- Step 3 (Baseline Comparison): Compares the average number of bookings between the two groups after the suggestions were launched. This happens in `impact.py`.
+- Step 4 (Difference-in-Differences): Calculates the "real" growth by comparing how much both groups changed over time. For example, if both groups saw a 10% summer boost, but the group with suggestions saw a 15% increase, the system identifies that only the extra 5% was caused by the suggestions. This ensures that natural city trends, like a busy July, are not mistakenly credited to the system. This happens in `impact.py`.
+- Step 5 (Visualization): Displays the success metrics, including the final percentage of extra revenue and bookings caused by the system. This happens in `dashboard_tabs/tab_impact.py`.
+
+RECOMMENDATIONS
+- Step 1 (Persona Assignment): Groups the guest into a Persona with others who have similar habits. It uses the K-Means method to analyze three features: age, average spending per night, and total rooms booked. For example, it identifies that a group of guests are around age 25, spend similar amounts, and book a similar number of rooms, so it places them in the same category. This allows the system to suggest events that worked well for that specific group. This happens in `personas.py`.
+- Step 2 (Date Filtering): Uses Cartesian Product Date Filtering [https://en.wikipedia.org/wiki/Cartesian_product] to find events that happen during the guest's specific stay (see algorithms used in the application above). This happens in `recommend.py`.
+- Step 3 (Collaborative Filtering): Suggests events that other similar guests in the same Persona group enjoyed. For example, if other guests in the same group enjoyed a museum, the system suggests it to the guest. This happens in `recommend.py`.
+- Step 4 (Content-Based Filtering): Suggests events by matching words in descriptions to the interests of the guest's group. For example, it uses TF-IDF to identify that a group likes "Jazz" and then searches all new event names for that specific word to find a match. This happens in `recommend.py`.
+- Step 5 (Hybrid Merging): Combines the results from both Collaborative Filtering (Step 3) and Content-Based Filtering (Step 4) into one diverse list. It removes any duplicate events that appeared in both methods to give the guest a variety of choices. This happens in `recommend.py`.
+- Step 6 (Transport Linking): Uses Location Matching to find the best bus route for every suggested event. For example, if an event is at "Ziggo Dome," the system finds the bus line that stops there. If no matching stop is found, it labels the transport as "Walk / Taxi." This happens in `recommend.py`.
+- Step 7 (Visualization): Displays the final top recommendations in a clean table for the guest. This happens in `dashboard_tabs/tab_recommendations.py`.
+
+ITINERARY
+- Step 1 (Date Filtering): Uses Cartesian Product Date Filtering [https://en.wikipedia.org/wiki/Cartesian_product] to narrow down the list to only events that happen during the guest's specific stay  (see algorithms used in the application above). This ensures you do not see suggestions for a day after you leave. This happens in `recommend.py`.
+- Step 2 (Match Ranking): Picks the events with the highest "match scores" from the Hybrid list. These scores are calculated using Cosine Similarity [https://en.wikipedia.org/wiki/Cosine_similarity] to measure how closely an event aligns with the guest's Persona's booking history and group interests. For example, it chooses the 3 events that most closely fit the Persona. This happens in `recommend.py`.
+- Step 3 (Daily Organization): Arranges the top matches into a daily schedule while ensuring there are no duplicate events or overlapping times. For example, it suggests a museum in the morning, a park in the afternoon, and a concert in the evening based on the specific time of day. This happens in `recommend.py`.
+- Step 4 (Visualization): Displays the organized schedule in a table where the user can select how many events they want per day. This happens in `dashboard_tabs/tab_itinerary.py`.
+
+RECOMMENDATIONS VS ITINERARY
+- Recommendations: Provides a general "Menu" of events the recommender thinks the guest will like. It includes all top matches, even if multiple events happen at the same time.
+- Itinerary: Provides a chronological "Schedule." It takes the top matches and picks only one event for any given time slot to ensure there are no overlapping plans.
+
+DATASETS GENERATION
+- Step 1 (Climate & Events): Generates the weather using a Sine-Wave and city events using a Poisson rule (see above algorithms and mthods above). The Sine-Wave formula creates natural temperature cycles (hot summers, cold winters), while the Poisson rule ensures the number of events per day varies naturally (some days have 0, others have 5). Expected event attendance is rounded to the nearest 100 to look realistic. This happens in `generate_weather.py` and `generate_events.py`.
+- Step 2 (Transport): Creates bus routes and stops that share the same names as the city venues created in Step 1. It generates a realistic schedule where buses arrive every 7 minutes during the "Morning Rush" but only every 25 minutes late at night. The schedule includes a random 5% daily fluctuation to simulate real-world service. This happens in `generate_bus_schedules.py`.
+- Step 3 (Base Bookings): Creates Base Bookings of the hotel data using Demand Scaling and Loyalty Selection. The system starts with 100 base bookings per day and then multiplies that number based on Step 1. For example, it adds +25% if a festival is happening and +15% if the weather is sunny. The system also simulates loyalty by keeping a "Guest Pool" in its memory; for every new booking, it has a 30% chance to reuse a guest who has already visited instead of creating a new one. This represents guests who visit the hotel naturally due to city events or seasons, independent of the recommendation system. This happens in `generate_bookings.py`.
+- Step 4 (Simulated Analytics): Simulates guests engaging with the recommendation system. It uses the Deterministic Group Assignment rule (ID % 100) to split guests into a 20% Control group (who see nothing) and an 80% Treatment group (see algorithms). For the Treatment group, it records simulated "clicks" and "conversions" based on how well the event matches their stay dates. This happens in `generate_web_analytics.py`.
+- Step 5 (Success Bookings): Creates Success Bookings (based on recommendations) of the hotel data. It looks at the "converted" guests from Step 4 and gives them a 15% chance (Conversion Boost Rate) of booking a return trip. These represent the extra sales caused by the recommendations. This happens in `generate_bookings.py`.
+- Step 6 (Data Pollution): Adds errors to the files until exactly 5% of all data is corrupted, which matches real-world averages for dirty data. It adds 1.5% outliers (like 200-year-old guests), 1.5% duplicate records, and 2% missing values (NaN). This allows the system to test the quality of its cleaning tools. This happens in `dataset_polluter.py`.
+- Step 7 (Master Generation): Runs the scripts in a mandatory sequence: 
+  a) Weather & Events (to create the city foundation)
+  b) Bus Schedules (to link transport to venues)
+  c) Base Bookings (to use the foundation data for demand)
+  d) Web Analytics (to suggest events to those guests)
+  d) Success Bookings (to simulate the result of those suggestions)
+  e) Data Pollution (to corrupt the final results).
+
+This ensures the logical dependencies between every file remain intact. This happens in `generate_all_datasets.py`.

@@ -6,13 +6,12 @@ from dataset_aggregation_by_day import preprocess
 import config
 
 def render_forecast():
-    """Render Forecast tab."""
-    bookings, events, weather, _ = get_data()
+    bookings, events, weather, _, bus_schedules = get_data()
     if len(bookings) == 0 or len(events) == 0:
         st.write("No datasets available. Please generate datasets first.")
         return
     
-    df = preprocess(bookings, events, weather)
+    df = preprocess(bookings, events, weather, bus_schedules)
     st.header("Demand & RevPAR Forecast")
     periods = st.slider("Forecast periods", 7, 90, config.DEFAULT_FORECAST_PERIODS)
     

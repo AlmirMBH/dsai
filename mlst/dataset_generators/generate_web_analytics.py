@@ -21,20 +21,15 @@ def generate_web_analytics():
     events = pd.read_csv(events_file)
     
     bookings['date'] = pd.to_datetime(bookings['date'])
+    bookings['arrival_date'] = pd.to_datetime(bookings['arrival_date'])
+    bookings['departure_date'] = pd.to_datetime(bookings['departure_date'])
     events['date'] = pd.to_datetime(events['date'])
     
     recommendation_start_date = pd.to_datetime(config.RECOMMENDATION_START_DATE)
-    
-    unique_guests = bookings['guest_id'].unique()
-    n_control = int(len(unique_guests) * config.CONTROL_GROUP_PERCENTAGE)
-    control_group = set(np.random.choice(unique_guests, size=n_control, replace=False))
+    control_limit = config.CONTROL_GROUP_PERCENTAGE * 100
     
     analytics = []
     id = 1
-    
-    events_by_date = {}
-    for date, group in events.groupby('date'):
-        events_by_date[date] = group['id'].tolist()
     
     for _, booking in bookings.iterrows():
         booking_date = booking['date']
@@ -43,14 +38,15 @@ def generate_web_analytics():
         if booking_date < recommendation_start_date:
             continue
         
-        if guest_id in control_group:
+        if guest_id % 100 < control_limit:
             continue
         
         rec_date = booking_date - timedelta(days=np.random.randint(1, 8))
         rec_date_str = rec_date.strftime('%Y-%m-%d')
-        rec_datetime = pd.to_datetime(rec_date)
         
-        available_events = events_by_date.get(rec_datetime, [])
+        mask = (events['date'] >= booking['arrival_date']) & (events['date'] <= booking['departure_date'])
+        available_events = events.loc[mask, 'id'].tolist()
+        
         if len(available_events) == 0:
             continue
         

@@ -1,6 +1,6 @@
 # Amsterdam Dataset Generators
 
-This directory contains scripts to generate synthetic datasets for the MLST project, all focused on Amsterdam and spanning December 2023 - February 2026.
+This directory contains scripts to generate synthetic datasets for the MLST project, all focused on Amsterdam. The date range is controlled by `DATASET_START_DATE` and `DATASET_END_DATE` in `config.py`.
 
 ## Datasets Generated
 
@@ -18,14 +18,13 @@ This directory contains scripts to generate synthetic datasets for the MLST proj
 python generate_all_datasets.py
 ```
 
-This generates all datasets in order:
-1. Weather (foundation)
-2. Events
-3. Bus Schedules
-4. Bookings (correlated with events & weather)
-5. Web Analytics (generated from bookings)
-6. Additional Bookings (from conversions)
-7. Dataset Pollution (if enabled in config.py)
+This generates all datasets in a mandatory sequence to maintain logical dependencies:
+1. **Weather & Events** (`generate_weather.py`, `generate_events.py`): Creates the city foundation (climate and activity).
+2. **Bus Schedules** (`generate_bus_schedules.py`): Links transport to the venues created in Step 1.
+3. **Base Bookings** (`generate_bookings.py`): Uses the foundation data to simulate natural hotel demand.
+4. **Web Analytics** (`generate_web_analytics.py`): Suggests events to those guests and tracks engagement.
+5. **Success Bookings** (`generate_bookings.py`): Simulates return trips for guests who converted on suggestions.
+6. **Data Pollution** (`dataset_polluter.py`): Corrupts 5% of the final data to test cleaning tools.
 
 ### Generate Individual Datasets
 
@@ -34,30 +33,15 @@ This generates all datasets in order:
 python generate_events.py
 ```
 
-Options:
-- `--start-date YYYY-MM-DD` (default: 2023-11-01)
-- `--end-date YYYY-MM-DD` (default: 2025-11-30)
-- `--output events.csv` (default: events.csv)
-
 #### Weather
 ```bash
 python generate_weather.py
 ```
 
-Options:
-- `--start-date YYYY-MM-DD` (default: 2023-11-01)
-- `--end-date YYYY-MM-DD` (default: 2025-11-30)
-- `--output weather.csv` (default: weather.csv)
-
 #### Bus Schedules
 ```bash
 python generate_bus_schedules.py
 ```
-
-Options:
-- `--start-date YYYY-MM-DD` (default: 2023-11-01)
-- `--end-date YYYY-MM-DD` (default: 2025-11-30)
-- `--output bus_schedules.csv` (default: bus_schedules.csv)
 
 #### Bookings
 ```bash
@@ -66,13 +50,25 @@ python generate_bookings.py
 
 Bookings should be generated after events and weather to enable correlations.
 
-Options:
-- `--start-date YYYY-MM-DD` (default: 2023-11-01)
-- `--end-date YYYY-MM-DD` (default: 2025-11-30)
-- `--n-accommodations N` (default: 50)
-- `--events-file events.csv` (default: events.csv)
-- `--weather-file weather.csv` (default: weather.csv)
-- `--output bookings.csv` (default: bookings.csv)
+## Generation Logic
+
+### Step 1: Climate & Events
+- **Climate & Events**: Generates the weather using a Sine-Wave and city events using a Poisson rule. The Sine-Wave formula creates natural temperature cycles (hot summers, cold winters), while the Poisson rule ensures the number of events per day varies naturally (some days have 0, others have 5). Expected event attendance is rounded to the nearest 100 to look realistic. This happens in `generate_weather.py` and `generate_events.py`.
+
+### Step 2: Transport
+- **Transport**: Creates bus routes and stops that share the same names as the city venues created in Step 1. It generates a realistic schedule where buses arrive every 7 minutes during the "Morning Rush" but only every 25 minutes late at night. The schedule is static and does not change for city events or seasons. This happens in `generate_bus_schedules.py`.
+
+### Step 3: Base Bookings
+- **Base Bookings**: Creates Base Bookings of the hotel data using Demand Scaling and Loyalty Selection. The system starts with 100 base bookings per day and then multiplies that number based on Step 1. For example, it adds +25% if a festival is happening and +15% if the weather is sunny. The system also simulates loyalty by keeping a "Guest Pool" in its memory; for every new booking, it has a 30% chance to reuse a guest who has already visited instead of creating a new one. This represents guests who visit the hotel naturally due to city events or seasons, independent of the recommendation system. This happens in `generate_bookings.py`.
+
+### Step 4: Simulated Analytics
+- **Simulated Analytics**: Simulates guests engaging with the recommendation system. It uses the Deterministic Group Assignment rule (ID % 100) to split guests into a 20% Control group (who see nothing) and an 80% Treatment group. For the Treatment group, it records simulated "clicks" and "conversions" based on how well the event matches their stay dates. This happens in `generate_web_analytics.py`.
+
+### Step 5: Success Bookings
+- **Success Bookings**: Creates Success Bookings (based on recommendations) of the hotel data. It looks at the "converted" guests from Step 4 and gives them a 15% chance (Conversion Boost Rate) of booking a return trip. These represent the extra sales specifically caused by the AI recommendations. This happens in `generate_bookings.py`.
+
+### Step 6: Data Pollution
+- **Data Pollution**: Adds errors to the files until exactly 5% of all data is corrupted, which matches real-world averages for dirty data. It adds 1.5% outliers (like 200-year-old guests), 1.5% duplicate records, and 2% missing values (NaN). This allows the system to test the quality of the cleaning tools. This happens in `dataset_polluter.py`.
 
 ## Dataset Details
 
@@ -87,17 +83,6 @@ Options:
 - `location` - Event location/venue
 - `expected_attendance` - Number of attendees
 
-**Features:**
-- Includes Amsterdam events:
-  - King's Day (April 27)
-  - Amsterdam Dance Event (ADE) - October
-  - Amsterdam Pride - August
-  - Amsterdam Marathon - October
-  - Amsterdam Light Festival - December
-- More events on weekends and in summer
-- Event times based on event type (conferences/education in morning, concerts/music in evening, festivals all-day, etc.)
-- Real Amsterdam venues (Ziggo Dome, RAI Amsterdam, etc.)
-
 ### Weather Dataset
 
 **Columns:**
@@ -107,12 +92,6 @@ Options:
 - `weather_category` - Weather type (sunny, rainy, cloudy, etc.)
 - `precipitation` - Rainfall in mm
 - `humidity` - Humidity percentage
-
-**Features:**
-- Amsterdam maritime climate
-- Seasonal temperature patterns
-- Precipitation patterns
-- Humidity included
 
 ### Bus Schedules Dataset
 
@@ -124,13 +103,6 @@ Options:
 - `stop_id` - Stop identifier
 - `stop_name` - Stop name with location
 
-**Features:**
-- GVB routes (Lines 15, 18, 21, 22, 24, 26, 48, 65)
-- Amsterdam stops (Centraal Station, Dam, Leidseplein, etc.)
-- Time-of-day included
-- More trips on weekdays
-- Operating hours: 05:30 - 00:30
-
 ### Bookings Dataset
 
 **Columns:**
@@ -141,18 +113,10 @@ Options:
 - Guest information (first_name, last_name, email, age, country)
 - Accommodation details (Amsterdam addresses only)
 
-**Features:**
-- Amsterdam addresses only
-- Guests from around the world
-- Correlated with events (more bookings during events)
-- Correlated with weather (more bookings in warm weather)
-- 50-200 bookings per day (varies based on events/weather)
-- Amsterdam street names and districts
-
 ## Data Consistency
 
 All datasets:
-- Share the same date range: 2023-12-01 to 2026-02-28 (configurable in config.py)
+- Share the same date range (configurable in `config.py`)
 - Focus on Amsterdam only
 - Are date-aligned for easy joins
 - Use consistent date formats (YYYY-MM-DD)

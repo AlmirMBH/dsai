@@ -10,11 +10,11 @@ import config
 
 app = FastAPI()
 
-bookings, events, weather, _ = get_data()
+bookings, events, weather, _, bus_schedules = get_data()
 if len(bookings) == 0 or len(events) == 0:
     raise FileNotFoundError("No datasets available. Please generate datasets first.")
 
-df = preprocess(bookings, events, weather)
+df = preprocess(bookings, events, weather, bus_schedules)
 personas = create_personas(bookings)
 
 @app.get("/forecast/demand")
@@ -28,14 +28,14 @@ def forecast_revpar(periods: int = config.DEFAULT_FORECAST_PERIODS):
     return forecast[['ds', 'yhat']].tail(periods).to_dict('records')
 
 @app.get("/recommend/{guest_id}")
-def recommend(guest_id: int, start_date: date, end_date: date, n: int = config.DEFAULT_RECOMMENDATIONS):
-    recs = recommend_events(guest_id, n, start_date, end_date)
-    return recs[['id', 'date', 'time', 'type', 'name', 'location']].to_dict('records')
+def recommend(guest_id: int, start_date: date, end_date: date, number_of_recommendations: int = config.DEFAULT_RECOMMENDATIONS):
+    recs = recommend_events(guest_id, number_of_recommendations, start_date, end_date)
+    return recs[['id', 'date', 'time', 'type', 'name', 'location', 'bus_route']].to_dict('records')
 
 @app.get("/itinerary/{guest_id}")
-def get_itinerary(guest_id: int, start_date: date, end_date: date, n_per_day: int = config.DEFAULT_EVENTS_PER_DAY):
+def get_itinerary(guest_id: int, start_date: date, end_date: date, number_of_events_per_day: int = config.DEFAULT_EVENTS_PER_DAY):
     days = (end_date - start_date).days + 1
-    recs = recommend_events(guest_id, n=days * n_per_day, start_date=start_date, end_date=end_date)
+    recs = recommend_events(guest_id, number_of_recommendations=days * number_of_events_per_day, start_date=start_date, end_date=end_date)
     
     if len(recs) == 0:
         return {"itinerary": []}
@@ -60,7 +60,7 @@ def get_itinerary(guest_id: int, start_date: date, end_date: date, n_per_day: in
             }
             current_date = event_date
         
-        if len(day_plan["events"]) >= n_per_day:
+        if len(day_plan["events"]) >= number_of_events_per_day:
             continue
         
         day_plan["events"].append({
@@ -69,6 +69,7 @@ def get_itinerary(guest_id: int, start_date: date, end_date: date, n_per_day: in
             "name": event['name'],
             "type": event['type'],
             "location": event['location'],
+            "bus_route": event.get('bus_route', 'Walk / Taxi'),
             "expected_attendance": int(event['expected_attendance'])
         })
     

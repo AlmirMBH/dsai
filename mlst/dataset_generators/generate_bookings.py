@@ -124,7 +124,7 @@ def create_booking(guest_id, guest_info, booking_date, accommodations_df, bookin
                                       p=[0.2, 0.4, 0.3, 0.1])
     
     base_rate = 50 + (acc['stars'] * 20) + np.random.randint(-20, 50)
-    average_daily_rate = max(30, base_rate) * 100
+    average_daily_rate = int(max(30, base_rate) * 100 * np.random.uniform(0.9, 1.1))
     revenue_available_room = (average_daily_rate * stay_nights) // rooms_booked
     
     created_at = booking_date - timedelta(days=np.random.randint(0, 30))
@@ -169,12 +169,12 @@ def calculate_booking_multiplier(date_str, events_by_date, weather_by_date):
     if date_str in events_by_date:
         attendance = events_by_date[date_str]
         # Scale: 0.1% of event attendance might book accommodation
-        # Major events (>100k attendance) boost bookings by 20-30%
-        if attendance > 100000:
+        # Major events boost bookings by 20-30%
+        if attendance > config.EVENT_ATTENDANCE_MAX:
             multiplier += 0.25
-        elif attendance > 50000:
+        elif attendance > config.EVENT_ATTENDANCE_MAX / 2:
             multiplier += 0.15
-        elif attendance > 10000:
+        elif attendance > config.EVENT_ATTENDANCE_MAX / 10:
             multiplier += 0.10
         else:
             multiplier += 0.05
@@ -240,17 +240,9 @@ def generate_bookings(accommodations_df):
     guest_id_counter = 1
     guest_pool = {}  # Reuse guest IDs for repeat visitors
     
-    # Recreate control group using same random seed as web_analytics generation
+    # Define deterministic control group assignment
     recommendation_start_date = datetime.strptime(config.RECOMMENDATION_START_DATE, '%Y-%m-%d')
-    np.random.seed(config.RANDOM_STATE)
-    # Estimate total guests (will be refined as we generate)
-    estimated_total_guests = int(len(date_range) * config.DATASET_BASE_BOOKINGS_PER_DAY * 0.7)  # ~70% new guests
-    control_group_set = set()
-    if estimated_total_guests > 0:
-        control_guest_ids = np.random.choice(range(1, estimated_total_guests + 1), 
-                                            size=int(estimated_total_guests * config.CONTROL_GROUP_PERCENTAGE), 
-                                            replace=False)
-        control_group_set = set(control_guest_ids)
+    control_limit = config.CONTROL_GROUP_PERCENTAGE * 100
     
     base_bookings_per_day = config.DATASET_BASE_BOOKINGS_PER_DAY
     
@@ -259,7 +251,7 @@ def generate_bookings(accommodations_df):
         
         # Calculate booking multiplier
         multiplier = calculate_booking_multiplier(date_str, events_by_date, weather_by_date)
-        n_bookings_today = int(base_bookings_per_day * multiplier)
+        n_bookings_today = int(base_bookings_per_day * multiplier * np.random.uniform(0.85, 1.15))
         n_bookings_today = np.clip(n_bookings_today, config.DATASET_MIN_BOOKINGS_PER_DAY, config.DATASET_MAX_BOOKINGS_PER_DAY)
         
         for _ in range(n_bookings_today):
@@ -277,7 +269,7 @@ def generate_bookings(accommodations_df):
                 
                 # Boost repeat probability for treatment guests after recommendations start
                 if is_after_recommendations:
-                    is_treatment_guest = guest_id not in control_group_set if guest_id <= estimated_total_guests else True
+                    is_treatment_guest = not (guest_id % 100 < control_limit)
                     if is_treatment_guest:
                         # Treatment guests: keep reuse (recommendations help retention)
                         reuse_guest = True
@@ -331,19 +323,13 @@ def generate_additional_bookings(accommodations_df, existing_bookings_df):
         return []
     
     web_analytics = pd.read_csv(web_analytics_file)
-    web_analytics['date_shown'] = pd.to_datetime(web_analytics['date_shown'])
-    recommendation_start_date = pd.to_datetime(config.RECOMMENDATION_START_DATE)
-    
+    web_analytics['date_shown'] = pd.to_datetime(web_analytics['date_shown'])    
     converted = web_analytics[web_analytics['converted'] == 1].copy()
+    
     if len(converted) == 0:
         return []
     
-    converted['days_since_start'] = (converted['date_shown'] - recommendation_start_date).dt.days
-    converted['is_after_start'] = converted['days_since_start'] >= 0
-    
-    base_rate = config.CONVERSION_BASE_RATE
-    boost_rate = config.CONVERSION_BOOST_RATE
-    converted['conversion_prob'] = converted['is_after_start'].map({True: boost_rate, False: base_rate})
+    converted['conversion_prob'] = config.CONVERSION_BOOST_RATE
     
     mask = np.random.random(len(converted)) < converted['conversion_prob']
     converted = converted[mask].drop_duplicates(subset='guest_id')

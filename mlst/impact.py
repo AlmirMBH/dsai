@@ -12,24 +12,22 @@ def measure_impact(bookings, web_analytics):
     bookings_before = bookings[bookings['date'] < recommendation_start_date]
     bookings_after = bookings[bookings['date'] >= recommendation_start_date]
     
-    dataset_start = pd.to_datetime(config.DATASET_START_DATE)
-    dataset_end = pd.to_datetime(config.DATASET_END_DATE)
-    months_before = (recommendation_start_date - dataset_start).days / 30.44
-    months_after = (dataset_end - recommendation_start_date).days / 30.44
+    dataset_start = bookings['date'].min()
+    dataset_end = bookings['date'].max()
+    months_before = (recommendation_start_date - dataset_start).days / config.DAYS_IN_MONTH_AVERAGE
+    months_after = (dataset_end - recommendation_start_date).days / config.DAYS_IN_MONTH_AVERAGE
     
-    equal_window_end = recommendation_start_date + pd.Timedelta(days=int(months_before * 30.44))
+    equal_window_end = recommendation_start_date + pd.Timedelta(days=int(months_before * config.DAYS_IN_MONTH_AVERAGE))
     bookings_after_equal = bookings_after[bookings_after['date'] < equal_window_end]
     
-    np.random.seed(config.RANDOM_STATE)
+    control_limit = config.CONTROL_GROUP_PERCENTAGE * 100
     unique_guests = bookings['guest_id'].unique()
-    control_group_set = set(np.random.choice(unique_guests, 
-                                             size=int(len(unique_guests) * config.CONTROL_GROUP_PERCENTAGE), 
-                                             replace=False))
-    treatment_group = list(set(unique_guests) - control_group_set)
-    control_group = list(control_group_set)
     
-    treatment_after = bookings_after_equal[bookings_after_equal['guest_id'].isin(treatment_group)]
-    control_after = bookings_after_equal[bookings_after_equal['guest_id'].isin(control_group)]
+    control_group = [gid for gid in unique_guests if gid % 100 < control_limit]
+    treatment_group = [gid for gid in unique_guests if not (gid % 100 < control_limit)]
+    
+    treatment_after = bookings_after_equal[~ (bookings_after_equal['guest_id'] % 100 < control_limit)]
+    control_after = bookings_after_equal[bookings_after_equal['guest_id'] % 100 < control_limit]
     
     avg_treatment_after = treatment_after['guest_id'].value_counts().reindex(treatment_group, fill_value=0).mean()
     avg_control_after = control_after['guest_id'].value_counts().reindex(control_group, fill_value=0).mean()

@@ -199,7 +199,7 @@ def generate_events():
             elif venue in ['RAI Amsterdam']:
                 max_att = min(max_att, 10000)
             
-            expected_attendance = np.random.randint(min_att, max_att)
+            expected_attendance = max(100, np.random.randint(min_att // 100, max_att // 100 + 1) * 100)
             
             events.append({
                 'id': id,

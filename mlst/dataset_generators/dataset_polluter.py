@@ -37,10 +37,10 @@ def pollute_dataset(df, dataset_type):
         
         # Outliers (2 columns)
         if 'age' in df.columns:
-            mask = np.random.random(n_rows) < pollution_rate
+            mask = np.random.random(n_rows) < config.POLLUTION_OUTLIER_RATE
             df.loc[mask, 'age'] = np.random.randint(121, 200, mask.sum())
         if 'average_daily_rate' in df.columns:
-            mask = np.random.random(n_rows) < pollution_rate
+            mask = np.random.random(n_rows) < config.POLLUTION_OUTLIER_RATE
             df.loc[mask, 'average_daily_rate'] = -abs(df.loc[mask, 'average_daily_rate'])
         
         # Invalid values (1 type)
@@ -63,10 +63,10 @@ def pollute_dataset(df, dataset_type):
         
         # Outliers (2 columns)
         if 'expected_attendance' in df.columns:
-            mask = np.random.random(n_rows) < pollution_rate
+            mask = np.random.random(n_rows) < config.POLLUTION_OUTLIER_RATE
             df.loc[mask, 'expected_attendance'] = -abs(df.loc[mask, 'expected_attendance'])
         if 'expected_attendance' in df.columns:
-            mask = np.random.random(n_rows) < pollution_rate
+            mask = np.random.random(n_rows) < config.POLLUTION_OUTLIER_RATE
             df.loc[mask, 'expected_attendance'] = df.loc[mask, 'expected_attendance'] * 1000
         
         # Invalid values (1 type)
@@ -89,10 +89,10 @@ def pollute_dataset(df, dataset_type):
         
         # Outliers (2 columns)
         if 'temperature_max' in df.columns:
-            mask = np.random.random(n_rows) < pollution_rate
+            mask = np.random.random(n_rows) < config.POLLUTION_OUTLIER_RATE
             df.loc[mask, 'temperature_max'] = 600  # > 50°C
         if 'precipitation' in df.columns:
-            mask = np.random.random(n_rows) < pollution_rate
+            mask = np.random.random(n_rows) < config.POLLUTION_OUTLIER_RATE
             df.loc[mask, 'precipitation'] = -abs(df.loc[mask, 'precipitation'])
         
         # Invalid values (1 type)
@@ -114,10 +114,10 @@ def pollute_dataset(df, dataset_type):
         
         # Outliers (2 columns)
         if 'clicked' in df.columns:
-            mask = np.random.random(n_rows) < pollution_rate
+            mask = np.random.random(n_rows) < config.POLLUTION_OUTLIER_RATE
             df.loc[mask, 'clicked'] = 2
         if 'converted' in df.columns:
-            mask = np.random.random(n_rows) < pollution_rate
+            mask = np.random.random(n_rows) < config.POLLUTION_OUTLIER_RATE
             df.loc[mask, 'converted'] = 2
         
         # Invalid values (1 type)

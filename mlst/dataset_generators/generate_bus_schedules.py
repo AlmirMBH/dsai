@@ -171,6 +171,9 @@ def generate_bus_schedules():
                     if current_hour >= 24:
                         current_hour = 0
         
+        # Add random 5% variance to daily trips
+        time_slots = np.random.choice(time_slots, size=int(len(time_slots) * np.random.uniform(0.95, 1.05)))
+
         # Generate trips for each route
         for route in GVB_ROUTES:
             for time_slot in time_slots:

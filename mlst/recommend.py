@@ -8,67 +8,63 @@ from personas import create_personas
 import config
 
 def find_events_in_date_ranges(events, date_ranges_df, extra_cols=None):
-    """Find events that fall within any of the given date ranges using cartesian product.
-    
-    TODO: Simplify cartesian product merge trick at final project stage - use explicit loops or pandas cross merge.
-    
-    Args:
-        events: DataFrame with 'date' column
-        date_ranges_df: DataFrame with 'arrival_date' and 'departure_date' columns
-        extra_cols: Optional list of additional columns to preserve from date_ranges_df
-    """
-    events_key = events.reset_index().copy()
-    events_key['_key'] = 1
-    cols_to_copy = ['arrival_date', 'departure_date']
+    """Find events that fall within any of the given date ranges using pandas cross merge."""
+    events_reset = events.reset_index().copy()
+    columns_to_copy = ['arrival_date', 'departure_date']
     if extra_cols:
-        cols_to_copy.extend(extra_cols)
-    ranges_key = date_ranges_df[cols_to_copy].copy()
-    ranges_key['_key'] = 1
-    merged = events_key.merge(ranges_key, on='_key')
+        columns_to_copy.extend(extra_cols)
+    
+    ranges_subset = date_ranges_df[columns_to_copy].copy()
+    merged = events_reset.merge(ranges_subset, how='cross')
     mask = (merged['date'] >= merged['arrival_date']) & (merged['date'] <= merged['departure_date'])
     return merged[mask]
 
-def collaborative_filtering(events, guest_id, bookings, n=config.DEFAULT_RECOMMENDATIONS):
+def collaborative_filtering(events, guest_id, personas, bookings, number_of_recommendations=config.DEFAULT_RECOMMENDATIONS):
     bookings['date'] = pd.to_datetime(bookings['date'])
     bookings['arrival_date'] = pd.to_datetime(bookings['arrival_date'])
     bookings['departure_date'] = pd.to_datetime(bookings['departure_date'])
     events['date'] = pd.to_datetime(events['date'])
     
-    guest_bookings = bookings[bookings['guest_id'] == guest_id]
+    guest_persona = personas[personas['guest_id'] == guest_id]['persona_id'].values
+    if len(guest_persona) == 0:
+        return pd.DataFrame()
+    
+    persona_id = guest_persona[0]
+    persona_guests = personas[personas['persona_id'] == persona_id]['guest_id'].unique()
+    persona_bookings = bookings[bookings['guest_id'].isin(persona_guests)]
+    
+    guest_bookings = persona_bookings[persona_bookings['guest_id'] == guest_id]
     if len(guest_bookings) == 0:
         return pd.DataFrame()
     
-    merged = find_events_in_date_ranges(events, guest_bookings)
-    guest_events = events[events.index.isin(merged['index'])].drop_duplicates()
+    merged_guest = find_events_in_date_ranges(events, guest_bookings)
+    guest_events = events[events.index.isin(merged_guest['index'])].drop_duplicates()
     
     if len(guest_events) == 0:
         return pd.DataFrame()
     
-    merged = find_events_in_date_ranges(events, bookings, extra_cols=['guest_id'])
-    user_item = merged[['guest_id', 'id']].drop_duplicates()
+    merged_all = find_events_in_date_ranges(events, persona_bookings, extra_cols=['guest_id'])
+    user_item = merged_all[['guest_id', 'id']].drop_duplicates()
     user_item['count'] = 1
     user_item_matrix = user_item.pivot_table(index='guest_id', columns='id', values='count', fill_value=0)
     
     if guest_id not in user_item_matrix.index:
         return pd.DataFrame()
     
-    # Calculate similarity between guest and all other users
     user_similarity = cosine_similarity(user_item_matrix.loc[[guest_id]], user_item_matrix)[0]
-    # Get indices sorted by similarity (lowest to highest)
     sorted_indices = user_similarity.argsort()
-    # Take top N most similar users (excluding the guest themselves)
     top_indices = sorted_indices[-config.SIMILAR_USERS_COUNT:]
-    top_indices = top_indices[::-1]  # Reverse to get highest similarity first
-    similar_users = user_item_matrix.index[top_indices[1:]]  # Skip index 0 (guest themselves)
+    top_indices = top_indices[::-1]  
+    similar_users = user_item_matrix.index[top_indices[1:]]  
     
     similar_users_events = user_item_matrix.loc[similar_users].sum()
     guest_events_ids = set(guest_events['id'].values)
     similar_users_events = similar_users_events[~similar_users_events.index.isin(guest_events_ids)]
     
-    top_event_ids = similar_users_events.nlargest(n).index
+    top_event_ids = similar_users_events.nlargest(number_of_recommendations).index
     return events[events['id'].isin(top_event_ids)]
 
-def content_based_filtering(events, guest_id, personas, bookings, n=config.DEFAULT_RECOMMENDATIONS):
+def content_based_filtering(events, guest_id, personas, bookings, number_of_recommendations=config.DEFAULT_RECOMMENDATIONS):
     if len(events) == 0:
         return pd.DataFrame()
     
@@ -88,18 +84,18 @@ def content_based_filtering(events, guest_id, personas, bookings, n=config.DEFAU
         merged = find_events_in_date_ranges(events_shuffled, persona_bookings)
         persona_events = events_shuffled[events_shuffled.index.isin(merged['index'])].drop_duplicates()
     else:
-        return events_shuffled.head(n)
+        return events_shuffled.head(number_of_recommendations)
     
     if len(persona_events) == 0:
-        return events_shuffled.head(n)
+        return events_shuffled.head(number_of_recommendations)
     
     if len(persona_events) == len(events_shuffled):
-        return events_shuffled.head(n)
+        return events_shuffled.head(number_of_recommendations)
     
     events_text = persona_events['type'] + ' ' + persona_events['name'] + ' ' + persona_events['location']
     
     if events_text.fillna('').str.strip().eq('').all():
-        return events_shuffled.head(n)
+        return events_shuffled.head(number_of_recommendations)
     
     vectorizer = TfidfVectorizer()
     vectorizer.fit_transform(events_text.fillna(''))
@@ -108,21 +104,30 @@ def content_based_filtering(events, guest_id, personas, bookings, n=config.DEFAU
     all_tfidf = vectorizer.transform(all_events_text.fillna(''))
     
     persona_tfidf = vectorizer.transform(persona_events['type'] + ' ' + persona_events['name'] + ' ' + persona_events['location'])
-    # Calculate mean TF-IDF vector for persona events
     persona_mean = persona_tfidf.mean(axis=0)
     persona_mean = np.asarray(persona_mean).reshape(1, -1)
-    # Calculate similarity between persona mean and all events
     similarity = cosine_similarity(persona_mean, all_tfidf)[0]
     
-    # Get indices sorted by similarity (lowest to highest)
     sorted_indices = similarity.argsort()
-    # Take top N most similar events
-    top_indices = sorted_indices[-n:]
-    top_indices = top_indices[::-1]  # Reverse to get highest similarity first
+    top_indices = sorted_indices[-number_of_recommendations:]
+    top_indices = top_indices[::-1]  
     return events_shuffled.iloc[top_indices]
 
-def recommend_events(guest_id, n=config.DEFAULT_RECOMMENDATIONS, start_date=None, end_date=None):
-    bookings, events, _, _ = get_data()
+def get_bus_route_for_event(event_location, bus_schedules):
+    if bus_schedules.empty:
+        return "No bus data"
+    
+    stops_routes = bus_schedules[['stop_name', 'route_id']].drop_duplicates()
+    
+    for _, row in stops_routes.iterrows():
+        stop_name_base = row['stop_name'].replace(', Amsterdam', '')
+        if stop_name_base.lower() in event_location.lower():
+            return f"{row['route_id']} ({stop_name_base})"
+    
+    return "Walk / Taxi"
+
+def recommend_events(guest_id, number_of_recommendations=config.DEFAULT_RECOMMENDATIONS, start_date=None, end_date=None):
+    bookings, events, _, _, bus_schedules = get_data()
     personas = create_personas(bookings)
     
     events = events.copy()
@@ -136,14 +141,17 @@ def recommend_events(guest_id, n=config.DEFAULT_RECOMMENDATIONS, start_date=None
             end_date = start_date + timedelta(days=config.DEFAULT_RECOMMENDATION_DAYS)
         events = events[(events['date'].dt.date >= start_date) & (events['date'].dt.date <= end_date)]
     
-    collab_recs = collaborative_filtering(events.copy(), guest_id, bookings, n)
-    content_recs = content_based_filtering(events.copy(), guest_id, personas, bookings, n)
+    collaborative_recommendations = collaborative_filtering(events.copy(), guest_id, personas, bookings, number_of_recommendations)
+    content_based_recommendations = content_based_filtering(events.copy(), guest_id, personas, bookings, number_of_recommendations)
     
-    if len(collab_recs) > 0 and len(content_recs) > 0:
-        result = pd.concat([collab_recs, content_recs]).drop_duplicates(subset=['name']).head(n)
-    elif len(collab_recs) > 0:
-        result = collab_recs.head(n)
+    if len(collaborative_recommendations) > 0 and len(content_based_recommendations) > 0:
+        result = pd.concat([collaborative_recommendations, content_based_recommendations]).drop_duplicates(subset=['name']).head(number_of_recommendations)
+    elif len(collaborative_recommendations) > 0:
+        result = collaborative_recommendations.head(number_of_recommendations)
     else:
-        result = content_recs.head(n)
+        result = content_based_recommendations.head(number_of_recommendations)
+    
+    result = result.copy()
+    result['bus_route'] = result['location'].apply(lambda loc: get_bus_route_for_event(loc, bus_schedules))
     
     return result.sort_values(['date', 'time'])

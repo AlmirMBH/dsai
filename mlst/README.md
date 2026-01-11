@@ -23,22 +23,34 @@ The system is built using Python and the following libraries:
 ## Setup Virtual Environment
 
 ```bash
-python -m venv venv
+python3 -m venv venv
 ```
 
 ## Project Installation
-
 ```bash
 source venv/bin/activate && pip install -r requirements.txt
 ```
 
-## Start Project
+## Generate Datasets (Mandatory)
+```bash
+cd dataset_generators && python generate_all_datasets.py
+```
 
+## Start Project
 ```bash
 source venv/bin/activate && python main.py
 ```
 
 Starts API server (port 8000) and dashboard (port 8501).
+
+## Project Startup Note
+The first time the project is run, loading the datasets and performing initial evaluations may take 2–3 minutes before the project is fully operational. 
+
+
+## Stop the project
+```
+pkill -f streamlit
+```
 
 ### Application Flow
 
@@ -53,30 +65,30 @@ Starts API server (port 8000) and dashboard (port 8501).
 **When `main.py` runs:**
 
 1. **Server Startup**
-   - FastAPI server starts in background thread (port 8000)
-   - Streamlit dashboard starts in background thread (port 8501)
+   - FastAPI server starts (port 8000)
+   - Streamlit dashboard starts (port 8501)
 
 2. **Data Ingestion** (`data_ingestion.py`)
-   - Each dashboard tab calls `data_ingestion.get_data()` when needed
-   - Raw CSV files are loaded from `datasets/` directory (cached)
-   - **Data Cleaning** (`data_cleaning.py`) is applied automatically:
+   - Dashboard tabs call `data_ingestion.get_data()`
+   - Raw CSV files are loaded from `datasets/`
+   - **Data Cleaning** (`data_cleaning.py`) is applied:
      - Remove duplicates
      - Fix invalid values and type errors
      - Handle outliers
-     - Impute missing values (median for numeric, "Unknown" for categorical)
-   - Cleaned data is cached for subsequent requests
+     - Impute missing values (median or seasonal mean)
+   - Cleaned data is cached
 
 3. **Data Processing (per tab)**
-   - **Data Processing Tab**: Loads raw and cleaned data, computes cleaning metadata
-   - **EDA Tab**: Loads cleaned data, applies `dataset_aggregation_by_day.preprocess()` for daily aggregation
-   - **Forecast Tab**: Loads cleaned data, applies daily aggregation, runs Prophet forecasting
-   - **Impact Tab**: Loads cleaned bookings and web_analytics, measures conversion rates and A/B test results
-   - **Recommendations Tab**: Loads cleaned data, generates event recommendations per guest
-   - **Itinerary Tab**: Loads cleaned data, creates daily event itineraries
+   - **Data Processing Tab**: Shows data quality metrics and cleaning operations
+   - **EDA Tab**: Shows trends and transport analysis (bus activity vs demand)
+   - **Forecast Tab**: Runs Prophet forecasting with events, weather, and bus trips
+   - **Impact Tab**: Measures conversion and A/B test results using deterministic groups
+   - **Recommendations Tab**: Shows persona-aware event recommendations
+   - **Itinerary Tab**: Shows daily events and suggested bus routes
 
 4. **API Endpoints**
-   - Use same `data_ingestion.get_data()` for cleaned data
-   - Return forecast results, recommendations, and itineraries
+   - Use same cleaned data
+   - Return forecast, recommendations, and itineraries with transport info
 
 **Note**: Datasets must be generated before starting the application. If datasets are missing, the dashboard displays an error message.
 
@@ -111,7 +123,6 @@ The `config.py` file contains system settings.
 **Impact Simulation:**
 - `BASE_REPEAT_PROBABILITY` - Base probability of repeat guest booking (default: 0.3)
 - `CONTROL_RETENTION_DROP` - Control group retention drop probability (default: 0.7)
-- `CONVERSION_BASE_RATE` - Base conversion rate for additional bookings (default: 0.05)
 - `CONVERSION_BOOST_RATE` - Conversion rate after recommendations (default: 0.15)
 - `BASE_CLICK_RATE` - Base click rate for recommendations (default: 0.15)
 - `BASE_CONVERSION_RATE` - Base conversion rate for web analytics (default: 0.08)
@@ -131,7 +142,7 @@ After making any changes to `config.py`, restart the application to apply the ch
 
 ## Dataset
 
-Synthetic Amsterdam datasets (December 2023 to February 2026):
+Synthetic Amsterdam datasets (dates defined in `config.py`):
 - bookings.csv - Accommodation bookings
 - events.csv - Amsterdam events
 - weather.csv - Daily weather data
@@ -160,33 +171,34 @@ Datasets are generated in order: weather, events, bus schedules, bookings, web a
 
 **Bookings**: Generated day by day. Base bookings per day multiplied by event intensity and weather factors. Guest pool reused with repeat probability:
 - Base: 30% chance of repeat guest
-- After recommendations start: Treatment guests maintain 30% repeat rate, control guests drop to ~9% (70% chance to create new guest instead)
+- After recommendations start: Treatment guests maintain 30% repeat rate, control guests (determined by `guest_id % 100 < 20`) drop to ~9% (70% chance to create new guest instead)
 - *Modeled after*: Hotel booking datasets (Expedia, Airbnb)
 
-**Web Analytics**: Generated from bookings. Recommendations shown 1-7 days before booking date. Control group (20% of guests) excluded from recommendations.
+**Web Analytics**: Generated from bookings. Recommendations shown 1-7 days before booking date. Control group (based on deterministic assignment) excluded from recommendations.
 - *Modeled after*: E-commerce recommendation tracking datasets (RetailRocket, Amazon)
 
 **Additional Bookings**: Generated from converted guests after web analytics generation:
-- Before recommendations start: 5% of conversions lead to bookings
-- After recommendations start: 15% of conversions lead to bookings
+- Intentional Design: Only existing guests (past bookers) receive recommendations and can generate additional bookings. This simulates targeted marketing to a registered guest database.
+- Impact: Converted recommendations have a 15% chance (`CONVERSION_BOOST_RATE`) of leading to a return booking.
 
 ## Methodology
 
-- **Forecasting**: Prophet with event intensity, weather, temporal features
-- **Recommendations**: Hybrid (collaborative + content-based filtering) with K-means personas
+- **Forecasting**: Prophet with event intensity, weather, bus trip counts, and temporal features
+- **Recommendations**: Hybrid (collaborative + content-based filtering) with K-means personas. Collaborative filtering is persona-aware.
 - **Impact Measurement**: 
   - **Conversion Rate**: Percentage of recommendations that convert
   - **A/B Test**: Treatment vs control group comparison (bookings per guest)
   - **Difference-in-Differences (DID)**: Causal impact accounting for trends
+  - **Deterministic Assignment**: Control groups are assigned based on `guest_id % 100`. This ensures consistent group membership across all scripts without external state.
 
 ## Data Processing Pipeline
 
 6-phase data cleaning pipeline:
 
 1. **Data Ingestion** - Load raw datasets from CSV files
-2. **EDA** - Exploratory data analysis and visualization
+2. **EDA** - Exploratory data analysis and transport analysis
 3. **Data Cleaning** - Remove duplicates, fix invalid values, handle outliers
-4. **Data Imputation & Standardization** - Fill missing values (median for numeric, "Unknown" for categorical)
+4. **Data Imputation & Standardization** - Fill missing values (median for numeric, "Unknown" for categorical). Forecast uses seasonal mean imputation.
 5. **Quality Metrics & Validation** - Calculate completeness, track cleaning operations
 6. **Final Display** - Show before/after statistics in dashboard
 
@@ -195,6 +207,7 @@ Datasets are generated in order: weather, events, bus schedules, bookings, web a
 - **Events**: Remove duplicates, fix negative attendance, remove invalid dates, impute missing values
 - **Weather**: Remove duplicates, fix negative precipitation, fix temperature outliers, impute missing values
 - **Web Analytics**: Remove duplicates, fix invalid date formats, drop rows with missing dates, fix invalid boolean values
+- **Bus Schedules**: Remove duplicates, remove invalid dates, impute missing values
 
 Cleaning operations are applied when datasets are loaded via `data_ingestion.get_data()`.
 
@@ -243,8 +256,8 @@ Streamlit web interface accessible at `http://localhost:8501`.
 
 - `GET /forecast/demand?periods=30`
 - `GET /forecast/revpar?periods=30`
-- `GET /recommend/{guest_id}?n=5`
-- `GET /itinerary/{guest_id}?days=3&n_per_day=3`
+- `GET /recommend/{guest_id}?number_of_recommendations=5`
+- `GET /itinerary/{guest_id}?start_date=2024-07-01&end_date=2024-07-03`
 
 ## Dataset References
 
@@ -260,7 +273,7 @@ Synthetic datasets modeled after:
 - Synthetic datasets may not reflect real-world data distributions 100%
 - Forecasting accuracy depends on data quality and temporal patterns
 - Recommendation system uses persona clustering
-- Impact measurement assumes consistent control/treatment group membership
+- Impact measurement uses deterministic control/treatment group membership based on guest IDs to ensure consistency.
 - Data cleaning pipeline handles common issues but may not cover all edge cases
 
 ## Next Steps
