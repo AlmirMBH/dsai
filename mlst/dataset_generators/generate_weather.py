@@ -5,9 +5,8 @@ Amsterdam Weather Dataset Generator
 Generates realistic weather.csv for Amsterdam with:
 - Maritime climate patterns
 - Seasonal temperature variations
-- Realistic precipitation patterns
+- Precipitation patterns
 - Humidity included
-- Date range: November 2023 - November 2025
 """
 
 import pandas as pd
@@ -68,20 +67,31 @@ def generate_weather():
         season = get_season(date)
         climate = AMSTERDAM_CLIMATE[season]
         
-        # Day of year for seasonal variation
+        # Day of year for seasonal variation, e.g. December 1st is day 365
         day_of_year = date.timetuple().tm_yday
         
-        # Base temperature with seasonal sine wave
-        # Peak around July 15 (day 196), trough around January 15 (day 15)
+        # We calculate 2*np.pi * (day_of_year - 15) / 365, which gives us an angle in radians.
+        # (day_of_year - 15) gives us the day offset from January 15.
+        # Dividing by 365 normalizes the day number to a fraction (0 to 1), so that when we multiply
+        # by 2*np.pi (≈ 6.28, one full circle), we get exactly one complete cycle (0 to 2π radians)
+        # over the entire year. Without dividing by 365, we'd get many cycles instead of one.
+        # The angle ranges from -0.25 to 6.02 because subtracting 15 shifts the range.
+        # We pass this angle to np.sin(), which converts it to a value between -1 and +1.
+        # This value (-1 = coldest, +1 = warmest) becomes our seasonal_factor, which we then
+        # use to adjust the base temperature up or down. The "-15" shifts the entire sine wave
+        # pattern by 15 days, making January 15 the zero point.
         seasonal_factor = np.sin(2 * np.pi * (day_of_year - 15) / 365)
         base_temp = climate['avg_temp'] + 7 * seasonal_factor
         
         # Add daily variation
+        # temp_variation is a random offset from normal distribution (mean=0, std=3)
+        # Most values are between -3 and +3°C, but can range roughly from -9 to +9°C
+        # temp_max adds a 2-6°C gap above, temp_min subtracts a 2-6°C gap below
         temp_variation = np.random.normal(0, 3)
         temp_max = base_temp + temp_variation + np.random.uniform(2, 6)
         temp_min = base_temp + temp_variation - np.random.uniform(2, 6)
         
-        # Ensure min < max
+        # Fix edge case: if random variations cause min >= max, set min to max minus 3-8°C gap
         if temp_min >= temp_max:
             temp_min = temp_max - np.random.uniform(3, 8)
         

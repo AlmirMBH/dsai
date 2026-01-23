@@ -2,12 +2,11 @@
 """
 Amsterdam Bus Schedules Dataset Generator
 
-Generates realistic bus_schedules.csv for Amsterdam GVB routes with:
+Generates bus_schedules.csv for Amsterdam GVB routes with:
 - Real GVB routes and stops
 - Time-of-day included
-- Realistic schedule patterns (more trips on weekdays)
+- Schedule patterns (more trips on weekdays)
 - Operating hours: 05:30 - 00:30
-- Date range: November 2023 - November 2025
 """
 
 import pandas as pd

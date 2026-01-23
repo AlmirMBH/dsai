@@ -2,12 +2,11 @@
 """
 Amsterdam Bookings Dataset Generator
 
-Generates realistic bookings.csv for Amsterdam with:
+Generates bookings.csv for Amsterdam with:
 - Amsterdam addresses only
 - Correlations with events and weather
 - 50-200 bookings per day
 - Guests from around the world
-- Date range: November 2023 - November 2025
 """
 
 import pandas as pd
@@ -251,7 +250,7 @@ def generate_bookings(accommodations_df):
         
         # Calculate booking multiplier
         multiplier = calculate_booking_multiplier(date_str, events_by_date, weather_by_date)
-        n_bookings_today = int(base_bookings_per_day * multiplier * np.random.uniform(0.85, 1.15))
+        n_bookings_today = int(base_bookings_per_day * multiplier * np.random.uniform(0.85, 1.15)) # 15%
         n_bookings_today = np.clip(n_bookings_today, config.DATASET_MIN_BOOKINGS_PER_DAY, config.DATASET_MAX_BOOKINGS_PER_DAY)
         
         for _ in range(n_bookings_today):

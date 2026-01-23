@@ -13,15 +13,16 @@ def preprocess(bookings, events, weather, bus_schedules):
     
     daily = bookings.groupby('date').agg({
         'rooms_booked': 'sum',
-        'total_revenue': 'sum',
-        'accommodation_units': 'sum'
+        'total_revenue': 'sum'
     }).reset_index()
+    
+    total_available_units = bookings['accommodation_units'].drop_duplicates().sum()
     
     # Fill gaps in the time series with 0
     all_dates = pd.date_range(start=daily['date'].min(), end=daily['date'].max(), freq='D')
     daily = daily.set_index('date').reindex(all_dates, fill_value=0).reset_index()
     daily.rename(columns={'index': 'date'}, inplace=True)
-    daily['revpar'] = daily['total_revenue'] / daily['accommodation_units'].replace(0, 1)
+    daily['revpar'] = daily['total_revenue'] / total_available_units
     daily['demand'] = daily['rooms_booked']
     
     event_intensity = events.groupby('date')['expected_attendance'].sum().reset_index()

@@ -2,11 +2,10 @@
 """
 Amsterdam Events Dataset Generator
 
-Generates realistic events.csv for Amsterdam with:
+Generates events.csv for Amsterdam with:
 - Major annual events (King's Day, ADE, Pride, Marathon)
 - Seasonal patterns (more in summer, weekends)
-- Real Amsterdam venues
-- Date range: November 2023 - November 2025
+- Amsterdam venues
 """
 
 import pandas as pd
@@ -69,7 +68,7 @@ MAJOR_EVENTS = {
     '2025-11-30': {'type': 'festival', 'name': 'Amsterdam Light Festival Opening', 'venue': 'Canal Route', 'attendance': 100000},
 }
 
-# ADE week events (multiple events during ADE week)
+# Amsterdam Dance Event week events (multiple events during ADE week)
 ADE_WEEKS = {
     2024: {'start': '2024-10-16', 'end': '2024-10-20'},
     2025: {'start': '2025-10-15', 'end': '2025-10-19'}
@@ -140,7 +139,12 @@ def generate_events():
         if is_summer:
             base_events *= 1.5
         
-        # Generate number of events (Poisson distribution)
+        # Randomly pick how many events happen a day (like rolling dice, but weighted toward
+        # base_events)
+        # Poisson can return any non-negative integer (0, 1, 2, 3, 4, 5...), with base_events
+        # as the average
+        # Example: if base_events=6, most likely values are 4-8, but 0-12+ are all possible
+        # max(1, ...) ensures at least 1 event per day (since Poisson could randomly return 0)
         n_events = max(1, int(np.random.poisson(base_events)))
         
         # Add major event if it's a major event day

@@ -16,11 +16,13 @@ TECHNOLOGIES
 - Streamlit: Frontend.
 - FastAPI: Backend.
 - Pandas: Manages tables.
-- Scikit-learn: A tool for grouping guests and calculating similarities. It provides the mathematical rules for the K-Means and Cosine Similarity methods.
+- Scikit-learn: A tool for grouping guests and calculating similarities. It provides the mathematical rules for the
+K-Means and Cosine Similarity methods.
 - Prophet: A model for demand prediction. It identifies patterns in past dates to calculate future booking numbers.
 - Matplotlib: Used for charts and graphs. It draws the lines and bars for the visual reports in the dashboard.
 - Uvicorn: A server that runs the background processes.
-- LRU Caching (Technology): After the system cleans the datasets once, it remembers the clean version so the dashboard stays fast and does not repeat the process every time you switch tabs.
+- LRU Caching (Least Recently Used): After the system cleans the datasets once, it remembers the clean version so the
+dashboard stays fast and does not repeat the process every time you switch tabs.
 
 METHODS USED IN DATASETS GENERATION
 - Sine-Wave (Function) [https://en.wikipedia.org/wiki/Sine_wave]: A formula used to simulate cycles in `dataset_generators/generate_weather.py`. For example, it creates a rise and fall in temperature that peaks in July and hits the lowest point in January.
