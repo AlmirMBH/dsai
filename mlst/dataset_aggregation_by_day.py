@@ -30,11 +30,12 @@ def preprocess(bookings, events, weather, bus_schedules):
     
     weather['rain_flag'] = (weather['precipitation'] > 0).astype(int)
     
-    # Count unique bus trips per day (based on date, time, and route_id)
     if not bus_schedules.empty:
-        bus_trips = bus_schedules.groupby('date').agg({
-            'route_id': 'count' # Simplified: count of stop arrivals as proxy for bus activity
-        }).reset_index()
+        first_stops = bus_schedules.groupby('route_id')['stop_id'].first().to_dict()
+        bus_first_stops = bus_schedules[
+            bus_schedules.apply(lambda row: row['stop_id'] == first_stops.get(row['route_id']), axis=1)
+        ]
+        bus_trips = bus_first_stops.groupby('date').size().reset_index()
         bus_trips.columns = ['date', 'bus_trip_count']
     else:
         bus_trips = pd.DataFrame(columns=['date', 'bus_trip_count'])
@@ -42,6 +43,7 @@ def preprocess(bookings, events, weather, bus_schedules):
     df = daily.merge(event_intensity, on='date', how='left')
     df = df.merge(weather[['date', 'rain_flag', 'temperature_max']], on='date', how='left')
     df = df.merge(bus_trips, on='date', how='left')
+    df['temperature_max'] = df['temperature_max'] / 10.0
     
     df['event_intensity'] = df['event_intensity'].fillna(0)
     df['rain_flag'] = df['rain_flag'].fillna(0)

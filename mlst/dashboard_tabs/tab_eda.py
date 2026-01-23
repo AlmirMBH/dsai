@@ -1,5 +1,6 @@
 import streamlit as st
 import matplotlib.pyplot as plt
+import pandas as pd
 from data_ingestion import get_data
 from dataset_aggregation_by_day import preprocess
 
@@ -38,10 +39,19 @@ def render_eda():
     ax4.set_title('Rooms Sold vs Temperature')
     st.pyplot(fig4)
     
-    fig5, ax5 = plt.subplots(figsize=(10, 4))
-    df.boxplot(column='demand', by='event_intensity', ax=ax5)
+    fig5, ax5 = plt.subplots(figsize=(12, 6))
+    df_plot = df.copy()
+    df_plot['event_intensity_category'] = pd.cut(
+        df_plot['event_intensity'],
+        bins=[-1, 0, 1000, 5000, 20000, float('inf')],
+        labels=['No Events', 'Low (1-1K)', 'Medium (1K-5K)', 'High (5K-20K)', 'Very High (20K+)']
+    )
+    df_plot.boxplot(column='demand', by='event_intensity_category', ax=ax5)
     plt.suptitle('')
     ax5.set_title('Rooms Sold by Event Intensity')
+    ax5.set_xlabel('Event Intensity Category')
+    ax5.set_ylabel('Rooms Sold')
+    plt.xticks(rotation=45, ha='right')
     st.pyplot(fig5)
 
     st.subheader("Transport Analysis")
