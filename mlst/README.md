@@ -6,7 +6,7 @@
 
 ## Project Background
 
-This project was completed as part of the Machine Learning: Supervised Techniques course. The system implements a tourism analytics system for Amsterdam that forecasts demand and RevPAR, and recommends events per persona. It uses time series forecasting (Prophet), hybrid recommendation systems (collaborative + content-based filtering), and causal impact measurement (A/B testing, difference-in-differences).
+This project was completed as part of the Machine Learning: Supervised Techniques course. The system implements a tourism analytics system for Amsterdam that forecasts demand and RevPAR, and recommends events per persona. It uses time series forecasting (Prophet and LSTM), hybrid recommendation systems (collaborative + content-based filtering), and causal impact measurement (A/B testing, difference-in-differences).
 
 ## Technologies
 
@@ -19,12 +19,17 @@ The system is built using Python and the following libraries:
 - **uvicorn**: ASGI server
 - **streamlit**: Web dashboard
 - **matplotlib**: Data visualization
+- **tensorflow**: LSTM forecasting (demand and RevPAR)
 
 ## Setup Virtual Environment
 
+The first setup may take 2–3 minutes. Use Python 3.11 or 3.12 (TensorFlow and Prophet do not support 3.14 yet).
+Because of caching, it is crucial that you follow the setup steps literally and in the order given.
+
 ```bash
-python3 -m venv venv
+python3.12 -m venv venv
 ```
+If you only have `python3`, ensure it is 3.11 or 3.12: `python3 --version`.
 
 ## Project Installation
 ```bash
@@ -81,7 +86,8 @@ pkill -f streamlit
 3. **Data Processing (per tab)**
    - **Data Processing Tab**: Shows data quality metrics and cleaning operations
    - **EDA Tab**: Shows trends and transport analysis (bus activity vs demand)
-   - **Forecast Tab**: Runs Prophet forecasting with events, weather, and bus trips
+   - **Forecast Tab**: Prophet forecasting with events, weather, and bus trips (slider: forecast periods). Backend: `forecast_prophet.py`.
+   - **Forecast LSTM Tab**: LSTM forecasting for demand and RevPAR; same layout as Forecast (slider, forecast vs same period last year). Backend: `lstm_forecast.py` (train on history, predict future; uses month and day-of-week). Models cached in session until Re-run model.
    - **Impact Tab**: Measures conversion and A/B test results using deterministic groups
    - **Recommendations Tab**: Shows persona-aware event recommendations
    - **Itinerary Tab**: Shows daily events and suggested bus routes
@@ -230,10 +236,13 @@ Streamlit web interface accessible at `http://localhost:8501`.
 - Examine relationships (temperature vs demand)
 - Compare event intensity impact
 
-**Forecast Tab:**
+**Forecast Tab (Prophet):**
 - Adjust forecast periods (7-90 days)
-- View demand and RevPAR forecasts
-- Compare actual vs predicted values
+- View demand and RevPAR forecasts; compare forecast vs same period last year
+
+**Forecast LSTM Tab:**
+- Same layout as Forecast (slider 7-90 days, forecast vs same period last year)
+- LSTM trained on history; forecast uses month and day-of-week; models cached until Re-run model
 
 **Impact Tab:**
 - View conversion rate

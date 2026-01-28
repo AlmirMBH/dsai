@@ -1,5 +1,19 @@
 import pandas as pd
 
+
+def _empty_daily_df():
+    return pd.DataFrame({
+        'date': pd.DatetimeIndex([]),
+        'demand': [],
+        'revpar': [],
+        'event_intensity': [],
+        'rain_flag': [],
+        'temperature_max': [],
+        'bus_trip_count': [],
+        'month': [],
+    })
+
+
 def preprocess(bookings, events, weather, bus_schedules):
     bookings['date'] = pd.to_datetime(bookings['date'])
     bookings['arrival_date'] = pd.to_datetime(bookings['arrival_date'])
@@ -15,13 +29,18 @@ def preprocess(bookings, events, weather, bus_schedules):
         'rooms_booked': 'sum',
         'total_revenue': 'sum'
     }).reset_index()
-    
+
+    if daily.empty:
+        return _empty_daily_df()
+
     total_available_units = bookings['accommodation_units'].drop_duplicates().sum()
-    
+    if total_available_units == 0 or pd.isna(total_available_units):
+        total_available_units = 1
+
     # Fill gaps in the time series with 0
     all_dates = pd.date_range(start=daily['date'].min(), end=daily['date'].max(), freq='D')
     daily = daily.set_index('date').reindex(all_dates, fill_value=0).reset_index()
-    daily.rename(columns={'index': 'date'}, inplace=True)
+    daily = daily.rename(columns={daily.columns[0]: 'date'})
     daily['revpar'] = daily['total_revenue'] / total_available_units
     daily['demand'] = daily['rooms_booked']
     
