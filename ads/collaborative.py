@@ -1,4 +1,4 @@
-from config import MAX_SIMILAR_USERS
+from config import MAX_SIMILAR_USERS, COLLABORATIVE_MIN_COMMON_MOVIES
 
 class CollaborativeRecommender:
     """
@@ -42,7 +42,7 @@ class CollaborativeRecommender:
             
             num_common_movies = len(common_movies)
 
-            if num_common_movies < 3:
+            if num_common_movies < COLLABORATIVE_MIN_COMMON_MOVIES:
                 continue
 
             num_user_movies = len(user_movies)
@@ -57,8 +57,7 @@ class CollaborativeRecommender:
         if contributing_users_count == 0:
             return 0
         
-        average_score = total_score / contributing_users_count
-        return average_score
+        return total_score
     
     
     def pick_users_for_movies(self, similar_users, recommended_movie_ids, max_users_per_movie):
