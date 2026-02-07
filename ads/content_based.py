@@ -55,8 +55,24 @@ class ContentBasedRecommender:
         
             similarity_scores = cosine_similarity(movie_vector, user_vectors)
             max_similarity = similarity_scores.max()
-
-            if max_similarity > 0:
-                movie_scores[movie_id] = max_similarity
+            
+            users_who_watched = self.graph.get_movie_users(movie_id)
+            if max_similarity > 0.15 and len(users_who_watched) >= 30:
+                ratings = [self.graph.get_rating(u, movie_id) for u in users_who_watched]
+                avg_rating = sum(ratings) / len(ratings)
+                if avg_rating >= 4.0:
+                    final_score = max_similarity * avg_rating
+                    movie_scores[movie_id] = (max_similarity, avg_rating, final_score)
         
-        return sorted(movie_scores.items(), key=lambda item: item[1], reverse=True)[:top_k]
+        movie_list = list(movie_scores.items())
+        movie_list.sort(key=lambda item: item[1][2], reverse=True)
+        
+        sorted_movies = []
+        for i in range(min(top_k, len(movie_list))):
+            movie_id = movie_list[i][0]
+            similarity = movie_list[i][1][0]
+            rating = movie_list[i][1][1]
+            score_tuple = (similarity, rating)
+            sorted_movies.append((movie_id, score_tuple))
+        
+        return sorted_movies

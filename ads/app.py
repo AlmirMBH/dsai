@@ -11,34 +11,26 @@ def initialize_recommendation_system():
     from cold_start import ColdStartRecommender
     from content_based import ContentBasedRecommender
     from same_genre import SameGenreRecommender
-    from evaluate import evaluate
+    from evaluate import evaluate, run_initial_evaluations
     from config import RATINGS_FILE, MOVIES_FILE, RECOMMENDATION_TOP_K, MAX_USERS, DEFAULT_DROP_DOWN_USER_ID
 
     ratings_dataframe = pandas.read_csv(RATINGS_FILE)
     movies_dataframe = pandas.read_csv(MOVIES_FILE)
     bipartite_graph = BipartiteGraph(ratings_dataframe)
-    shuffled_ratings = ratings_dataframe.sample(frac=1, random_state=42)
-    split_index = int(len(shuffled_ratings) * 0.8)
-    training_dataframe = shuffled_ratings.iloc[:split_index]
-    testing_dataframe = shuffled_ratings.iloc[split_index:]
-    evaluation_graph = BipartiteGraph(training_dataframe)
-    evaluation_recommenders = {
-        "Collaborative": CollaborativeRecommender(evaluation_graph),
-        "Content-Based": ContentBasedRecommender(evaluation_graph, movies_dataframe),
-        "Same-Genre": SameGenreRecommender(evaluation_graph, movies_dataframe),
-        "Cold-Start": ColdStartRecommender(evaluation_graph)
-    }
-    start_time = time.time()
-    results = {name: evaluate(recommender, testing_dataframe, 10, 7) for name, recommender in evaluation_recommenders.items()}
-    return (ratings_dataframe, movies_dataframe, bipartite_graph, results, time.time() - start_time,
+    
+    results, testing_dataframe, evaluation_recommenders, duration = run_initial_evaluations(ratings_dataframe, movies_dataframe)
+
+    return (ratings_dataframe, movies_dataframe, bipartite_graph, results, duration,
             pandas, matplotlib_pyplot, networkx, BipartiteGraph, CollaborativeRecommender, 
             ColdStartRecommender, ContentBasedRecommender, SameGenreRecommender, evaluate,
-            RECOMMENDATION_TOP_K, MAX_USERS, DEFAULT_DROP_DOWN_USER_ID)
+            RECOMMENDATION_TOP_K, MAX_USERS, DEFAULT_DROP_DOWN_USER_ID, 
+            testing_dataframe, evaluation_recommenders)
 
 (ratings_dataframe, movies_dataframe, graph, initial_results, initial_duration,
  pandas, matplotlib_pyplot, networkx, BipartiteGraph, CollaborativeRecommender, 
  ColdStartRecommender, ContentBasedRecommender, SameGenreRecommender, evaluate,
- RECOMMENDATION_TOP_K, MAX_USERS, DEFAULT_DROP_DOWN_USER_ID) = initialize_recommendation_system()
+ RECOMMENDATION_TOP_K, MAX_USERS, DEFAULT_DROP_DOWN_USER_ID,
+ testing_dataframe, evaluation_recommenders) = initialize_recommendation_system()
 
 if "evaluation_results" not in st.session_state:
     st.session_state.evaluation_results = initial_results
@@ -52,21 +44,15 @@ same_genre_recommender = SameGenreRecommender(graph, movies_dataframe)
 recommendation_tab, evaluation_tab = st.tabs(["Recommendations", "Evaluations"])
 
 with evaluation_tab:
-    user_limit = st.selectbox("Users to test", range(1, 11), index=6)
-    top_k_value = st.selectbox("K value", range(1, 11), index=9)
+    user_limit = st.selectbox("Users to test", range(1, 101), index=49)
+    top_k_value = st.selectbox("K value", range(1, 31), index=9)
     if st.button("Evaluate"):
         with st.status("Wait while evaluations are processed, this will take around 2 minutes"):
             start_time = time.time()
-            shuffled_ratings = ratings_dataframe.sample(frac=1, random_state=42)
-            training_dataframe, testing_dataframe = shuffled_ratings.iloc[:int(len(shuffled_ratings)*0.8)], shuffled_ratings.iloc[int(len(shuffled_ratings)*0.8):]
-            evaluation_graph = BipartiteGraph(training_dataframe)
-            evaluation_recommenders = {
-                "Collaborative": CollaborativeRecommender(evaluation_graph),
-                "Content-Based": ContentBasedRecommender(evaluation_graph, movies_dataframe),
-                "Same-Genre": SameGenreRecommender(evaluation_graph, movies_dataframe),
-                "Cold-Start": ColdStartRecommender(evaluation_graph)
-            }
-            st.session_state.evaluation_results = {name: evaluate(recommender, testing_dataframe, top_k_value, user_limit) for name, recommender in evaluation_recommenders.items()}
+            results = {}
+            for name, recommender in evaluation_recommenders.items():
+                results[name] = evaluate(recommender, testing_dataframe, top_k_value, user_limit)
+            st.session_state.evaluation_results = results
             st.session_state.evaluation_duration = time.time() - start_time
     
     if "evaluation_results" in st.session_state:
@@ -98,7 +84,12 @@ with recommendation_tab:
         else:
             recommendations = get_recommendations(selected_user, recommender_type, RECOMMENDATION_TOP_K)
         
-        score_texts = {"Cold-Start": "number of users who watched this movie", "Collaborative": "similar users and their ratings of the movie", "Content-Based": "similarity to your past watches", "Same-Genre": "same genre movies and their average rating"}
+        score_texts = {
+            "Cold-Start": "number of users who watched this movie", 
+            "Collaborative": "user similarity multiplied by the movie rating", 
+            "Content-Based": "title similarity and movie rating", 
+            "Same-Genre": "rating, genre overlap, and popularity"
+        }
         score_text = score_texts.get(recommender_type, "")
 
         st.subheader(f"Top {RECOMMENDATION_TOP_K} Recommendations")
@@ -110,7 +101,14 @@ with recommendation_tab:
             if recommender_type == "Cold-Start":
                 result = f"**{movie_title}**  --  {score}"
             elif recommender_type == "Content-Based":
-                result = f"**{movie_title}**  --  {score*100:.1f}%"
+                similarity = score[0]
+                rating = score[1]
+                result = f"**{movie_title}**  --  Similarity: {similarity*100:.1f}% | Rating: {rating:.1f}"
+            elif recommender_type == "Same-Genre":
+                rating = score[0]
+                genre_count = score[1]
+                popularity_boost = score[2]
+                result = f"**{movie_title}**  --  Rating: {rating:.1f} | Shared Genres: {genre_count} | Popularity: {popularity_boost*100:.0f}%"
             else:
                 result = f"**{movie_title}**  --  {score:.1f}"
             st.write(result)

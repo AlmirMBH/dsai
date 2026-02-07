@@ -18,15 +18,19 @@ class CollaborativeRecommender:
         The Jaccard similarity (two users' movie overlap ratio) is calculated as:
         total_unique_movies = num_user_movies + num_other_user_movies - num_common_movies
         users_similarity = num_common_movies / total_unique_movies
-        For this movie, the score is then calculated as the sum over all similar users:
-        movie_score = sum(users_similarity * other_user_rating) for all similar users who
-        watched the movie. Finally, we return the total score for this movie.
+        For this movie, we score it based on similar users who watched it. For example, if 
+        similar_user_A has 0.3 similarity and rated the movie 4.5, their contribution is 
+        0.3 * 4.5 = 1.35. If similar_user_B has 0.5 similarity and rated it 3.0, their 
+        contribution is 0.5 * 3.0 = 1.5. We sum all contributions from similar users who 
+        watched the movie: movie_score = 1.35 + 1.5 + ... = total_score.
+        Finally, we return the total score for this movie.
         """
         user_movies = self.graph.get_user_movies(user_id)
         if movie_id in user_movies:
             return 0
         
         total_score = 0.0
+        contributing_users_count = 0
         users_who_watched_movie = self.graph.get_movie_users(movie_id)
         
         for other_user_id in users_who_watched_movie:
@@ -37,6 +41,10 @@ class CollaborativeRecommender:
                 continue
             
             num_common_movies = len(common_movies)
+
+            if num_common_movies < 3:
+                continue
+
             num_user_movies = len(user_movies)
             num_other_user_movies = len(other_user_movies)
             total_unique_movies = num_user_movies + num_other_user_movies - num_common_movies
@@ -44,17 +52,20 @@ class CollaborativeRecommender:
             other_user_rating = self.graph.get_rating(other_user_id, movie_id)
             weighted_contribution = similarity * other_user_rating
             total_score += weighted_contribution
+            contributing_users_count += 1
         
-        return total_score
+        if contributing_users_count == 0:
+            return 0
+        
+        average_score = total_score / contributing_users_count
+        return average_score
     
     
     def pick_users_for_movies(self, similar_users, recommended_movie_ids, max_users_per_movie):
         """
-        Here we pick users to display in the graph visualization (not for recommendations).
-        For each recommended movie, we select up to max_users_per_movie users from the
-        similar_users set who watched the movie. We prioritize users not shown with
-        other movies (in the current graph) to increase diversity of users in the graph.
-        If there is not enough unique users, we reuse those that are already used in the graph.
+        For graph visualization: Pick which similar users to show for each recommended movie.
+        For example: Movie A uses user1, user2. Movie B uses user3, user4. Movie C (no new users 
+        left) reuses user1, user2.
         """
         all_picked_users = []
         used_users = set()
@@ -91,9 +102,9 @@ class CollaborativeRecommender:
 
     def recommend(self, user_id, top_k=10):
         """
-        Get all movies that the user watched and find similar users (users who watched
-        any of the same movies). Get all movies and find those that the user has not
-        watched (potential recommendations). Score each unseen movie (see score_movie
+        Get all movies that the target user watched and find similar users (users who watched
+        any of the target user's movies). Get all their movies and find those that the target user
+        has not watched (potential recommendations). Score each unseen movie (see score_movie
         method above). Sort movies by score in descending order (highest scores first)
         and select the top_k movies. Returns recommendations, recommended movie IDs,
         and similar users for graph visualization.

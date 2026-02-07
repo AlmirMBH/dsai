@@ -31,6 +31,7 @@ class SameGenreRecommender:
         """
         user_genres = set()
         movie_scores = {}
+        sorted_movies = []
 
         user_movies = self.graph.get_user_movies(user_id)
                 
@@ -45,7 +46,7 @@ class SameGenreRecommender:
             movie_genres = self.movie_genres.get(movie_id, set())
             shared_genres = user_genres & movie_genres
             
-            if len(shared_genres) > 0:
+            if len(shared_genres) >= 2:
                 users_who_watched = self.graph.get_movie_users(movie_id)
                 
                 if len(users_who_watched) >= 30:
@@ -53,8 +54,26 @@ class SameGenreRecommender:
                     for user_id_who_watched in users_who_watched:
                         rating = self.graph.get_rating(user_id_who_watched, movie_id)
                         ratings.append(rating)
-                
-                    movie_scores[movie_id] = sum(ratings) / len(ratings) if ratings else 0
+                    
+                    average_rating = sum(ratings) / len(ratings) if ratings else 0
+                    if average_rating >= 3.8:
+                        genre_count = len(shared_genres)
+                        # Popularity boost: scales 0-1.0 based on watchers (100+ watchers = max boost of 1.0)
+                        # Prevents blockbusters from dominating, e.g. 50 watchers = 0.5, 200 watchers = 1.0
+                        popularity_boost = min(len(users_who_watched) / 100, 1.0)
+                        final_score = average_rating * genre_count * (1 + popularity_boost)
+                        movie_scores[movie_id] = (average_rating, genre_count, popularity_boost, final_score)
         
-        return sorted(movie_scores.items(), key=lambda item: item[1], reverse=True)[:top_k]
+        movie_list = list(movie_scores.items())
+        movie_list.sort(key=lambda item: item[1][3], reverse=True)
+        
+        for i in range(min(top_k, len(movie_list))):
+            movie_id = movie_list[i][0]
+            rating = movie_list[i][1][0]
+            genre_count = movie_list[i][1][1]
+            popularity_boost = movie_list[i][1][2]
+            score_tuple = (rating, genre_count, popularity_boost)
+            sorted_movies.append((movie_id, score_tuple))
+        
+        return sorted_movies
 
