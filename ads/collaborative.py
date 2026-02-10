@@ -1,4 +1,4 @@
-from config import MAX_SIMILAR_USERS, COLLABORATIVE_MIN_COMMON_MOVIES
+from config import GRAPH_MAX_USERS_PER_MOVIE, COLLABORATIVE_MIN_COMMON_MOVIES
 
 class CollaborativeRecommender:
     """
@@ -132,6 +132,6 @@ class CollaborativeRecommender:
         for movie_id, score in recommendations:
             recommended_movie_ids.append(movie_id)
         
-        similar_users_for_viz = self.pick_users_for_movies(similar_users, recommended_movie_ids, MAX_SIMILAR_USERS)        
+        similar_users_for_viz = self.pick_users_for_movies(similar_users, recommended_movie_ids, GRAPH_MAX_USERS_PER_MOVIE)        
         return recommendations, recommended_movie_ids, similar_users_for_viz
 

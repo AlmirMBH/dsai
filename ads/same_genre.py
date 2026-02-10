@@ -1,3 +1,5 @@
+from config import SAME_GENRE_MIN_RATERS, SAME_GENRE_MIN_RATING
+
 class SameGenreRecommender:
     """
     Recommends movies based on genre similarity to user's watched movies.
@@ -49,14 +51,14 @@ class SameGenreRecommender:
             if len(shared_genres) >= 2:
                 users_who_watched = self.graph.get_movie_users(movie_id)
                 
-                if len(users_who_watched) >= 30:
+                if len(users_who_watched) >= SAME_GENRE_MIN_RATERS:
                     ratings = []
                     for user_id_who_watched in users_who_watched:
                         rating = self.graph.get_rating(user_id_who_watched, movie_id)
                         ratings.append(rating)
                     
                     average_rating = sum(ratings) / len(ratings) if ratings else 0
-                    if average_rating >= 3.8:
+                    if average_rating >= SAME_GENRE_MIN_RATING:
                         genre_count = len(shared_genres)
                         # Popularity boost: scales 0-1.0 based on watchers (100+ watchers = max boost of 1.0)
                         # Prevents blockbusters from dominating, e.g. 50 watchers = 0.5, 200 watchers = 1.0

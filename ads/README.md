@@ -11,7 +11,8 @@ The recommender is built using Python and several libraries:
 - **Streamlit**: Web framework for building the interactive user interface and displaying recommendations.
 - **NetworkX**: Graph library for creating and manipulating the bipartite graph structure, as well as graph layout algorithms for visualization.
 - **pandas**: Data manipulation library for reading and processing CSV files containing movie ratings and metadata.
-- **scikit-learn**: Machine learning library used for TF-IDF vectorization of movie titles and cosine similarity calculations in the content-based recommender.
+- **scikit-learn**: Machine learning library used for cosine similarity calculations in the content-based recommender.
+- **sentence-transformers**: Semantic embedding library used for vectorizing movie titles with the all-MiniLM-L6-v2 model in the content-based recommender.
 - **matplotlib**: Plotting library for rendering the graph visualization with custom node colors and layouts.
 
 ## Note: Performance and Caching
@@ -45,7 +46,7 @@ The `config.py` file contains system settings. The number of users is pretty low
 - **MOVIES_FILE**: Path to the movies CSV file (default: `archive/movies.csv`)
 - **RECOMMENDATION_TOP_K**: Number of top recommendations to return (default: 10)
 - **MAX_USERS**: Maximum number of users displayed in the user selection dropdown (default: 50)
-- **MAX_SIMILAR_USERS**: Number of similar users to show per recommended movie in graph visualization is configurable to keep the visibility of the similar users in the graph. The algorithm prioritizes unique users first, then reuses users if needed.
+- **GRAPH_MAX_USERS_PER_MOVIE**: Number of similar users to show per recommended movie in graph visualization is configurable to keep the visibility of the similar users in the graph. The algorithm prioritizes unique users first, then reuses users if needed.
 - **DEFAULT_DROP_DOWN_USER_ID**: Default user ID selected in the dropdown (default: 5)
 
 After making any changes to `config.py`, press the "Rerun" button in the upper right corner of the Streamlit UI to apply and see the changes.
@@ -61,7 +62,7 @@ This structure enables recommendations if User A and User B both rated the same 
 
 ## Recommender algorithms
 - **Collaborative**: Finds users who watched the same movies as the selected user. It calculates similarity between the selected user and each similar user once per user pair using Jaccard (common movies divided by total unique movies both users watched). For each movie that the selected user has not watched, scores it by summing (similarity × rating) contributions. The similarity is between the selected user and a similar user, and rating is the similar user's rating of that specific unseen movie. Requires minimum 3 common movies between users to ensure quality matches. Then, it ranks all unseen movies by total score and recommends the top k.
-- **Content-Based**: This is an extra feature. It vectorizes all movie titles using TF-IDF. For each movie that the user has not watched, it calculates cosine similarity (range 0-1, unitless ratio) between that movie's title vector and the title vectors of movies the user watched, taking the maximum similarity. Filters for movies with similarity > 0.15, minimum 30 raters, and average rating ≥ 4.0. Then, it ranks unseen movies by similarity × rating score and recommends the top ones.
+- **Content-Based**: This is an extra feature. It vectorizes all movie titles using semantic embeddings (sentence-transformers with all-MiniLM-L6-v2 model). For each movie that the user has not watched, it calculates cosine similarity (range 0-1, unitless ratio) between that movie's title vector and the title vectors of movies the user watched, taking the maximum similarity. Filters for movies with similarity > 0.15, minimum 30 raters, and average rating ≥ 4.0. Then, it ranks unseen movies by similarity × rating score and recommends the top ones.
 - **Same-Genre**: Based on the user's past movie genres to identify their category preferences. Filters for unseen movies sharing at least 2 common genres, minimum 30 raters, and average rating ≥ 3.8. Ranks by (rating × genre_count × popularity_boost) and recommends the top ones.
 - **Cold-Start**: This is an extra feature. It scores movies by how many users rated them (most popular movies). Solves the cold-start problem for new users with no rating history. Note: Not evaluated because it doesn't personalize to user taste - there's no ground truth to compare against.
 
@@ -125,7 +126,7 @@ The frontend is built using Streamlit and is organized into two tabs:
 ## Three Unique Features
 1. **Cold-Start Handling**: Recommends popular movies to new users who have no rating history, solving the cold-start problem where collaborative filtering fails. Not evaluated because it doesn't personalize to user taste.
 
-2. **Content-Based Filtering**: Uses TF-IDF vectorization and cosine similarity on movie titles to find semantically similar movies based on title content, independent of user ratings. Combines similarity scores with movie quality (ratings) for better recommendations.
+2. **Content-Based Filtering**: Uses semantic embeddings and cosine similarity on movie titles to find semantically similar movies based on title content, independent of user ratings. Semantic embeddings can recognize synonyms (e.g., "phone" and "mobile") unlike lexical methods. Combines similarity scores with movie quality (ratings) for better recommendations.
 
 3. **Same-Genre Recommendations**: Filters recommendations to movies sharing genres with the user's watched movies, then ranks by average rating weighted by genre overlap and popularity to ensure quality matches within preferred genres.
 

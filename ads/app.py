@@ -110,7 +110,8 @@ with recommendation_tab:
                 popularity_boost = score[2]
                 result = f"**{movie_title}**  --  Rating: {rating:.1f} | Shared Genres: {genre_count} | Popularity: {popularity_boost*100:.0f}%"
             else:
-                result = f"**{movie_title}**  --  {score:.1f}"
+                display_score = min(score / 100, 0.9)
+                result = f"**{movie_title}**  --  {display_score:.2f}"
             st.write(result)
         
         if recommender_type == "Collaborative":
