@@ -120,7 +120,7 @@ def get_bus_route_for_event(event_location, bus_schedules):
     stops_routes = bus_schedules[['stop_name', 'route_id']].drop_duplicates()
     
     for _, row in stops_routes.iterrows():
-        stop_name_base = row['stop_name'].replace(', Amsterdam', '')
+        stop_name_base = row['stop_name'].replace(f', {config.CITY_NAME}', '')
         if stop_name_base.lower() in event_location.lower():
             return f"{row['route_id']} ({stop_name_base})"
     

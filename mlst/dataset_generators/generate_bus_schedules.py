@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Amsterdam Bus Schedules Dataset Generator
+Bus Schedules Dataset Generator
 
-Generates bus_schedules.csv for Amsterdam GVB routes with:
-- Real GVB routes and stops
+Generates bus_schedules.csv for the configured city with:
+- Routes and stops from config (BUS_ROUTES)
 - Time-of-day included
-- Schedule patterns (more trips on weekdays)
-- Operating hours: 05:30 - 00:30
+- Schedule patterns (weekday vs weekend)
+- Operating hours from config
 """
 
 import pandas as pd
@@ -20,115 +20,6 @@ import config
 
 # Set random seed for reproducibility
 np.random.seed(config.RANDOM_STATE)
-
-# Real GVB bus routes in Amsterdam
-GVB_ROUTES = [
-    {
-        'route_id': 'R015',
-        'name': 'Line 15',
-        'stops': [
-            {'stop_id': 'CS', 'stop_name': 'Centraal Station'},
-            {'stop_id': 'DAM', 'stop_name': 'Dam'},
-            {'stop_id': 'LEI', 'stop_name': 'Leidseplein'},
-            {'stop_id': 'MUS', 'stop_name': 'Museumplein'},
-            {'stop_id': 'VON', 'stop_name': 'Vondelpark'}
-        ]
-    },
-    {
-        'route_id': 'R018',
-        'name': 'Line 18',
-        'stops': [
-            {'stop_id': 'CS', 'stop_name': 'Centraal Station'},
-            {'stop_id': 'DAM', 'stop_name': 'Dam'},
-            {'stop_id': 'LEI', 'stop_name': 'Leidseplein'},
-            {'stop_id': 'VON', 'stop_name': 'Vondelpark'},
-            {'stop_id': 'WES', 'stop_name': 'Westerpark'}
-        ]
-    },
-    {
-        'route_id': 'R021',
-        'name': 'Line 21',
-        'stops': [
-            {'stop_id': 'CS', 'stop_name': 'Centraal Station'},
-            {'stop_id': 'DAM', 'stop_name': 'Dam'},
-            {'stop_id': 'RAI', 'stop_name': 'RAI Amsterdam'},
-            {'stop_id': 'ZUI', 'stop_name': 'Amsterdam Zuid'},
-            {'stop_id': 'SCH', 'stop_name': 'Schiphol Airport'}
-        ]
-    },
-    {
-        'route_id': 'R022',
-        'name': 'Line 22',
-        'stops': [
-            {'stop_id': 'CS', 'stop_name': 'Centraal Station'},
-            {'stop_id': 'WES', 'stop_name': 'Westerpark'},
-            {'stop_id': 'SLT', 'stop_name': 'Sloterdijk'},
-            {'stop_id': 'OSD', 'stop_name': 'Osdorp'}
-        ]
-    },
-    {
-        'route_id': 'R024',
-        'name': 'Line 24',
-        'stops': [
-            {'stop_id': 'CS', 'stop_name': 'Centraal Station'},
-            {'stop_id': 'OLY', 'stop_name': 'Olympic Stadium'},
-            {'stop_id': 'ZUI', 'stop_name': 'Amsterdam Zuid'}
-        ]
-    },
-    {
-        'route_id': 'R026',
-        'name': 'Line 26',
-        'stops': [
-            {'stop_id': 'CS', 'stop_name': 'Centraal Station'},
-            {'stop_id': 'ZUI', 'stop_name': 'Amsterdam Zuid'},
-            {'stop_id': 'SCH', 'stop_name': 'Schiphol Airport'}
-        ]
-    },
-    {
-        'route_id': 'R048',
-        'name': 'Line 48',
-        'stops': [
-            {'stop_id': 'CS', 'stop_name': 'Centraal Station'},
-            {'stop_id': 'REM', 'stop_name': 'Rembrandtplein'},
-            {'stop_id': 'MUS', 'stop_name': 'Museumplein'},
-            {'stop_id': 'VON', 'stop_name': 'Vondelpark'}
-        ]
-    },
-    {
-        'route_id': 'R065',
-        'name': 'Line 65',
-        'stops': [
-            {'stop_id': 'CS', 'stop_name': 'Centraal Station'},
-            {'stop_id': 'DAM', 'stop_name': 'Dam'},
-            {'stop_id': 'REM', 'stop_name': 'Rembrandtplein'},
-            {'stop_id': 'WAT', 'stop_name': 'Waterlooplein'}
-        ]
-    }
-]
-
-# Operating hours
-OPERATING_HOURS = {
-    'start': 5,  # 05:30
-    'end': 0     # 00:30 (next day)
-}
-
-# Schedule patterns (frequency in minutes)
-SCHEDULE_PATTERNS = {
-    'weekday': {
-        'peak_morning': (7, 9, 7),      # 07:00-09:00, every 7 minutes
-        'midday': (9, 17, 12),          # 09:00-17:00, every 12 minutes
-        'peak_evening': (17, 19, 8),    # 17:00-19:00, every 8 minutes
-        'evening': (19, 23, 15),        # 19:00-23:00, every 15 minutes
-        'late_night': (23, 0, 25)       # 23:00-00:30, every 25 minutes
-    },
-    'weekend': {
-        'morning': (6, 10, 15),         # 06:00-10:00, every 15 minutes
-        'midday': (10, 20, 12),         # 10:00-20:00, every 12 minutes
-        'evening': (20, 23, 15),        # 20:00-23:00, every 15 minutes
-        'late_night': (23, 0, 30)       # 23:00-00:30, every 30 minutes
-    }
-}
-
 
 def generate_bus_schedules():
     output_file = os.path.join(config.DATASETS_PATH, 'bus_schedules.csv')
@@ -149,11 +40,11 @@ def generate_bus_schedules():
         day_of_week = date.weekday()
         is_weekend = day_of_week >= 5
         
-        patterns = SCHEDULE_PATTERNS['weekend' if is_weekend else 'weekday']
+        patterns = config.BUS_SCHEDULE_PATTERNS_WEEKDAY_WEEKEND['weekend' if is_weekend else 'weekday']
         time_slots = []
         for pattern_name, (start_hour, end_hour, frequency) in patterns.items():
             current_hour = start_hour
-            current_minute = 30 if start_hour == OPERATING_HOURS['start'] else 0
+            current_minute = 30 if start_hour == config.BUS_OPERATING_HOURS_START_END['start'] else 0
             while True:
                 if end_hour == 0:
                     if current_hour >= 23 and current_minute >= 30:
@@ -174,7 +65,7 @@ def generate_bus_schedules():
         time_slots = np.random.choice(time_slots, size=int(len(time_slots) * np.random.uniform(0.95, 1.05)))
 
         # Generate trips for each route
-        for route in GVB_ROUTES:
+        for route in config.BUS_ROUTES:
             for time_slot in time_slots:
                 # Each trip visits all stops in sequence
                 for stop_idx, stop_info in enumerate(route['stops']):
@@ -197,7 +88,7 @@ def generate_bus_schedules():
                         'time': arrival_time,
                         'route_id': route['route_id'],
                         'stop_id': stop_info['stop_id'],
-                        'stop_name': f"{stop_info['stop_name']}, Amsterdam"
+                        'stop_name': f"{stop_info['stop_name']}, {config.CITY_NAME}"
                     })
                 id += 1
     
@@ -211,7 +102,7 @@ def generate_bus_schedules():
 
 def main():
     """Main function."""
-    parser = argparse.ArgumentParser(description='Generate Amsterdam bus schedules dataset')
+    parser = argparse.ArgumentParser(description='Generate bus schedules dataset for configured city')
     parser.parse_args()
     generate_bus_schedules()
 

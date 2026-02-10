@@ -27,7 +27,7 @@ The first setup may take 2–3 minutes. Use Python 3.11 or 3.12 (TensorFlow and 
 Because of caching, it is crucial that you follow the setup steps literally and in the order given.
 
 ```bash
-python3.12 -m venv venv
+python3.12 -m venv venv # python 3.12 is a mandatory dependency
 ```
 If you only have `python3`, ensure it is 3.11 or 3.12: `python3 --version`.
 
@@ -143,6 +143,18 @@ The `config.py` file contains system settings.
 - `PERSONAS_CLUSTERS` - Number of persona clusters for K-means (default: 3)
 - `SIMILAR_USERS_COUNT` - Number of similar users for collaborative filtering (default: 10)
 - `RANDOM_STATE` - Random seed for reproducibility (default: 42)
+
+**Forecast (Prophet and LSTM):**
+- `FORECAST_REGRESSORS` - Standardized regressor column names used by both Prophet and LSTM
+- `FORECAST_REVPAR_REGRESSORS` - Same regressors plus demand_lag1_std, demand_lag7_std (RevPAR only)
+- `PROPHET_LOGISTIC_MARGIN`, `PROPHET_CHANGEPOINT_PRIOR_SCALE`, `PROPHET_SEASONALITY_PRIOR_SCALE` - Prophet tuning
+- `LSTM_INPUT_DAYS` - LSTM input window length in days (default: 21)
+- `LSTM_MAX_HORIZON` - Maximum forecast horizon in days (default: 90)
+- `LSTM_CALENDAR_COUNT` - Number of calendar features (default: 5)
+- `LSTM_DEFAULT_EPOCHS` - Max training epochs (default: 40)
+
+**City/region (dataset generation):**
+- `CITY_NAME`, `COUNTRY_NAME` - Used in addresses, locations, and stop names (default: Amsterdam, Netherlands)
 
 After making any changes to `config.py`, restart the application to apply the changes.
 

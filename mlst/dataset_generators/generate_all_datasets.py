@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Master Script: Generate All Amsterdam Datasets
+Master Script: Generate All Datasets
 
 Generates all datasets in the correct order:
 1. Weather (foundation)
@@ -8,8 +8,7 @@ Generates all datasets in the correct order:
 3. Bus Schedules (independent)
 4. Bookings (correlates with events and weather)
 
-All datasets span: November 2023 - November 2025
-All datasets focus on: Amsterdam only
+Date range and city/region are set in config (DATASET_START_DATE, DATASET_END_DATE, CITY_NAME).
 """
 
 import sys

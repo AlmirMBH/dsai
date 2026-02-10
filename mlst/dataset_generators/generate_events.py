@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-Amsterdam Events Dataset Generator
+Events Dataset Generator
 
-Generates events.csv for Amsterdam with:
-- Major annual events (King's Day, ADE, Pride, Marathon)
+Generates events.csv for the configured city with:
+- Major annual events and festival week from config
 - Seasonal patterns (more in summer, weekends)
-- Amsterdam venues
+- Venues from config (EVENTS_VENUES_BY_TYPE)
 """
 
 import pandas as pd
@@ -19,60 +19,6 @@ import config
 
 # Set random seed for reproducibility
 np.random.seed(config.RANDOM_STATE)
-
-# Amsterdam-specific venues
-AMSTERDAM_VENUES = {
-    'concert': ['Ziggo Dome', 'AFAS Live', 'Paradiso', 'Melkweg', 'Concertgebouw', 'TivoliVredenburg'],
-    'festival': ['Vondelpark', 'Westerpark', 'Museumplein', 'Dam Square', 'RAI Amsterdam', 'NDSM Werf'],
-    'conference': ['RAI Amsterdam', 'Beurs van Berlage', 'Amsterdam RAI', 'WTC Amsterdam'],
-    'exhibition': ['Rijksmuseum', 'Van Gogh Museum', 'Stedelijk Museum', 'Rembrandt House', 'Anne Frank House', 'NEMO Science Museum'],
-    'sports': ['Johan Cruyff Arena', 'Olympic Stadium', 'Ziggo Dome', 'AFAS Live'],
-    'education': ['University of Amsterdam', 'VU Amsterdam', 'Amsterdam University College', 'Openbare Bibliotheek Amsterdam'],
-    'music': ['Paradiso', 'Melkweg', 'Bitterzoet', 'Sugarfactory', 'De School', 'Shelter'],
-    'arts': ['Stedelijk Museum', 'Rijksmuseum', 'FOAM Photography Museum', 'EYE Film Museum', 'Moco Museum'],
-    'theater': ['Carré Theatre', 'Stadsschouwburg', 'DeLaMar Theatre', 'Royal Theatre'],
-    'comedy': ['Boom Chicago', 'Comedy Café', 'Toomler', 'Comedy Theater']
-}
-
-EVENT_TYPES = ['concert', 'festival', 'conference', 'exhibition', 'sports', 'education', 'music', 'arts', 'theater', 'comedy']
-
-EVENT_NAMES = {
-    'concert': ['Rock Concert', 'Jazz Night', 'Classical Performance', 'Pop Music Show', 'Electronic Music Night', 'Indie Rock Show'],
-    'festival': ['Food & Wine Festival', 'Cultural Festival', 'Film Festival', 'Art Festival', 'Music Festival', 'Street Festival'],
-    'conference': ['Tech Summit Amsterdam', 'Business Conference', 'Medical Symposium', 'Education Forum', 'Innovation Summit'],
-    'exhibition': ['Art Exhibition Opening', 'Photography Show', 'Historical Display', 'Science Exhibition', 'Design Showcase'],
-    'sports': ['Ajax Football Match', 'Marathon Race', 'Tennis Tournament', 'Basketball Game', 'Cycling Event', 'Running Event'],
-    'education': ['University Open Day', 'Workshop Series', 'Seminar', 'Training Course', 'Educational Fair', 'Lecture Series'],
-    'music': ['Live Music Night', 'DJ Set', 'Orchestra Performance', 'Choir Concert', 'Acoustic Session', 'Jazz Session'],
-    'arts': ['Theater Performance', 'Dance Show', 'Opera Night', 'Ballet Performance', 'Art Gallery Opening', 'Contemporary Art Show'],
-    'theater': ['Drama Play', 'Comedy Show', 'Musical', 'Shakespeare Performance', 'Modern Theater', 'Experimental Theater'],
-    'comedy': ['Stand-up Comedy', 'Comedy Night', 'Improv Show', 'Comedy Festival', 'Laugh Out Loud', 'Open Mic Night']
-}
-
-# Major annual events in Amsterdam
-MAJOR_EVENTS = {
-    # 2024
-    '2024-04-27': {'type': 'festival', 'name': "King's Day Celebration", 'venue': 'City-wide', 'attendance': 800000},
-    '2024-08-03': {'type': 'festival', 'name': 'Amsterdam Pride Canal Parade', 'venue': 'Canal Route', 'attendance': 500000},
-    '2024-10-16': {'type': 'music', 'name': 'Amsterdam Dance Event Opening', 'venue': 'Multiple Venues', 'attendance': 400000},
-    '2024-10-20': {'type': 'music', 'name': 'Amsterdam Dance Event Closing', 'venue': 'Multiple Venues', 'attendance': 400000},
-    '2024-10-20': {'type': 'sports', 'name': 'Amsterdam Marathon', 'venue': 'Olympic Stadium', 'attendance': 45000},
-    '2024-12-01': {'type': 'festival', 'name': 'Amsterdam Light Festival Opening', 'venue': 'Canal Route', 'attendance': 100000},
-    
-    # 2025
-    '2025-04-27': {'type': 'festival', 'name': "King's Day Celebration", 'venue': 'City-wide', 'attendance': 800000},
-    '2025-08-02': {'type': 'festival', 'name': 'Amsterdam Pride Canal Parade', 'venue': 'Canal Route', 'attendance': 500000},
-    '2025-10-15': {'type': 'music', 'name': 'Amsterdam Dance Event Opening', 'venue': 'Multiple Venues', 'attendance': 400000},
-    '2025-10-19': {'type': 'music', 'name': 'Amsterdam Dance Event Closing', 'venue': 'Multiple Venues', 'attendance': 400000},
-    '2025-10-19': {'type': 'sports', 'name': 'Amsterdam Marathon', 'venue': 'Olympic Stadium', 'attendance': 45000},
-    '2025-11-30': {'type': 'festival', 'name': 'Amsterdam Light Festival Opening', 'venue': 'Canal Route', 'attendance': 100000},
-}
-
-# Amsterdam Dance Event week events (multiple events during ADE week)
-ADE_WEEKS = {
-    2024: {'start': '2024-10-16', 'end': '2024-10-20'},
-    2025: {'start': '2025-10-15', 'end': '2025-10-19'}
-}
 
 def get_event_time(event_type):
     if event_type in ['conference', 'education']:
@@ -112,10 +58,10 @@ def generate_events():
         is_summer = 6 <= month <= 8  # June, July, August
         year = date.year
         
-        is_major_event_day = date_str in MAJOR_EVENTS
-        if year in ADE_WEEKS:
-            ade_start = datetime.strptime(ADE_WEEKS[year]['start'], '%Y-%m-%d')
-            ade_end = datetime.strptime(ADE_WEEKS[year]['end'], '%Y-%m-%d')
+        is_major_event_day = date_str in config.EVENTS_MAJOR_ANNUAL_DATES
+        if year in config.EVENTS_ADE_WEEK_START_END_BY_YEAR:
+            ade_start = datetime.strptime(config.EVENTS_ADE_WEEK_START_END_BY_YEAR[year]['start'], '%Y-%m-%d')
+            ade_end = datetime.strptime(config.EVENTS_ADE_WEEK_START_END_BY_YEAR[year]['end'], '%Y-%m-%d')
             date_obj = datetime.strptime(date_str, '%Y-%m-%d')
             is_ade_week = ade_start <= date_obj <= ade_end
         else:
@@ -149,9 +95,9 @@ def generate_events():
         
         # Add major event if it's a major event day
         if is_major_event_day:
-            major = MAJOR_EVENTS[date_str]
+            major = config.EVENTS_MAJOR_ANNUAL_DATES[date_str]
             venue = major['venue']
-            location = f"{venue}, Amsterdam"
+            location = f"{venue}, {config.CITY_NAME}"
             
             events.append({
                 'id': id,
@@ -167,18 +113,18 @@ def generate_events():
         
         # Generate additional regular events
         for _ in range(n_events):
-            event_type = np.random.choice(EVENT_TYPES)
+            event_type = np.random.choice(config.EVENTS_TYPES)
             
             # Select venue based on event type
-            if event_type in AMSTERDAM_VENUES:
-                venue = np.random.choice(AMSTERDAM_VENUES[event_type])
+            if event_type in config.EVENTS_VENUES_BY_TYPE:
+                venue = np.random.choice(config.EVENTS_VENUES_BY_TYPE[event_type])
             else:
                 venue = np.random.choice(['City Center', 'Various Locations'])
             
-            location = f"{venue}, Amsterdam"
+            location = f"{venue}, {config.CITY_NAME}"
             
             # Generate event name
-            name_pool = EVENT_NAMES.get(event_type, ['Event'])
+            name_pool = config.EVENTS_DISPLAY_NAMES_BY_TYPE.get(event_type, ['Event'])
             event_name = np.random.choice(name_pool)
             
             # Expected attendance based on event type and venue
@@ -226,7 +172,7 @@ def generate_events():
 
 def main():
     """Main function."""
-    parser = argparse.ArgumentParser(description='Generate Amsterdam events dataset')
+    parser = argparse.ArgumentParser(description='Generate events dataset for configured city')
     parser.parse_args()
     generate_events()
 

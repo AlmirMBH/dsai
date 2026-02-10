@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """
-Amsterdam Weather Dataset Generator
+Weather Dataset Generator
 
-Generates realistic weather.csv for Amsterdam with:
-- Maritime climate patterns
-- Seasonal temperature variations
-- Precipitation patterns
+Generates realistic weather.csv for the configured city with:
+- Seasonal climate from config (WEATHER_SEASONAL_PARAMS)
+- Temperature and precipitation patterns
 - Humidity included
 """
 
@@ -20,17 +19,6 @@ import config
 
 # Set random seed for reproducibility
 np.random.seed(config.RANDOM_STATE)
-
-# Amsterdam climate parameters
-AMSTERDAM_CLIMATE = {
-    'winter': {'avg_temp': 4, 'temp_range': (-2, 10), 'rain_prob': 0.45, 'humidity': (80, 95)},
-    'spring': {'avg_temp': 10, 'temp_range': (3, 18), 'rain_prob': 0.30, 'humidity': (70, 85)},
-    'summer': {'avg_temp': 19, 'temp_range': (12, 28), 'rain_prob': 0.25, 'humidity': (65, 80)},
-    'autumn': {'avg_temp': 12, 'temp_range': (5, 18), 'rain_prob': 0.40, 'humidity': (75, 90)}
-}
-
-WEATHER_CATEGORIES = ['sunny', 'partly_cloudy', 'cloudy', 'rainy', 'windy', 'foggy', 'snowy']
-
 
 def get_season(date):
     """Determine season based on date."""
@@ -65,7 +53,7 @@ def generate_weather():
     for date in date_range:
         date_str = date.strftime('%Y-%m-%d')
         season = get_season(date)
-        climate = AMSTERDAM_CLIMATE[season]
+        climate = config.WEATHER_SEASONAL_PARAMS[season]
         
         # Day of year for seasonal variation, e.g. December 1st is day 365
         day_of_year = date.timetuple().tm_yday
@@ -95,7 +83,7 @@ def generate_weather():
         if temp_min >= temp_max:
             temp_min = temp_max - np.random.uniform(3, 8)
         
-        # Clamp to realistic ranges for Amsterdam
+        # Clamp to realistic ranges for configured city
         temp_max = np.clip(temp_max, climate['temp_range'][0], climate['temp_range'][1])
         temp_min = np.clip(temp_min, climate['temp_range'][0] - 3, climate['temp_range'][1] - 5)
         
@@ -165,7 +153,7 @@ def generate_weather():
 
 def main():
     """Main function."""
-    parser = argparse.ArgumentParser(description='Generate Amsterdam weather dataset')
+    parser = argparse.ArgumentParser(description='Generate weather dataset for configured city')
     parser.parse_args()
     generate_weather()
 

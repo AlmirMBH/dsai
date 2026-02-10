@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Amsterdam Bookings Dataset Generator
+Bookings Dataset Generator
 
-Generates bookings.csv for Amsterdam with:
-- Amsterdam addresses only
+Generates bookings.csv for the configured city with:
+- Addresses from config (street names, districts, city, country)
 - Correlations with events and weather
 - 50-200 bookings per day
 - Guests from around the world
@@ -22,77 +22,25 @@ import config
 # Set random seed for reproducibility
 np.random.seed(config.RANDOM_STATE)
 
-# Sample data pools
-FIRST_NAMES = [
-    'James', 'Mary', 'John', 'Patricia', 'Robert', 'Jennifer', 'Michael', 'Linda',
-    'William', 'Elizabeth', 'David', 'Barbara', 'Richard', 'Susan', 'Joseph', 'Jessica',
-    'Thomas', 'Sarah', 'Charles', 'Karen', 'Christopher', 'Nancy', 'Daniel', 'Lisa',
-    'Matthew', 'Betty', 'Anthony', 'Margaret', 'Mark', 'Sandra', 'Donald', 'Ashley',
-    'Steven', 'Kimberly', 'Paul', 'Emily', 'Andrew', 'Donna', 'Joshua', 'Michelle',
-    'Kenneth', 'Carol', 'Kevin', 'Amanda', 'Brian', 'Dorothy', 'George', 'Melissa',
-    'Timothy', 'Deborah', 'Ronald', 'Stephanie', 'Jason', 'Rebecca', 'Edward', 'Sharon'
-]
-
-LAST_NAMES = [
-    'Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis',
-    'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Wilson', 'Anderson', 'Thomas', 'Taylor',
-    'Moore', 'Jackson', 'Martin', 'Lee', 'Thompson', 'White', 'Harris', 'Sanchez',
-    'Clark', 'Ramirez', 'Lewis', 'Robinson', 'Walker', 'Young', 'Allen', 'King',
-    'Wright', 'Scott', 'Torres', 'Nguyen', 'Hill', 'Flores', 'Green', 'Adams',
-    'Nelson', 'Baker', 'Hall', 'Rivera', 'Campbell', 'Mitchell', 'Carter', 'Roberts'
-]
-
-ACCOMMODATION_TYPES = ['hotel', 'hostel', 'apartment', 'resort', 'villa', 'bed_and_breakfast']
-CAPACITY_TYPES = ['room', 'bed', 'suite', 'apartment', 'villa', 'house']
-GUEST_COUNTRIES = [
-    'United States', 'United Kingdom', 'Germany', 'France', 'Italy', 'Spain',
-    'Netherlands', 'Belgium', 'Switzerland', 'Austria', 'Canada', 'Australia',
-    'Japan', 'China', 'Brazil', 'Mexico', 'Argentina', 'South Africa', 'India', 'Russia'
-]
-
-# Amsterdam-specific accommodation names
-AMSTERDAM_ACCOMMODATION_NAMES = [
-    'Grand Hotel Amsterdam', 'Canal View Hotel', 'Rijksmuseum Hotel', 'Dam Square Hotel',
-    'Vondelpark Hotel', 'Leidseplein Hotel', 'Jordaan Boutique Hotel', 'Museum Quarter Hotel',
-    'Central Station Hotel', 'Anne Frank Hotel', 'Red Light District Hotel', 'Westerpark Hotel',
-    'Amsterdam Marriott', 'Hilton Amsterdam', 'NH Collection Amsterdam', 'Park Plaza Amsterdam',
-    'Hotel Okura Amsterdam', 'Conservatorium Hotel', 'Pulitzer Amsterdam', 'Waldorf Astoria Amsterdam'
-]
-
-# Real Amsterdam street names
-AMSTERDAM_STREETS = [
-    'Damrak', 'Kalverstraat', 'Nieuwendijk', 'Leidsestraat', 'Rokin', 'Singel',
-    'Herengracht', 'Keizersgracht', 'Prinsengracht', 'Jordaan', 'Rozengracht',
-    'Overtoom', 'Vondelstraat', 'P.C. Hooftstraat', 'Van Baerlestraat', 'Museumplein',
-    'Leidseplein', 'Rembrandtplein', 'Waterlooplein', 'Dam Square', 'Spui',
-    'Nieuwezijds Voorburgwal', 'Oudezijds Voorburgwal', 'Warmoesstraat', 'Zeedijk'
-]
-
-AMSTERDAM_DISTRICTS = [
-    'Centrum', 'Jordaan', 'De Pijp', 'Oud-Zuid', 'Oud-West', 'Westerpark',
-    'Oost', 'Noord', 'Zuid', 'Nieuw-West'
-]
-
-
 def generate_accommodations(n_accommodations=None):
     if n_accommodations is None:
         n_accommodations = config.DATASET_N_ACCOMMODATIONS
-    """Generate accommodation data with Amsterdam addresses."""
+    """Generate accommodation data with addresses from config (city, streets, districts)."""
     accommodations = []
     for i in range(1, n_accommodations + 1):
-        acc_type = np.random.choice(ACCOMMODATION_TYPES)
-        cap_type = np.random.choice(CAPACITY_TYPES)
+        acc_type = np.random.choice(config.BOOKINGS_ACCOMMODATION_TYPES)
+        cap_type = np.random.choice(config.BOOKINGS_CAPACITY_TYPES)
         stars = np.random.choice([3, 4, 5], p=[0.3, 0.5, 0.2])
-        acc_name = np.random.choice(AMSTERDAM_ACCOMMODATION_NAMES)
-        if i <= len(AMSTERDAM_ACCOMMODATION_NAMES):
-            acc_name = AMSTERDAM_ACCOMMODATION_NAMES[i-1]
+        acc_name = np.random.choice(config.BOOKINGS_ACCOMMODATION_NAMES)
+        if i <= len(config.BOOKINGS_ACCOMMODATION_NAMES):
+            acc_name = config.BOOKINGS_ACCOMMODATION_NAMES[i-1]
         else:
             acc_name = f"{acc_name} {i}"
         
-        street = np.random.choice(AMSTERDAM_STREETS)
-        district = np.random.choice(AMSTERDAM_DISTRICTS)
+        street = np.random.choice(config.BOOKINGS_STREET_NAMES)
+        district = np.random.choice(config.BOOKINGS_DISTRICTS)
         house_number = np.random.randint(1, 300)
-        address = f"{house_number} {street}, {district}, Amsterdam, Netherlands"
+        address = f"{house_number} {street}, {district}, {config.CITY_NAME}, {config.COUNTRY_NAME}"
         
         accommodations.append({
             'accommodation_id': i,
@@ -286,12 +234,12 @@ def generate_bookings(accommodations_df):
                 pass
             else:
                 # New guest
-                first_name = np.random.choice(FIRST_NAMES)
-                last_name = np.random.choice(LAST_NAMES)
+                first_name = np.random.choice(config.BOOKINGS_GUEST_FIRST_NAMES_POOL)
+                last_name = np.random.choice(config.BOOKINGS_GUEST_LAST_NAMES_POOL)
                 email = f"{first_name.lower()}.{last_name.lower()}@{np.random.choice(['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com'])}"
                 age = np.random.randint(18, 80)
-                guest_country = np.random.choice(GUEST_COUNTRIES)
-                country_id = GUEST_COUNTRIES.index(guest_country) + 1
+                guest_country = np.random.choice(config.BOOKINGS_GUEST_COUNTRIES)
+                country_id = config.BOOKINGS_GUEST_COUNTRIES.index(guest_country) + 1
                 guest_id = guest_id_counter
                 guest_info = {
                     'first_name': first_name,
@@ -365,7 +313,7 @@ def generate_additional_bookings(accommodations_df, existing_bookings_df):
 
 def main():
     """Main function."""
-    parser = argparse.ArgumentParser(description='Generate Amsterdam bookings dataset')
+    parser = argparse.ArgumentParser(description='Generate bookings dataset for configured city')
     parser.add_argument(
         '--n-accommodations',
         type=int,

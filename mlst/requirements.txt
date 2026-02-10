@@ -5,5 +5,5 @@ fastapi
 uvicorn
 streamlit
 matplotlib
-tensorflow
+tensorflow>=2.15.0,<2.18
 
