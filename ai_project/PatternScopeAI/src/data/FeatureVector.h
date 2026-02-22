@@ -8,7 +8,7 @@ private:
 
 public:
     FeatureVector();
-    FeatureVector(const std::vector<double>& f);
+    FeatureVector(const std::vector<double>& initialFeatures);
     FeatureVector(size_t size);
     
     size_t size() const { return features.size(); }
@@ -16,8 +16,8 @@ public:
     void set(size_t index, double value);
     void add(double value);
     
-    void save(std::ostream& os) const;
-    void load(std::istream& is);
+    void save(std::ostream& outputStream) const;
+    void load(std::istream& inputStream);
     
     const std::vector<double>& getFeatures() const { return features; }
     std::vector<double>& getFeatures() { return features; }

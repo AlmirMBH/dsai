@@ -1,41 +1,34 @@
 #include "Engine.h"
 #include "features/PixelGridExtractor.h"
+#include "core/ResourcePath.h"
 #include <fstream>
 #include <map>
 
-/**
- * Load the pre-trained models from the disk for the selected mode. 
- * Avoid reloading if the mode is already active.
- */
 void Engine::loadModels(Mode mode) {
     if (currentMode == mode) {
         return;
     }
-    currentMode = mode; 
+    currentMode = mode;
     performanceStats.clear();
-    
-    std::string modeDirectory = "models/" + std::string(mode == Mode::DIGITS ? "digits" : (mode == Mode::SHAPES ? "shapes" : "symbols"));
-    
-    std::ifstream knnFile(modeDirectory + "/knn.txt"); 
-    knn.load(knnFile);
-    
-    std::ifstream naiveBayesFile(modeDirectory + "/nb.txt"); 
-    naiveBayes.load(naiveBayesFile);
-    
+
+    std::string modeDirectory = ResourcePath::getModelsDir() + std::string(mode == Mode::DIGITS ? "digits" : (mode == Mode::SHAPES ? "shapes" : "symbols"));
+
+    std::string knnPath = modeDirectory + "/knn.txt";
+    std::ifstream knnFile(knnPath);
+    if (knnFile) knn.load(knnFile);
+
+    std::ifstream naiveBayesFile(modeDirectory + "/nb.txt");
+    if (naiveBayesFile) naiveBayes.load(naiveBayesFile);
+
     int numClasses = (mode == Mode::DIGITS ? 10 : 3);
     mlp = MiniMLP(784, 64, numClasses);
-    std::ifstream mlpFile(modeDirectory + "/mlp.txt"); 
-    mlp.load(mlpFile);
-    
-    std::ifstream astarFile(modeDirectory + "/astar.txt"); 
-    astar.load(astarFile);
+    std::ifstream mlpFile(modeDirectory + "/mlp.txt");
+    if (mlpFile) mlp.load(mlpFile);
+
+    std::ifstream astarFile(modeDirectory + "/astar.txt");
+    if (astarFile) astar.load(astarFile);
 }
 
-/**
- * Use all models to guess what pattern is in the image. 
- * Combine results into a final answer. Use the rule system 
- * as a fallback if the main models are not certain.
- */
 PredictionResult Engine::predict(Mode mode, const Image& image) {
     loadModels(mode);
     
@@ -44,7 +37,6 @@ PredictionResult Engine::predict(Mode mode, const Image& image) {
     
     PredictionResult result;
     
-    // Individual Model Predictions
     int knnLabel = knn.predict(features);
     double knnConf = knn.getConfidence(features);
     result.modelComparison["KNN"] = {knnLabel, knnConf};
@@ -61,12 +53,10 @@ PredictionResult Engine::predict(Mode mode, const Image& image) {
     double astarConf = astar.getConfidence(features);
     result.modelComparison["AStar"] = {astarLabel, astarConf};
 
-    // Rule engine for comparison too
     int ruleLabel = rules.predict(image);
     double ruleConf = rules.getConfidence(image);
     result.modelComparison["RuleEngine"] = {ruleLabel, ruleConf};
 
-    // Voting for final decision
     std::map<int, double> classScores;
     classScores[knnLabel] += knnConf;
     classScores[nbLabel] += nbConf;
@@ -75,33 +65,20 @@ PredictionResult Engine::predict(Mode mode, const Image& image) {
 
     int bestLabel = -1;
     double maxScore = -1.0;
-    for (auto const& entry : classScores) {
-        if (entry.second > maxScore) {
-            maxScore = entry.second;
-            bestLabel = entry.first;
+    for (auto const& classScoreEntry : classScores) {
+        if (classScoreEntry.second > maxScore) {
+            maxScore = classScoreEntry.second;
+            bestLabel = classScoreEntry.first;
         }
     }
 
     result.finalLabel = bestLabel;
-    // Divide by 4.0 because the total score is combined from four different models.
     result.finalConfidence = maxScore / 4.0;
     result.finalModelName = "Hybrid Ensemble";
 
-    // Rule-Based Fallback
-    // If the models are not confident (less than 40%), use the rule system instead.
-    if (result.finalConfidence < 0.4 && ruleLabel != -1) {
-        result.finalLabel = ruleLabel;
-        result.finalConfidence = ruleConf;
-        result.finalModelName = "RuleEngine (Fallback)";
-    }
-    
     return result;
 }
 
-/**
- * Add a new example to the models during runtime. 
- * Make the system smarter based on user feedback.
- */
 void Engine::updateModel(Mode mode, const Image& image, int correctLabel) {
     loadModels(mode);
     PixelGridExtractor extractor(28, 28); 
@@ -112,10 +89,6 @@ void Engine::updateModel(Mode mode, const Image& image, int correctLabel) {
     mlp.addExample(features, correctLabel);
 }
 
-/**
- * Retrieve the performance results for a specific model. 
- * Load the data from the stats files.
- */
 std::shared_ptr<ConfusionMatrix> Engine::getMetrics(Mode mode, const std::string& modelName) {
     loadModels(mode);
     
@@ -123,7 +96,7 @@ std::shared_ptr<ConfusionMatrix> Engine::getMetrics(Mode mode, const std::string
         return performanceStats[modelName];
     }
     
-    std::string modeDirectory = "models/" + std::string(mode == Mode::DIGITS ? "digits" : (mode == Mode::SHAPES ? "shapes" : "symbols"));
+    std::string modeDirectory = ResourcePath::getModelsDir() + std::string(mode == Mode::DIGITS ? "digits" : (mode == Mode::SHAPES ? "shapes" : "symbols"));
     std::string statsFile = modeDirectory + "/" + (modelName == "KNN" ? "knn_stats.txt" : 
                                             (modelName == "NaiveBayes" ? "nb_stats.txt" : 
                                             (modelName == "MiniMLP" ? "mlp_stats.txt" : "astar_stats.txt")));

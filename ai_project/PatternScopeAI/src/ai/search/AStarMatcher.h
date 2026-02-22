@@ -6,9 +6,8 @@
 
 struct AStarNode {
     int templateIndex;
-    double gScore; // Actual distance from start
-    double hScore; // Estimated distance to target
-    
+    double gScore;
+    double hScore;
     double fScore() const { return gScore + hScore; }
     bool operator>(const AStarNode& other) const { return fScore() > other.fScore(); }
 };

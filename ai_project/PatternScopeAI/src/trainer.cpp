@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sys/stat.h>
+#include "core/ResourcePath.h"
 #include "data/DataManager.h"
 #include "data/ConfusionMatrix.h"
 #include "ai/models/KNN.h"
@@ -8,19 +9,14 @@
 #include "ai/models/MiniMLP.h"
 #include "ai/search/AStarMatcher.h"
 
-/**
- * Train every model using the training dataset and 
- * save their internal logic to text files. Test the 
- * models using the test dataset and save the performance 
- * results to separate stats files.
- */
-void trainAndSave(const Dataset& trainingSet, const Dataset& testSet, std::string modeName, int numClasses) {
+void trainAndSave(const Dataset& trainingSet, const Dataset& testSet, std::string modeName, int numClasses, const std::string& modelsDir) {
     std::cout << "Starting training process for: " << modeName << "..." << std::endl;
     
-    mkdir("models", 0777); 
-    mkdir(("models/" + modeName).c_str(), 0777);
+    std::string modeDir = modelsDir + modeName + "/";
+    mkdir(modelsDir.c_str(), 0777);
+    mkdir((modelsDir + modeName).c_str(), 0777);
     
-    std::string modelDirectoryPath = "models/" + modeName + "/";
+    std::string modelDirectoryPath = modeDir;
 
     KNN knnModel(3); 
     knnModel.train(trainingSet); 
@@ -68,33 +64,35 @@ void trainAndSave(const Dataset& trainingSet, const Dataset& testSet, std::strin
     std::ofstream aStarStatsFile(modelDirectoryPath + "astar_stats.txt"); 
     aStarPerformanceMatrix.save(aStarStatsFile);
 
-    std::cout << "✓ Training for " << modeName << " completed successfully." << std::endl;
+    std::cout << "Training for " << modeName << " completed successfully." << std::endl;
 }
 
-/**
- * This is the entry point for the training tool. Load 
- * digits, shapes, and symbols datasets. 
- * Start the training and evaluation process for each mode.
- */
-int main() {
+int main(int argc, char* argv[]) {
+    ResourcePath::init(argc > 0 ? argv[0] : "trainer");
+    std::string modelsOutputDir = ResourcePath::getModelsDir();
     std::cout << "PatternScope: Initializing Model Training..." << std::endl;
+    std::cout << "Resource root: " << ResourcePath::getRoot() << std::endl;
+    std::cout << "Models output: " << modelsOutputDir << std::endl;
 
+    std::string mnistDir = ResourcePath::getMnistDir();
     Dataset digitsTrainingDataset, digitsTestDataset;
-    if (DataManager::loadMNIST("../mnist/train-images.idx3-ubyte", "../mnist/train-labels.idx1-ubyte", digitsTrainingDataset) &&
-        DataManager::loadMNIST("../mnist/t10k-images.idx3-ubyte", "../mnist/t10k-labels.idx1-ubyte", digitsTestDataset)) {
-        trainAndSave(digitsTrainingDataset, digitsTestDataset, "digits", 10);
+    if (DataManager::loadMNIST(mnistDir + "train-images.idx3-ubyte", mnistDir + "train-labels.idx1-ubyte", digitsTrainingDataset) &&
+        DataManager::loadMNIST(mnistDir + "t10k-images.idx3-ubyte", mnistDir + "t10k-labels.idx1-ubyte", digitsTestDataset)) {
+        trainAndSave(digitsTrainingDataset, digitsTestDataset, "digits", 10, modelsOutputDir);
+    } else {
+        std::cout << "Warning: MNIST data not found in " << mnistDir << " (digits mode skipped)." << std::endl;
     }
     
     Dataset shapesTrainingDataset, shapesTestDataset; 
     DataManager::loadShapes(shapesTrainingDataset, 1000); 
     DataManager::loadShapes(shapesTestDataset, 200); 
-    trainAndSave(shapesTrainingDataset, shapesTestDataset, "shapes", 3);
+    trainAndSave(shapesTrainingDataset, shapesTestDataset, "shapes", 3, modelsOutputDir);
     
     Dataset symbolsTrainingDataset, symbolsTestDataset; 
     DataManager::loadSymbols(symbolsTrainingDataset, 1000); 
     DataManager::loadSymbols(symbolsTestDataset, 200); 
-    trainAndSave(symbolsTrainingDataset, symbolsTestDataset, "symbols", 3);
+    trainAndSave(symbolsTrainingDataset, symbolsTestDataset, "symbols", 3, modelsOutputDir);
     
-    std::cout << "All training tasks finished. Models are saved in the 'models/' directory." << std::endl;
+    std::cout << "All training tasks finished. Models are saved in: " << modelsOutputDir << std::endl;
     return 0;
 }

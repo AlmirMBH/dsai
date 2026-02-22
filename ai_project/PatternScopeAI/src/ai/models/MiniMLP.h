@@ -14,7 +14,7 @@ class MiniMLP {
     std::vector<double> bias1;
     std::vector<double> bias2;
     
-    double sig(double x) { return 1.0 / (1.0 + std::exp(-x)); }
+    double sig(double inputValue) { return 1.0 / (1.0 + std::exp(-inputValue)); }
 
 public:
     MiniMLP(int input = 784, int hidden = 64, int output = 10) 

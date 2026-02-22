@@ -6,15 +6,6 @@
 
 class HOGExtractor {
 public:
-    /**
-     * Find the direction of light changes between pixels because edges define shapes. 
-     * Convert directions from radians to degrees using 180 and PI for easier grouping. 
-     * Adds 180 to negative results to treat opposite directions (dark-to-light vs light-to-dark) 
-     * as the same edge. Divide the 180-degree range by 45 to create four groups: 
-     * horizontal, vertical, and two diagonals. Add the strength of light changes 
-     * to these groups and divide by 1000 (random) to scale the large numbers down. 
-     * Summarize the image into four small numbers for analysis.
-     */    
     FeatureVector extract(const Image& image) {
         FeatureVector features(4); 
         std::vector<double> gradientBins(4, 0.0);

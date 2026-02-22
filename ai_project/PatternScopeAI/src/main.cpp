@@ -1,15 +1,12 @@
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
+#include "core/ResourcePath.h"
 #include "data/DataManager.h"
 #include "ai/Engine.h"
 
-/**
- * This is the entry point for the backend testing tool. Load 
- * the selected dataset and run the recognition engine on a small number of samples. 
- * Display individual model guesses and the final accuracy in the terminal.
- */
 int main(int argc, const char* argv[]) {
+    ResourcePath::init(argc > 0 ? argv[0] : "patternScopeAI_cli");
     Mode recognitionMode = Mode::DIGITS;
     
     if (argc > 1) { 
@@ -24,8 +21,9 @@ int main(int argc, const char* argv[]) {
     Engine recognitionEngine; 
     Dataset testDataset;
     
+    std::string mnistDir = ResourcePath::getMnistDir();
     if (recognitionMode == Mode::DIGITS) {
-        DataManager::loadMNIST("../mnist/t10k-images.idx3-ubyte", "../mnist/t10k-labels.idx1-ubyte", testDataset);
+        DataManager::loadMNIST(mnistDir + "t10k-images.idx3-ubyte", mnistDir + "t10k-labels.idx1-ubyte", testDataset);
     } else if (recognitionMode == Mode::SHAPES) {
         DataManager::loadShapes(testDataset, 100);
     } else {
@@ -61,7 +59,6 @@ int main(int argc, const char* argv[]) {
                       << " | Confidence: " << std::fixed << std::setprecision(2) << predictionResult.finalConfidence 
                       << " | Model: " << predictionResult.finalModelName << std::endl;
             
-            // Show model comparison
             std::cout << "   Comparison: ";
             for (auto const& modelResultEntry : predictionResult.modelComparison) {
                 std::cout << modelResultEntry.first << "=" << modelResultEntry.second.label 

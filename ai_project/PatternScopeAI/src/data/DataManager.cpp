@@ -1,4 +1,5 @@
 #include "DataManager.h"
+#include "core/ResourcePath.h"
 #include <fstream>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -10,10 +11,6 @@ const int NUMPY_HEADER_SIZE = 80;
 const int IMAGE_PIXELS = 784;
 const int TRAINING_SAMPLES_LIMIT = 5000;
 
-/**
- * Open binary files containing handwritten digits and labels. 
- * Skip the file headers and stores the pixel values into the dataset.
- */
 bool DataManager::loadMNIST(std::string imagePath, std::string labelPath, Dataset& dataset) {
     std::ifstream imageFile(imagePath, std::ios::binary);
     std::ifstream labelFile(labelPath, std::ios::binary);
@@ -21,7 +18,6 @@ bool DataManager::loadMNIST(std::string imagePath, std::string labelPath, Datase
         return false;
     }
     
-    // Skip the file headers defined by the MNIST dataset creators (16 bytes for images, 8 for labels).
     imageFile.seekg(MNIST_IMAGE_HEADER_SIZE); 
     labelFile.seekg(MNIST_LABEL_HEADER_SIZE);
 
@@ -39,59 +35,53 @@ bool DataManager::loadMNIST(std::string imagePath, std::string labelPath, Datase
     return true;
 }
 
-/**
- * Load a single image file from the disk. Convert the 
- * image into a format the system can process (28x28 pixels).
- */
 bool DataManager::loadImage(std::string path, Image& image) {
     int origWidth, origHeight, channelCount;
     unsigned char* imageData = stbi_load(path.c_str(), &origWidth, &origHeight, &channelCount, 1);
     if (!imageData) {
         return false;
     }
-    
-    // Resize the image to 28x28 so the models can process it correctly.
-    // We use a simple method that picks the nearest pixel from the original image.
+    const long long maxPixels = 4096 * 4096;
+    if (origWidth <= 0 || origHeight <= 0 || (long long)origWidth * origHeight > maxPixels) {
+        stbi_image_free(imageData);
+        return false;
+    }
+
     std::vector<uint8_t> resizedData;
     resizedData.reserve(784);
-    for (int y = 0; y < 28; ++y) {
-        for (int x = 0; x < 28; ++x) {
-            int srcX = (x * origWidth) / 28;
-            int srcY = (y * origHeight) / 28;
-            resizedData.push_back(imageData[srcY * origWidth + srcX]);
+    for (int rowIndex = 0; rowIndex < 28; ++rowIndex) {
+        for (int columnIndex = 0; columnIndex < 28; ++columnIndex) {
+            int sourceX = (columnIndex * origWidth) / 28;
+            int sourceY = (rowIndex * origHeight) / 28;
+            resizedData.push_back(imageData[sourceY * origWidth + sourceX]);
         }
     }
-    
+    stbi_image_free(imageData);
+    imageData = nullptr;
+
     image = Image(28, 28, resizedData);
-    
-    // If the image is mostly light (black-on-white), we invert it to match MNIST (white-on-black).
+
     int totalBrightness = 0;
-    for (uint8_t pixel : resizedData) {
-        totalBrightness += pixel;
+    for (uint8_t pixelValue : resizedData) {
+        totalBrightness += pixelValue;
     }
     if (totalBrightness / 784 > 128) {
-        for (int y = 0; y < 28; ++y) {
-            for (int x = 0; x < 28; ++x) {
-                image.setPixel(x, y, 255 - image.getPixel(x, y));
+        for (int rowIndex = 0; rowIndex < 28; ++rowIndex) {
+            for (int columnIndex = 0; columnIndex < 28; ++columnIndex) {
+                image.setPixel(columnIndex, rowIndex, 255 - image.getPixel(columnIndex, rowIndex));
             }
         }
     }
 
-    stbi_image_free(imageData);
     return true;
 }
 
-/**
- * Load patterns from a specialized binary file. Skip 
- * the file header and store a limited number of samples into the dataset.
- */
 bool DataManager::loadNumpy(std::string path, Dataset& dataset, int label, int maxSamples) {
     std::ifstream binaryFile(path, std::ios::binary);
     if (!binaryFile) {
         return false;
     }
 
-    // Skip the 80-byte header used in the Numpy (.npy) file format.
     binaryFile.seekg(NUMPY_HEADER_SIZE);
     for (int sampleIndex = 0; sampleIndex < maxSamples; ++sampleIndex) {
         std::vector<double> featureValues;
@@ -110,20 +100,16 @@ bool DataManager::loadNumpy(std::string path, Dataset& dataset, int label, int m
     return true;
 }
 
-/**
- * Load circle, square, and triangle patterns from the datasets folder.
- */
 void DataManager::loadShapes(Dataset& dataset, int samplesPerClass) {
-    loadNumpy("../datasets/circle.npy", dataset, 0, samplesPerClass);
-    loadNumpy("../datasets/square.npy", dataset, 1, samplesPerClass);
-    loadNumpy("../datasets/triangle.npy", dataset, 2, samplesPerClass);
+    std::string datasetsBaseDirectory = ResourcePath::getDatasetsDir();
+    loadNumpy(datasetsBaseDirectory + "circle.npy", dataset, 0, samplesPerClass);
+    loadNumpy(datasetsBaseDirectory + "square.npy", dataset, 1, samplesPerClass);
+    loadNumpy(datasetsBaseDirectory + "triangle.npy", dataset, 2, samplesPerClass);
 }
 
-/**
- * Load star, zigzag, and lightning patterns from the datasets folder.
- */
 void DataManager::loadSymbols(Dataset& dataset, int samplesPerClass) {
-    loadNumpy("../datasets/full_numpy_bitmap_star.npy", dataset, 0, samplesPerClass);
-    loadNumpy("../datasets/full_numpy_bitmap_zigzag.npy", dataset, 1, samplesPerClass);
-    loadNumpy("../datasets/full_numpy_bitmap_lightning.npy", dataset, 2, samplesPerClass);
+    std::string datasetsBaseDirectory = ResourcePath::getDatasetsDir();
+    loadNumpy(datasetsBaseDirectory + "full_numpy_bitmap_star.npy", dataset, 0, samplesPerClass);
+    loadNumpy(datasetsBaseDirectory + "full_numpy_bitmap_zigzag.npy", dataset, 1, samplesPerClass);
+    loadNumpy(datasetsBaseDirectory + "full_numpy_bitmap_lightning.npy", dataset, 2, samplesPerClass);
 }

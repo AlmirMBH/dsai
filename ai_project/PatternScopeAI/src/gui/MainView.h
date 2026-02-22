@@ -2,54 +2,68 @@
 #include <gui/View.h>
 #include <gui/Button.h>
 #include <gui/Label.h>
-#include "DrawingCanvas.h"
-#include "../ai/Engine.h"
+#include <gui/VerticalLayout.h>
+#include <gui/HorizontalLayout.h>
+#include "ai/Engine.h"
+#include "data/DataManager.h"
+#include "data/Image.h"
+#include "data/Mode.h"
+#include <string>
 
 class MainView : public gui::View
 {
 protected:
-    Engine engine;
-    Mode currentMode = Mode::DIGITS;
-
-    DrawingCanvas canvas;
-    
-    // Prediction Panel
+    gui::Button btnDigits;
+    gui::Button btnShapes;
+    gui::Button btnSymbols;
     gui::Label lblPredictionTitle;
-    gui::Label lblTopClass;
-    gui::Label lblConfidence;
-    gui::Label lblAgentWarning;
-
-    // Model Comparison
+    gui::Label lblTopRow;
     gui::Label lblComparisonTitle;
     gui::Label lblKNN;
     gui::Label lblNaiveBayes;
     gui::Label lblMLP;
+    gui::Label lblAStar;
+    gui::Label lblRuleFallback;
 
-    // A* & Rules
-    gui::Label lblAStarRulesTitle;
-    gui::Label lblAStarMatch;
-    gui::Label lblRuleReason;
-
-    // Footer Buttons
     gui::Button btnLoadImage;
-    gui::Button btnPredict;
     gui::Button btnClear;
-    gui::Button btnTrain;
-    gui::Button btnConfusionMatrix;
-    
-    // Active Learning Feedback
+    gui::Button btnMetrics;
     gui::Label lblFeedback;
     gui::Button btnCorrect;
-    gui::Button btnWrong;
+    gui::Button btnIncorrect;
 
-    void updateUI(const PredictionResult& result);
+    gui::View predictionFrameView;
+    gui::View feedbackFrameView;
+    gui::View metricsFrameView;
+    gui::Label lblMetricsTitle;
+    gui::Label lblMetricsKNN;
+    gui::Label lblMetricsNaiveBayes;
+    gui::Label lblMetricsMLP;
+    gui::Label lblMetricsAStar;
+
+    gui::HorizontalLayout modeBarLayout;
+    gui::VerticalLayout predictionPanel;
+    gui::VerticalLayout feedbackVerticalLayout;
+    gui::HorizontalLayout feedbackButtonsLayout;
+    gui::VerticalLayout rightLayout;
+    gui::VerticalLayout metricsPanelLayout;
+    gui::HorizontalLayout footerLayout;
+    gui::VerticalLayout mainLayout;
+
+    static const unsigned _modelCount = 5;
+    gui::Label* _modelLabels[_modelCount];
+    void clearPredictionLabels();
+
+    std::string _currentImagePath;
+    Image _currentImage{28, 28};
+    Engine _engine;
+
+    bool _hasPrediction = false;
+    Mode _lastMode = Mode::DIGITS;
+    int _lastFinalLabel = -1;
 
 public:
     MainView();
-    void setMode(Mode mode);
-    bool onClick(gui::Button* pBtn) override;
+    bool onClick(gui::Button* button) override;
     bool handleUserEvent(td::UINT4 eventID, const td::Variant& userParam) override;
-    
-    // Triggered when drawing changes
-    void processDrawing();
 };

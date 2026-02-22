@@ -2,10 +2,6 @@
 #include <random>
 #include <algorithm>
 
-/**
- * Adjust the internal weights based on the dataset. 
- * Repeat the process five times to improve accuracy.
- */
 void MiniMLP::train(const Dataset& dataset) {
     if (dataset.size() == 0) {
         return;
@@ -69,9 +65,6 @@ void MiniMLP::train(const Dataset& dataset) {
     }
 }
 
-/**
- * Update weights using a single new pattern during runtime.
- */
 void MiniMLP::addExample(const FeatureVector& features, int label) {
     if (label < 0 || label >= outputSize) {
         return;
@@ -81,7 +74,6 @@ void MiniMLP::addExample(const FeatureVector& features, int label) {
     std::vector<double> hiddenValues(hiddenSize);
     std::vector<double> outputValues(outputSize);
     
-    // Forward pass
     for (int hiddenIndex = 0; hiddenIndex < hiddenSize; hiddenIndex++) {
         double weightedSum = bias1[hiddenIndex];
         for (int inputIndex = 0; inputIndex < inputSize; inputIndex++) {
@@ -97,7 +89,6 @@ void MiniMLP::addExample(const FeatureVector& features, int label) {
         outputValues[outputIndex] = sig(weightedSum);
     }
     
-    // Backward pass (one step)
     std::vector<double> targetValues(outputSize, 0.0);
     targetValues[label] = 1.0;
     
@@ -118,18 +109,10 @@ void MiniMLP::addExample(const FeatureVector& features, int label) {
     }
 }
 
-/**
- * Pass the image features through the weighted layers. 
- * Return the category with the strongest signal.
- */
 int MiniMLP::predict(const FeatureVector& features) {
-    // The hidden layer acts as an intermediate step to find clues in the raw pixels. 
-    // These clues help the model recognize complex patterns before deciding on a final category.
     std::vector<double> hiddenValues(hiddenSize);
     std::vector<double> outputValues(outputSize);
     for (int hiddenIndex = 0; hiddenIndex < hiddenSize; hiddenIndex++) {
-        // A signal is a number that represents how much the model "sees" a certain clue. 
-        // We calculate the signal strength for each hidden clue here.
         double weightedSum = bias1[hiddenIndex];
         for (int inputIndex = 0; inputIndex < inputSize; inputIndex++) {
             weightedSum += weights1[hiddenIndex][inputIndex] * features.get(inputIndex);
@@ -137,15 +120,12 @@ int MiniMLP::predict(const FeatureVector& features) {
         hiddenValues[hiddenIndex] = sig(weightedSum);
     }
     for (int outputIndex = 0; outputIndex < outputSize; outputIndex++) {
-        // Calculate the final signals for each possible category.
         double weightedSum = bias2[outputIndex];
         for (int hiddenIndex = 0; hiddenIndex < hiddenSize; hiddenIndex++) {
             weightedSum += weights2[outputIndex][hiddenIndex] * hiddenValues[hiddenIndex];
         }
         outputValues[outputIndex] = sig(weightedSum);
     }
-    // Each category (like "Circle" or "7") has its own signal strength. 
-    // We find the category with the highest number, which means the strongest match.
     int bestClass = 0;
     for (int classIndex = 1; classIndex < outputSize; classIndex++) {
         if (outputValues[classIndex] > outputValues[bestClass]) {
@@ -155,10 +135,6 @@ int MiniMLP::predict(const FeatureVector& features) {
     return bestClass;
 }
 
-/**
- * Calculate certainty by comparing the strongest signal 
- * to the sum of all signals.
- */
 double MiniMLP::getConfidence(const FeatureVector& features) {
     std::vector<double> hiddenValues(hiddenSize);
     std::vector<double> outputValues(outputSize);
@@ -178,14 +154,9 @@ double MiniMLP::getConfidence(const FeatureVector& features) {
         outputValues[outputIndex] = sig(weightedSum);
         totalOutputSum += outputValues[outputIndex];
     }
-    // The confidence is calculated by comparing the strongest signal to the total 
-    // strength of all signals combined.
     return totalOutputSum > 0 ? outputValues[predict(features)] / totalOutputSum : 0.0;
 }
 
-/**
- * Save all internal weights and biases to a text file.
- */
 void MiniMLP::save(std::ostream& outputStream) const {
     outputStream << inputSize << " " << hiddenSize << " " << outputSize << "\n";
     for (int hiddenIndex = 0; hiddenIndex < hiddenSize; hiddenIndex++) {
@@ -202,18 +173,24 @@ void MiniMLP::save(std::ostream& outputStream) const {
     }
 }
 
-/**
- * Load weights and biases from a text file.
- */
+static const int MAX_MLP_INPUT_SIZE = 10000;
+static const int MAX_MLP_HIDDEN_SIZE = 10000;
+static const int MAX_MLP_OUTPUT_SIZE = 256;
+
 void MiniMLP::load(std::istream& inputStream) {
-    inputStream >> inputSize >> hiddenSize >> outputSize;
-    
-    // Weights represent the "strength" of connections between sensors and neurons.
-    // Bias is an extra adjustment value that helps the network learn patterns more flexibly.
-    // Hidden layer is an intermediate step that helps the model find complex relationships in the data.
+    int readInputSize = 0;
+    int readHiddenSize = 0;
+    int readOutputSize = 0;
+    inputStream >> readInputSize >> readHiddenSize >> readOutputSize;
+    if (!inputStream || readInputSize <= 0 || readInputSize > MAX_MLP_INPUT_SIZE ||
+        readHiddenSize <= 0 || readHiddenSize > MAX_MLP_HIDDEN_SIZE ||
+        readOutputSize <= 0 || readOutputSize > MAX_MLP_OUTPUT_SIZE) return;
+    inputSize = readInputSize;
+    hiddenSize = readHiddenSize;
+    outputSize = readOutputSize;
     weights1.assign(hiddenSize, std::vector<double>(inputSize));
     weights2.assign(outputSize, std::vector<double>(hiddenSize));
-    bias1.resize(hiddenSize); 
+    bias1.resize(hiddenSize);
     bias2.resize(outputSize);
     for (int hiddenIndex = 0; hiddenIndex < hiddenSize; hiddenIndex++) {
         for (int inputIndex = 0; inputIndex < inputSize; inputIndex++) {

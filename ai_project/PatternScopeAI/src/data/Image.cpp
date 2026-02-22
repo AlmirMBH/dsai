@@ -1,67 +1,54 @@
 #include "Image.h"
 #include <algorithm>
 
-Image::Image(int w, int h) : width(w), height(h) {
+Image::Image(int initialWidth, int initialHeight) : width(initialWidth), height(initialHeight) {
     pixels.resize(height, std::vector<uint8_t>(width, 0));
 }
 
-Image::Image(int w, int h, const std::vector<uint8_t>& data) : width(w), height(h) {
+Image::Image(int initialWidth, int initialHeight, const std::vector<uint8_t>& data) : width(initialWidth), height(initialHeight) {
     pixels.resize(height, std::vector<uint8_t>(width));
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
-            pixels[y][x] = data[y * width + x];
+    for (int rowIndex = 0; rowIndex < height; ++rowIndex) {
+        for (int columnIndex = 0; columnIndex < width; ++columnIndex) {
+            pixels[rowIndex][columnIndex] = data[rowIndex * width + columnIndex];
         }
     }
 }
 
-/**
- * Retrieve the brightness of a pixel at specific coordinates.
- */
-uint8_t Image::getPixel(int x, int y) const {
-    if (x >= 0 && x < width && y >= 0 && y < height) {
-        return pixels[y][x];
+uint8_t Image::getPixel(int columnIndex, int rowIndex) const {
+    if (columnIndex >= 0 && columnIndex < width && rowIndex >= 0 && rowIndex < height) {
+        return pixels[rowIndex][columnIndex];
     }
     return 0;
 }
 
-/**
- * Set the brightness of a pixel at specific coordinates.
- */
-void Image::setPixel(int x, int y, uint8_t value) {
-    if (x >= 0 && x < width && y >= 0 && y < height) {
-        pixels[y][x] = value;
+void Image::setPixel(int columnIndex, int rowIndex, uint8_t value) {
+    if (columnIndex >= 0 && columnIndex < width && rowIndex >= 0 && rowIndex < height) {
+        pixels[rowIndex][columnIndex] = value;
     }
 }
 
-/**
- * Convert the image grid into a single long list of pixels.
- */
 std::vector<uint8_t> Image::getData() const {
     std::vector<uint8_t> data;
     data.reserve(width * height);
-    for (const auto& row : pixels) {
-        data.insert(data.end(), row.begin(), row.end());
+    for (const auto& pixelRow : pixels) {
+        data.insert(data.end(), pixelRow.begin(), pixelRow.end());
     }
     return data;
 }
 
-/**
- * Stretch the light values so the darkest pixel is 0 
- * and the brightest is 255. This makes the image clearer for the models.
- */
 void Image::normalize() {
-    uint8_t maxVal = 0;
-    for (const auto& row : pixels) {
-        for (uint8_t val : row) {
-            if (val > maxVal) {
-                maxVal = val;
+    uint8_t maximumPixelValue = 0;
+    for (const auto& pixelRow : pixels) {
+        for (uint8_t pixelValue : pixelRow) {
+            if (pixelValue > maximumPixelValue) {
+                maximumPixelValue = pixelValue;
             }
         }
     }
-    if (maxVal > 0) {
-        for (auto& row : pixels) {
-            for (uint8_t& val : row) {
-                val = (val * 255) / maxVal;
+    if (maximumPixelValue > 0) {
+        for (auto& pixelRow : pixels) {
+            for (uint8_t& pixelValue : pixelRow) {
+                pixelValue = (pixelValue * 255) / maximumPixelValue;
             }
         }
     }

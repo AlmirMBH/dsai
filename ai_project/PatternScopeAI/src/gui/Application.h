@@ -13,7 +13,6 @@ protected:
 public:
     Application(int argc, const char** argv)
     : gui::Application(argc, argv)
-    {
-    }
+    { setInitialFrameSize(gui::Window::FrameSize::UseSpecified); }
 };
 
