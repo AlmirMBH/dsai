@@ -2,8 +2,10 @@ set(APP_NAME PatternVision)
 
 # Collect GUI sources and headers
 file(GLOB GUI_SOURCES ${CMAKE_CURRENT_LIST_DIR}/src/gui/*.cpp)
-file(GLOB GUI_MM ${CMAKE_CURRENT_LIST_DIR}/src/gui/*.mm)
-list(APPEND GUI_SOURCES ${GUI_MM})
+if(NOT WIN32)
+	file(GLOB GUI_MM ${CMAKE_CURRENT_LIST_DIR}/src/gui/*.mm)
+	list(APPEND GUI_SOURCES ${GUI_MM})
+endif()
 file(GLOB GUI_INCS ${CMAKE_CURRENT_LIST_DIR}/src/gui/*.h)
 set(APP_PLIST ${CMAKE_CURRENT_LIST_DIR}/src/Info.plist)
 

@@ -1,20 +1,28 @@
 cmake_minimum_required(VERSION 3.18)
 
-# Override architecture for ARM64 BEFORE including Common.cmake
-set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "Mac OS X build architectures" FORCE)
-
 set(CMAKE_CXX_STANDARD 14)
 project(PatternScopeAI)
 set(SOLUTION_NAME PatternScopeAI)
 set(SOURCE_ROOT ${CMAKE_CURRENT_LIST_DIR})
-set(HOME_ROOT $ENV{HOME})
-if (WIN32)
+
+if(APPLE)
+	set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "Mac OS X build architectures" FORCE)
+endif()
+
+if(WIN32 AND "$ENV{HOME}" STREQUAL "")
+	set(HOME_ROOT $ENV{USERPROFILE})
+else()
+	set(HOME_ROOT $ENV{HOME})
+endif()
+if(WIN32)
 	string(REPLACE "\\" "/" HOME_ROOT "${HOME_ROOT}")
 endif()
 set(WORK_ROOT ${HOME_ROOT}/Work)
 
-include(${WORK_ROOT}/DevEnv/Common.cmake)
-include(${WORK_ROOT}/DevEnv/natGUI.cmake)
+if(EXISTS ${WORK_ROOT}/DevEnv/Common.cmake)
+	include(${WORK_ROOT}/DevEnv/Common.cmake)
+	include(${WORK_ROOT}/DevEnv/natGUI.cmake)
+endif()
 
 file(GLOB_RECURSE SOURCES 
     ${SOURCE_ROOT}/src/ai/*.cpp
@@ -31,7 +39,9 @@ target_include_directories(trainer PRIVATE ${SOURCE_ROOT}/src)
 add_executable(predictor src/predictor.cpp ${SOURCES})
 target_include_directories(predictor PRIVATE ${SOURCE_ROOT}/src)
 
-include(patternScopeAI.cmake)
+if(EXISTS ${WORK_ROOT}/DevEnv/Common.cmake)
+	include(patternScopeAI.cmake)
+endif()
 
 set(RESOURCES_SRC ${SOURCE_ROOT}/resources)
 set(_PV_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}")

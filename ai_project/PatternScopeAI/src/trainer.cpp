@@ -1,6 +1,10 @@
 #include <iostream>
 #include <fstream>
+#ifdef _WIN32
+#include <direct.h>
+#else
 #include <sys/stat.h>
+#endif
 #include "core/ResourcePath.h"
 #include "data/DataManager.h"
 #include "data/ConfusionMatrix.h"
@@ -13,8 +17,13 @@ void trainAndSave(const Dataset& trainingSet, const Dataset& testSet, std::strin
     std::cout << "Starting training process for: " << modeName << "..." << std::endl;
     
     std::string modeDir = modelsDir + modeName + "/";
+#ifdef _WIN32
+    _mkdir(modelsDir.c_str());
+    _mkdir((modelsDir + modeName).c_str());
+#else
     mkdir(modelsDir.c_str(), 0777);
     mkdir((modelsDir + modeName).c_str(), 0777);
+#endif
     
     std::string modelDirectoryPath = modeDir;
 
